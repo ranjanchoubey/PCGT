@@ -106,8 +106,29 @@ if args.method == 'graphormer':
 
 print(f"num nodes {n} | num classes {c} | num node feats {d}")
 
+### PCGT: Partition preprocessing (computed once before training) ###
+partition_indices = None
+if args.method == 'pcgt':
+    from partition import compute_partitions
+    print(f"Computing {args.num_partitions} partitions using {args.partition_method}...")
+    edge_index_cpu = dataset.graph['edge_index'].cpu()
+    features_cpu = dataset.graph['node_feat'].cpu()
+    partition_indices, boundary_nodes, partition_labels = compute_partitions(
+        edge_index_cpu, n, args.num_partitions, method=args.partition_method,
+        features=features_cpu)
+    # Count intra-partition edges
+    src, dst = edge_index_cpu[0].numpy(), edge_index_cpu[1].numpy()
+    intra = sum(1 for s, d in zip(src, dst) if partition_labels[s] == partition_labels[d])
+    total = len(src)
+    print(f"Partitions: {len(partition_indices)}, Boundary nodes: {len(boundary_nodes)}/{n} ({100*len(boundary_nodes)/n:.1f}%)")
+    print(f"Intra-partition edges: {intra}/{total} ({100*intra/total:.1f}%)")
+
 ### Load method ###
 model = parse_method(args.method, args, c, d, device)
+
+# Set partition info on PCGT model
+if args.method == 'pcgt' and partition_indices is not None:
+    model.set_partition_info(partition_indices, partition_labels)
 
 # using rocauc as the eval function
 if args.dataset in ('deezer-europe'):
@@ -123,7 +144,7 @@ model.train()
 
 ### Training loop ###
 patience = 0
-if args.method == 'ours' and args.use_graph:
+if args.method in ('ours', 'pcgt') and args.use_graph:
     optimizer = torch.optim.Adam([
         {'params': model.params1, 'weight_decay': args.ours_weight_decay},
         {'params': model.params2, 'weight_decay': args.weight_decay}
@@ -191,11 +212,15 @@ for run in range(args.runs):
                 break
 
         if epoch % args.display_step == 0:
+            gamma_str = ''
+            if args.method == 'pcgt' and hasattr(model, 'get_gamma_values'):
+                gammas = model.get_gamma_values()
+                gamma_str = f' γ={[f"{g:.3f}" for g in gammas]}'
             print(f'Epoch: {epoch:02d}, '
                   f'Loss: {loss:.4f}, '
                   f'Train: {100 * result[0]:.2f}%, '
                   f'Valid: {100 * result[1]:.2f}%, '
-                  f'Test: {100 * result[2]:.2f}%')
+                  f'Test: {100 * result[2]:.2f}%{gamma_str}')
     logger.print_statistics(run)
 
 run_time = sum(run_time_list) / len(run_time_list)
@@ -211,9 +236,11 @@ def make_print(method):
         print_str += f'label per class:{args.label_num_per_class}, valid:{args.valid_num},test:{args.test_num}\n'
     else:
         print_str += f'train_prop:{args.train_prop}, valid_prop:{args.valid_prop}'
-    if method == 'ours':
+    if method in ('ours', 'pcgt'):
         use_weight=' ours_use_weight' if args.ours_use_weight else ''
         print_str += f'method: {args.method} hidden: {args.hidden_channels} ours_layers:{args.ours_layers} lr:{args.lr} use_graph:{args.use_graph} aggregate:{args.aggregate} graph_weight:{args.graph_weight} alpha:{args.alpha} ours_decay:{args.ours_weight_decay} ours_dropout:{args.ours_dropout} epochs:{args.epochs} use_feat_norm:{not args.no_feat_norm} use_bn:{args.use_bn} use_residual:{args.ours_use_residual} use_act:{args.ours_use_act}{use_weight}\n'
+        if method == 'pcgt':
+            print_str += f'num_partitions:{args.num_partitions} partition_method:{args.partition_method}\n'
         if not args.use_graph:
             return print_str
         if args.backbone == 'gcn':
@@ -224,7 +251,7 @@ def make_print(method):
 
 
 file_name = f'{args.dataset}_{args.method}'
-if args.method == 'ours' and args.use_graph:
+if args.method in ('ours', 'pcgt') and args.use_graph:
     file_name += '_' + args.backbone
 file_name += '.txt'
 out_path = os.path.join(out_folder, file_name)
@@ -234,3 +261,25 @@ with open(out_path, 'a+') as f:
     f.write(results)
     f.write(f' run_time: { run_time }')
     f.write('\n\n')
+
+### Append to CSV results file ###
+import csv, re
+csv_path = os.path.join(out_folder, 'experiment_results.csv')
+csv_exists = os.path.exists(csv_path)
+parsed = re.search(r'Highest Test:\s*([\d.]+)\s*±\s*([\d.]+).*?Final Test:\s*([\d.]+)\s*±\s*([\d.]+)', results, re.DOTALL)
+val_ep = re.search(r'Highest val epoch:\s*(\d+)', results)
+if parsed:
+    with open(csv_path, 'a', newline='') as csvf:
+        writer = csv.writer(csvf)
+        if not csv_exists:
+            writer.writerow(['dataset','method','num_partitions','runs',
+                           'highest_test_mean','highest_test_std',
+                           'final_test_mean','final_test_std',
+                           'highest_val_epoch','notes'])
+        method_label = 'sgformer' if args.method == 'ours' else args.method
+        k = args.num_partitions if args.method == 'pcgt' else 0
+        notes = f'auto-logged run_time={run_time:.1f}ms'
+        writer.writerow([args.dataset, method_label, k, args.runs,
+                        parsed.group(1), parsed.group(2),
+                        parsed.group(3), parsed.group(4),
+                        val_ep.group(1) if val_ep else 0, notes])

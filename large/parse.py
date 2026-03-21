@@ -1,5 +1,6 @@
 from gnns import *
 from ours import *
+from pcgt import PCGTFormer
 
 def parse_method(args, c, d, device):
     if args.method == 'gcn':
@@ -37,6 +38,19 @@ def parse_method(args, c, d, device):
                     trans_num_layers=args.trans_num_layers, trans_dropout=args.trans_dropout, trans_num_heads=args.trans_num_heads, trans_use_bn=args.trans_use_bn, trans_use_residual=args.trans_use_residual, trans_use_weight=args.trans_use_weight, trans_use_act=args.trans_use_act,
                      gnn_num_layers=args.gnn_num_layers, gnn_dropout=args.gnn_dropout, gnn_use_bn=args.gnn_use_bn, gnn_use_residual=args.gnn_use_residual, gnn_use_weight=args.gnn_use_weight, gnn_use_init=args.gnn_use_init, gnn_use_act=args.gnn_use_act,
                      ).to(device)
+    elif args.method == 'pcgt':
+        model = PCGTFormer(d, args.hidden_channels, c,
+                    graph_weight=args.graph_weight, aggregate=args.aggregate,
+                    trans_num_layers=args.trans_num_layers, trans_dropout=args.trans_dropout,
+                    trans_num_heads=args.trans_num_heads, trans_use_bn=args.trans_use_bn,
+                    trans_use_residual=args.trans_use_residual, trans_use_weight=args.trans_use_weight,
+                    trans_use_act=args.trans_use_act,
+                    gnn_num_layers=args.gnn_num_layers, gnn_dropout=args.gnn_dropout,
+                    gnn_use_bn=args.gnn_use_bn, gnn_use_residual=args.gnn_use_residual,
+                    gnn_use_weight=args.gnn_use_weight, gnn_use_init=args.gnn_use_init,
+                    gnn_use_act=args.gnn_use_act,
+                    num_partitions=args.num_partitions,
+                    ).to(device)
     else:
         raise ValueError('Invalid method')
     return model
@@ -123,5 +137,11 @@ def parser_add_main_args(parser):
                         help='attention heads for gat')
     parser.add_argument('--out_heads', type=int, default=1,
                         help='out heads for gat')
+
+    # pcgt parameters
+    parser.add_argument('--num_partitions', type=int, default=500,
+                        help='number of METIS partitions for PCGT')
+    parser.add_argument('--partition_method', type=str, default='metis',
+                        help='partition method: metis, spectral, random, kmeans')
 
 

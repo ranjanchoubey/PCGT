@@ -1,5 +1,6 @@
 from models import *
 from ours import *
+from pcgt import PCGT
 from nodeformer import *
 from difformer import *
 from graphormer import *
@@ -102,6 +103,11 @@ def parse_method(method, args, c, d, device):
         else:
             model = Ours(d, args.hidden_channels, c, num_layers=args.num_layers, alpha=args.alpha, dropout=args.dropout, num_heads=args.num_heads,
                      use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, aggregate=args.aggregate).to(device)
+    elif method == 'pcgt':
+        gnn = parse_method(args.backbone, args, args.hidden_channels, d, device) if args.use_graph else None
+        model = PCGT(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
+                use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, gnn=gnn, aggregate=args.aggregate,
+                num_partitions=args.num_partitions).to(device)
     else:
         raise ValueError(f'Invalid method {method}')
     return model
@@ -203,9 +209,16 @@ def parser_add_main_args(parser):
     parser.add_argument('--encoder_emdim', type=int, default=768,
                         help='number of encoder embedded dimension')
 
+    # pcgt
+    parser.add_argument('--num_partitions', type=int, default=10,
+                        help='number of METIS partitions for PCGT')
+    parser.add_argument('--partition_method', type=str, default='metis',
+                        choices=['metis', 'spectral', 'random', 'kmeans'],
+                        help='graph partitioning algorithm')
+
 
 def parser_add_default_args(args):
-    if args.method=='ours':
+    if args.method in ('ours', 'pcgt'):
         if args.ours_weight_decay is None:
             args.ours_weight_decay=args.weight_decay
         if args.ours_dropout is None:

@@ -84,6 +84,22 @@ dataset.graph['edge_index'], dataset.graph['node_feat'] = \
 ### Load method ###
 model = parse_method(args, c, d, device)
 
+### PCGT: Partition preprocessing ###
+if args.method == 'pcgt':
+    from partition import compute_partitions
+    print(f"Computing {args.num_partitions} partitions using {args.partition_method}...")
+    edge_index_cpu = dataset.graph['edge_index'].cpu()
+    features_cpu = dataset.graph['node_feat'].cpu()
+    partition_indices, boundary_nodes, partition_labels = compute_partitions(
+        edge_index_cpu, n, args.num_partitions, method=args.partition_method,
+        features=features_cpu)
+    sizes = [len(idx) for idx in partition_indices]
+    print(f"Partitions: {len(partition_indices)}, "
+          f"avg size: {sum(sizes)/len(sizes):.0f}, "
+          f"max size: {max(sizes)}, "
+          f"boundary: {len(boundary_nodes)}/{n} ({100*len(boundary_nodes)/n:.1f}%)")
+    model.set_partition_info(partition_indices, partition_labels)
+
 ### Loss function (Single-class, Multi-class) ###
 if args.dataset in ('yelp-chi', 'deezer-europe', 'twitch-e', 'fb100', 'ogbn-proteins'):
     criterion = nn.BCEWithLogitsLoss()
@@ -111,7 +127,7 @@ for run in range(args.runs):
         split_idx = split_idx_lst[run]
     train_idx = split_idx['train'].to(device)
     model.reset_parameters()
-    if args.method == 'sgformer':
+    if args.method in ('sgformer', 'pcgt'):
         optimizer = torch.optim.Adam([
             {'params': model.params1, 'weight_decay': args.trans_weight_decay},
             {'params': model.params2, 'weight_decay': args.gnn_weight_decay}
