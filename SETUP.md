@@ -270,6 +270,143 @@ The **correct approach** is fixing the dependency installation process (which we
 
 ---
 
+---
+
+## Available Datasets
+
+The PCGT project supports multiple datasets across different categories. Here's what works out-of-the-box:
+
+👉 **Full dataset guide**: See [DATASETS.md](DATASETS.md) for complete reference with all 20+ supported datasets.
+
+### ✅ Planetoid Datasets (Recommended for Quick Start)
+
+Automatically downloaded and work immediately:
+
+| Dataset | Nodes | Edges | Classes | Command |
+|---|---|---|---|---|
+| **Cora** | 2,708 | 5,429 | 7 | `python main.py --dataset cora --epochs 100 --cpu` |
+| **Citeseer** | 3,327 | 4,732 | 6 | `python main.py --dataset citeseer --epochs 100 --cpu` |
+| **Pubmed** | 19,717 | 44,338 | 3 | `python main.py --dataset pubmed --epochs 100 --cpu` |
+
+**Quick test all three:**
+```bash
+cd medium
+for dataset in cora citeseer pubmed; do
+  echo "Testing $dataset..."
+  python main.py --dataset $dataset --epochs 10 --cpu --runs 1
+done
+```
+
+### 📊 Other Supported Datasets
+
+These require **manual data download**. See section below.
+
+#### Wikipedia/Heterophilic Graphs
+- **Chameleon**: `python main.py --dataset chameleon --epochs 100 --cpu`
+- **Squirrel**: `python main.py --dataset squirrel --epochs 100 --cpu`
+
+#### Heterophily Datasets
+- **Roman Empire**: `python main.py --dataset roman-empire --epochs 100 --cpu`
+- **Amazon Ratings**: `python main.py --dataset amazon-ratings --epochs 100 --cpu`
+- **Minesweeper**: `python main.py --dataset minesweeper --epochs 100 --cpu`
+- **Tolokers**: `python main.py --dataset tolokers --epochs 100 --cpu`
+- **Questions**: `python main.py --dataset questions --epochs 100 --cpu`
+
+#### Social Networks
+- **Deezer Europe**: `python main.py --dataset deezer-europe --epochs 100 --cpu`
+
+#### Large-Scale OGB Datasets
+- **ogbn-arxiv**: `python main.py --dataset ogbn-arxiv --epochs 100 --cpu`
+- **ogbn-products**: `python main.py --dataset ogbn-products --epochs 100 --cpu` (requires GPU)
+- **ogbn-papers100M**: `python main.py --dataset ogbn-papers100M --epochs 100` (requires GPU)
+
+---
+
+## Downloading Additional Datasets
+
+### Verify & Auto-Download Planetoid
+```bash
+# Verify all Planetoid datasets exist
+python download_data.py --verify-only
+
+# Re-download if needed
+python download_data.py --datasets cora citeseer pubmed
+```
+
+### Manual Dataset Downloads
+
+For non-Planetoid datasets, download from the official sources:
+
+**1. Wiki/Heterophilic Datasets:**
+```bash
+# Download geom-gcn format datasets
+mkdir -p data/geom-gcn/film
+# Download from: https://github.com/snap-stanford/ogb/blob/master/ogb/nodeproppred/geom_gcn_datasets.py
+```
+
+**2. Heterophily Benchmark Datasets:**
+```bash
+# Download from: https://github.com/yushun-yuan/Heterophily-Benchmark
+# Extract to: data/heterophilous-graphs/
+```
+
+**3. Deezer Social Network:**
+```bash
+# Download from: https://github.com/benedekrozemberczki/node2vec
+# Save to: data/deezer/deezer-europe.mat
+```
+
+---
+
+## Directory Structure Reference
+
+Expected structure after download:
+
+```
+data/
+├── Planetoid/               # Auto-downloaded
+│   ├── cora/
+│   │   ├── raw/
+│   │   └── processed/
+│   ├── citeseer/
+│   └── pubmed/
+├── geom-gcn/                # Manual (film dataset)
+│   └── film/
+├── wiki_new/                # Manual (chameleon, squirrel)
+│   ├── chameleon/
+│   └── squirrel/
+├── heterophilous-graphs/    # Manual (heterophily datasets)
+│   ├── roman_empire.npz
+│   ├── amazon_ratings.npz
+│   └── ...
+└── deezer/                  # Manual (social networks)
+    └── deezer-europe.mat
+```
+
+---
+
+## FAQ: Datasets
+
+**Q: Can I train on all datasets at once?**  
+A: Yes. Use bash loop: `for ds in cora citeseer pubmed chameleon squirrel; do ... done`
+
+**Q: Do I need all datasets?**  
+A: No. Start with Cora (2.7k nodes) for quick prototyping, then try Pubmed (19.7k nodes) for scaling tests.
+
+**Q: Which dataset should I use for my paper?**  
+A: Typically researchers report on Cora, Citeseer, and Pubmed (standard citation benchmarks).
+
+**Q: Can I use custom datasets?**  
+A: Yes. Add your dataset loader in `medium/dataset.py` in the `load_nc_dataset()` function. Follow the `load_geom_gcn_dataset()` pattern.
+
+**Q: Why can't I download non-Planetoid datasets automatically?**  
+A: These datasets have different formats and license requirements. Manual download is safer for compliance.
+
+**Q:How do I fix "Invalid dataname" error?**  
+A: The dataset loader doesn't recognize your dataset name. Check spelling and make sure you've set up the data files in `data/` directory.
+
+---
+
 ## Project Structure
 
 After successful setup, your directory should look like:
@@ -280,7 +417,7 @@ PCGT/
 ├── data/                    # Datasets (created by download_data.py)
 │   └── Planetoid/
 │       ├── cora/
-│       ├── citeseer/
+│       ├── citeseer/       
 │       └── pubmed/
 ├── medium/                  # Main training code
 │   ├── main.py
@@ -313,11 +450,14 @@ python -c "import torch, torch_geometric, torch_sparse; print('✓ Imports OK')"
 # Download data
 python download_data.py
 
-# Run training
+# Test all three main datasets
 cd medium
-python main.py --backbone gcn --dataset cora --epochs 5 --cpu --runs 1
+for dataset in cora citeseer pubmed; do
+  echo "Testing $dataset..."
+  python main.py --dataset $dataset --epochs 5 --cpu --runs 1
+done
 
-# Expected result: Training completes successfully
+# Expected result: All three datasets train successfully
 ```
 
 ---
