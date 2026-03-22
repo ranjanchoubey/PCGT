@@ -107,7 +107,9 @@ def parse_method(method, args, c, d, device):
         gnn = parse_method(args.backbone, args, args.hidden_channels, d, device) if args.use_graph else None
         model = PCGT(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
                 use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, gnn=gnn, aggregate=args.aggregate,
-                num_partitions=args.num_partitions).to(device)
+                num_partitions=args.num_partitions,
+                num_reps=args.num_reps).to(device)
+
     else:
         raise ValueError(f'Invalid method {method}')
     return model
@@ -212,6 +214,8 @@ def parser_add_main_args(parser):
     # pcgt
     parser.add_argument('--num_partitions', type=int, default=10,
                         help='number of METIS partitions for PCGT')
+    parser.add_argument('--num_reps', type=int, default=4,
+                        help='number of attention-pooled representatives per partition')
     parser.add_argument('--partition_method', type=str, default='metis',
                         choices=['metis', 'spectral', 'random', 'kmeans'],
                         help='graph partitioning algorithm')

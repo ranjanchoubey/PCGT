@@ -1,31 +1,14 @@
 """
-PCGT: Partition-Conditioned Graph Transformer (v4)
-Multi-Resolution Partition Attention — a novel attention mechanism for graphs.
+PCGT v5: Boundary-Routed Multi-Resolution Partition Attention
 
-Key idea: Graph partitions define a natural two-level hierarchy (nodes and
-communities). We build attention that operates at BOTH resolutions:
+Key improvements over v4:
+  1. Boundary-Aware Routing: Per-node α based on boundary score.
+     Interior nodes → more local attention (intra-community)
+     Boundary nodes → more global attention (cross-community)
+     Only 1 extra scalar parameter (boundary_weight).
 
-  FINE (Local):   Exact softmax attention within each partition.
-                  Captures detailed intra-community patterns.
-                  Cost: O(N²/K)
-
-  COARSE (Global): Learnable "seed" vectors attention-pool each partition
-                  into M representative vectors. Each node then cross-attends
-                  to K×M partition representatives for global context.
-                  Cost: O(NKM) = O(N) since K,M are small constants.
-
-  Total: O(N²/K + NKM) — subquadratic, topology-aware.
-
-This is NOT an add-on to SGFormer. It completely replaces the attention
-mechanism. No kernel approximation is used.
-
-Why this differs from prior work:
-  - SGFormer:       Single-resolution O(N) kernel trick (lossy)
-  - NodeFormer:     Gumbel-softmax kernelized attention (single resolution)
-  - NAGphormer:     Hop-based tokenization (no partition structure)
-  - Set Transformer: Learned inducing points (not topology-aware)
-  - PCGT:           Two-resolution attention via graph topology
-                    with LEARNED partition representatives (not mean pooling)
+  2. Constrained Self-Connection: β ∈ [0, 2] via sigmoid scaling.
+     Prevents the model from bypassing attention via unbounded β.
 
 Architecture per layer:
   x → Q, K, V
@@ -34,12 +17,9 @@ Architecture per layer:
       ├─→ seeds · K[p] → attn → weighted V[p] ─→ reps (K×M vectors)
       └─→ CrossAttn(Q, reps_k, reps_v) ────────────── x_global
                                                         │
-      α * x_local + (1-α) * x_global + β * x_self    ◄───┘
-      α = sigmoid(learnable scalar)
-      β = learnable self-connection weight
-
-  + Partition Structural Encoding (learnable embeddings per partition)
-  + GCN branch for edge-level structural features
+      α_i * x_local + (1-α_i) * x_global + β * x_self ◄┘
+      α_i = sigmoid(α_logit + w * boundary_score_i)   (per-node)
+      β   = sigmoid(β_logit) * 2                       (bounded [0,2])
 """
 
 import math
@@ -49,14 +29,7 @@ import torch.nn.functional as F
 
 
 class PCGTConvLayer(nn.Module):
-    """Multi-Resolution Partition Attention Layer.
-
-    Fine resolution:  Exact softmax attention within each partition  O(N²/K)
-    Coarse resolution: Attention-pooled partition representatives + cross-attn
-                      M learned seeds per partition → K×M representatives
-                      Each node cross-attends to representatives → O(NKM)
-    Combined via learnable scalars α (local vs global) and β (self-connection).
-    """
+    """Boundary-Routed Multi-Resolution Partition Attention Layer."""
 
     def __init__(self, in_channels, out_channels, num_heads=1,
                  use_weight=True, attn_dropout=0.0, num_reps=4):
@@ -66,8 +39,6 @@ class PCGTConvLayer(nn.Module):
         if use_weight:
             self.Wv = nn.Linear(in_channels, out_channels * num_heads)
 
-        # Learnable pool seeds: each extracts a different "aspect" from partitions
-        # Shape: [M, H, D] — M seeds, each a query vector per head
         self.pool_seeds = nn.Parameter(
             torch.randn(num_reps, num_heads, out_channels) * 0.02)
 
@@ -78,11 +49,14 @@ class PCGTConvLayer(nn.Module):
         self.scale = math.sqrt(out_channels)
         self.attn_dropout = attn_dropout
 
-        # α blends local (intra-partition) and global (cross-partition)
+        # Base α: local vs global blend
         self.alpha_logit = nn.Parameter(torch.tensor(0.0))
 
-        # β: learnable self-connection weight
-        self.beta = nn.Parameter(torch.tensor(1.0))
+        # Boundary routing: shifts α for boundary nodes (positive w → boundary gets more global)
+        self.boundary_weight = nn.Parameter(torch.tensor(-1.0))
+
+        # Constrained self-connection: β ∈ [0, 2]
+        self.beta_logit = nn.Parameter(torch.tensor(0.0))  # sigmoid(0)=0.5 → β=1.0
 
     def reset_parameters(self):
         self.Wq.reset_parameters()
@@ -91,9 +65,10 @@ class PCGTConvLayer(nn.Module):
             self.Wv.reset_parameters()
         nn.init.normal_(self.pool_seeds, std=0.02)
         nn.init.constant_(self.alpha_logit, 0.0)
-        nn.init.constant_(self.beta, 1.0)
+        nn.init.constant_(self.boundary_weight, -1.0)
+        nn.init.constant_(self.beta_logit, 0.0)
 
-    def forward(self, x, partition_indices):
+    def forward(self, x, partition_indices, boundary_scores=None):
         N = x.size(0)
         H = self.num_heads
         D = self.out_channels
@@ -119,11 +94,10 @@ class PCGTConvLayer(nn.Module):
         reps_v = torch.zeros(num_parts * M, H, D, device=x.device)
 
         for p, indices in enumerate(partition_indices):
-            q_p = Q[indices]  # [n_p, H, D]
+            q_p = Q[indices]
             k_p = K[indices]
             v_p = V[indices]
 
-            # Exact softmax attention within this partition
             attn_local = torch.einsum('phd,qhd->hpq', q_p, k_p) / self.scale
             attn_local = F.softmax(attn_local, dim=-1)
             if self.training and self.attn_dropout > 0:
@@ -131,22 +105,18 @@ class PCGTConvLayer(nn.Module):
                                        training=True)
             out_local[indices] = torch.einsum('hpq,qhd->phd', attn_local, v_p)
 
-            # Attention-pooled representatives using learned seeds
-            # pool_seeds: [M,H,D] queries, k_p: [n_p,H,D] keys
             pool_attn = torch.einsum('mhd,nhd->mhn', self.pool_seeds, k_p)
             pool_attn = pool_attn / self.scale
-            pool_attn = F.softmax(pool_attn, dim=-1)  # [M, H, n_p]
+            pool_attn = F.softmax(pool_attn, dim=-1)
 
-            # Extract M representatives from this partition
             reps_k[p*M:(p+1)*M] = torch.einsum('mhn,nhd->mhd', pool_attn, k_p)
             reps_v[p*M:(p+1)*M] = torch.einsum('mhn,nhd->mhd', pool_attn, v_p)
 
         x_local = out_local.mean(dim=1)  # [N, D]
 
         # ─── GLOBAL: cross-partition attention to representatives ───
-        # Q: [N,H,D] attends to reps_k: [K*M,H,D]
         cross_attn = torch.einsum('nhd,rhd->nhr', Q, reps_k) / self.scale
-        cross_attn = F.softmax(cross_attn, dim=-1)  # [N, H, K*M]
+        cross_attn = F.softmax(cross_attn, dim=-1)
         if self.training and self.attn_dropout > 0:
             cross_attn = F.dropout(cross_attn, p=self.attn_dropout,
                                    training=True)
@@ -157,14 +127,27 @@ class PCGTConvLayer(nn.Module):
         # ─── SELF: each node's own transformed value ───
         x_self = V.mean(dim=1)  # [N, D]
 
-        # ─── COMBINE: local + global + self ───
-        alpha = torch.sigmoid(self.alpha_logit)
+        # ─── BOUNDARY-ROUTED COMBINE ───
+        # Per-node α: boundary nodes shifted toward more global attention
+        if boundary_scores is not None:
+            # boundary_scores: [N] in [0,1], higher = more boundary
+            # Negative boundary_weight → boundary nodes get LOWER α → more global
+            alpha = torch.sigmoid(
+                self.alpha_logit + self.boundary_weight * boundary_scores
+            ).unsqueeze(-1)  # [N, 1]
+        else:
+            alpha = torch.sigmoid(self.alpha_logit)  # scalar fallback
+
         x_context = alpha * x_local + (1 - alpha) * x_global
-        return x_context + self.beta * x_self
+
+        # Constrained β ∈ [0, 2]
+        beta = torch.sigmoid(self.beta_logit) * 2.0
+
+        return x_context + beta * x_self
 
 
 class PCGTConv(nn.Module):
-    """Multi-layer multi-resolution partition attention."""
+    """Multi-layer boundary-routed partition attention."""
 
     def __init__(self, in_channels, hidden_channels, num_layers=1, num_heads=1,
                  alpha=0.5, dropout=0.5, use_bn=True, use_residual=True,
@@ -177,7 +160,6 @@ class PCGTConv(nn.Module):
         self.bns = nn.ModuleList()
         self.bns.append(nn.LayerNorm(hidden_channels))
 
-        # Partition Structural Encoding
         self.partition_pe = nn.Embedding(num_partitions, hidden_channels)
 
         self.convs = nn.ModuleList()
@@ -204,7 +186,8 @@ class PCGTConv(nn.Module):
             conv.reset_parameters()
         nn.init.normal_(self.partition_pe.weight, std=0.02)
 
-    def forward(self, data, partition_indices, partition_labels=None):
+    def forward(self, data, partition_indices, partition_labels=None,
+                boundary_scores=None):
         x = data.graph['node_feat']
         layer_ = []
 
@@ -220,7 +203,7 @@ class PCGTConv(nn.Module):
         layer_.append(x)
 
         for i, conv in enumerate(self.convs):
-            x = conv(x, partition_indices)
+            x = conv(x, partition_indices, boundary_scores)
             if self.residual:
                 x = self.alpha * x + (1 - self.alpha) * layer_[i]
             if self.use_bn:
@@ -234,10 +217,7 @@ class PCGTConv(nn.Module):
 
 
 class PCGT(nn.Module):
-    """Partition-Conditioned Graph Transformer (v4).
-
-    Multi-resolution partition attention + GCN for node classification.
-    """
+    """PCGT v5: Boundary-Routed Partition-Conditioned Graph Transformer."""
 
     def __init__(self, in_channels, hidden_channels, out_channels,
                  num_layers=1, num_heads=1, alpha=0.5, dropout=0.5,
@@ -267,18 +247,23 @@ class PCGT(nn.Module):
 
         self.partition_indices = None
         self.partition_labels = None
+        self.boundary_scores = None
 
         self.params1 = list(self.pcgt_conv.parameters())
         self.params2 = list(self.gnn.parameters()) if self.gnn is not None else []
         self.params2.extend(list(self.fc.parameters()))
 
-    def set_partition_info(self, partition_indices, partition_labels):
+    def set_partition_info(self, partition_indices, partition_labels,
+                          boundary_scores=None):
         device = next(self.parameters()).device
         self.partition_indices = [idx.to(device) for idx in partition_indices]
         self.partition_labels = torch.LongTensor(partition_labels).to(device)
+        if boundary_scores is not None:
+            self.boundary_scores = boundary_scores.to(device)
 
     def forward(self, data):
-        x1 = self.pcgt_conv(data, self.partition_indices, self.partition_labels)
+        x1 = self.pcgt_conv(data, self.partition_indices,
+                            self.partition_labels, self.boundary_scores)
         if self.use_graph:
             x2 = self.gnn(data)
             if self.aggregate == 'add':
@@ -297,10 +282,11 @@ class PCGT(nn.Module):
         self.fc.reset_parameters()
 
     def get_gamma_values(self):
-        """Return α (local vs global) and β (self-connection) for monitoring."""
+        """Return α_base, β, w for monitoring."""
         vals = []
         for c in self.pcgt_conv.convs:
             a = torch.sigmoid(c.alpha_logit).item()
-            b = c.beta.item()
-            vals.append(f"α={a:.2f},β={b:.2f}")
+            b = (torch.sigmoid(c.beta_logit) * 2.0).item()
+            w = c.boundary_weight.item()
+            vals.append(f"α={a:.2f},β={b:.2f},w={w:.2f}")
         return vals

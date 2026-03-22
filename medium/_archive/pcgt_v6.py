@@ -1,45 +1,28 @@
 """
-PCGT: Partition-Conditioned Graph Transformer (v4)
-Multi-Resolution Partition Attention — a novel attention mechanism for graphs.
+PCGT v6: Partition-Conditioned Graph Transformer
+with Topology-Grounded Global Representatives.
 
-Key idea: Graph partitions define a natural two-level hierarchy (nodes and
-communities). We build attention that operates at BOTH resolutions:
+Key change from v4: replaces learned pool_seeds [M, H, D] with
+partition centroids — the mean of node features per partition.
 
-  FINE (Local):   Exact softmax attention within each partition.
-                  Captures detailed intra-community patterns.
-                  Cost: O(N²/K)
-
-  COARSE (Global): Learnable "seed" vectors attention-pool each partition
-                  into M representative vectors. Each node then cross-attends
-                  to K×M partition representatives for global context.
-                  Cost: O(NKM) = O(N) since K,M are small constants.
-
-  Total: O(N²/K + NKM) — subquadratic, topology-aware.
-
-This is NOT an add-on to SGFormer. It completely replaces the attention
-mechanism. No kernel approximation is used.
-
-Why this differs from prior work:
-  - SGFormer:       Single-resolution O(N) kernel trick (lossy)
-  - NodeFormer:     Gumbel-softmax kernelized attention (single resolution)
-  - NAGphormer:     Hop-based tokenization (no partition structure)
-  - Set Transformer: Learned inducing points (not topology-aware)
-  - PCGT:           Two-resolution attention via graph topology
-                    with LEARNED partition representatives (not mean pooling)
+Why: pool_seeds are arbitrary learned vectors with no structural meaning.
+Centroids are topology-grounded: each one summarizes a real region of the
+graph.  This removes M×H×D parameters and ties global context directly to
+graph structure.
 
 Architecture per layer:
   x → Q, K, V
       ├─→ IntraPartitionAttn(Q,K,V) per partition ──── x_local
       │
-      ├─→ seeds · K[p] → attn → weighted V[p] ─→ reps (K×M vectors)
-      └─→ CrossAttn(Q, reps_k, reps_v) ────────────── x_global
+      ├─→ centroid_k = mean(K[p]),  centroid_v = mean(V[p])  per partition
+      └─→ CrossAttn(Q, centroids_k, centroids_v) ──── x_global
                                                         │
       α * x_local + (1-α) * x_global + β * x_self    ◄───┘
       α = sigmoid(learnable scalar)
       β = learnable self-connection weight
 
-  + Partition Structural Encoding (learnable embeddings per partition)
-  + GCN branch for edge-level structural features
+Complexity: O(N²/K + NKD) — same as v4, but K naturally replaces M
+and the global reps are grounded in topology rather than learned from scratch.
 """
 
 import math
@@ -49,29 +32,22 @@ import torch.nn.functional as F
 
 
 class PCGTConvLayer(nn.Module):
-    """Multi-Resolution Partition Attention Layer.
+    """Multi-Resolution Partition Attention with Centroid Global Reps.
 
-    Fine resolution:  Exact softmax attention within each partition  O(N²/K)
-    Coarse resolution: Attention-pooled partition representatives + cross-attn
-                      M learned seeds per partition → K×M representatives
-                      Each node cross-attends to representatives → O(NKM)
-    Combined via learnable scalars α (local vs global) and β (self-connection).
+    Fine:   Exact softmax attention within each partition  O(N²/K)
+    Coarse: Partition centroids (mean-pooled K/V) as global representatives
+            Each node cross-attends to K centroids → O(NKD)
+    Combined via learnable α (local vs global) and β (self-connection).
     """
 
     def __init__(self, in_channels, out_channels, num_heads=1,
-                 use_weight=True, attn_dropout=0.0, num_reps=4):
+                 use_weight=True, attn_dropout=0.0):
         super().__init__()
         self.Wq = nn.Linear(in_channels, out_channels * num_heads)
         self.Wk = nn.Linear(in_channels, out_channels * num_heads)
         if use_weight:
             self.Wv = nn.Linear(in_channels, out_channels * num_heads)
 
-        # Learnable pool seeds: each extracts a different "aspect" from partitions
-        # Shape: [M, H, D] — M seeds, each a query vector per head
-        self.pool_seeds = nn.Parameter(
-            torch.randn(num_reps, num_heads, out_channels) * 0.02)
-
-        self.num_reps = num_reps
         self.out_channels = out_channels
         self.num_heads = num_heads
         self.use_weight = use_weight
@@ -89,7 +65,6 @@ class PCGTConvLayer(nn.Module):
         self.Wk.reset_parameters()
         if self.use_weight:
             self.Wv.reset_parameters()
-        nn.init.normal_(self.pool_seeds, std=0.02)
         nn.init.constant_(self.alpha_logit, 0.0)
         nn.init.constant_(self.beta, 1.0)
 
@@ -97,7 +72,6 @@ class PCGTConvLayer(nn.Module):
         N = x.size(0)
         H = self.num_heads
         D = self.out_channels
-        M = self.num_reps
 
         Q = self.Wq(x).reshape(N, H, D)
         K = self.Wk(x).reshape(N, H, D)
@@ -114,9 +88,9 @@ class PCGTConvLayer(nn.Module):
         # ─── LOCAL: exact intra-partition attention ───
         out_local = torch.zeros(N, H, D, device=x.device)
 
-        # ─── BUILD REPRESENTATIVES: attention-pooled, M per partition ───
-        reps_k = torch.zeros(num_parts * M, H, D, device=x.device)
-        reps_v = torch.zeros(num_parts * M, H, D, device=x.device)
+        # ─── BUILD CENTROIDS: mean-pooled K/V per partition ───
+        centroids_k = torch.zeros(num_parts, H, D, device=x.device)
+        centroids_v = torch.zeros(num_parts, H, D, device=x.device)
 
         for p, indices in enumerate(partition_indices):
             q_p = Q[indices]  # [n_p, H, D]
@@ -131,27 +105,21 @@ class PCGTConvLayer(nn.Module):
                                        training=True)
             out_local[indices] = torch.einsum('hpq,qhd->phd', attn_local, v_p)
 
-            # Attention-pooled representatives using learned seeds
-            # pool_seeds: [M,H,D] queries, k_p: [n_p,H,D] keys
-            pool_attn = torch.einsum('mhd,nhd->mhn', self.pool_seeds, k_p)
-            pool_attn = pool_attn / self.scale
-            pool_attn = F.softmax(pool_attn, dim=-1)  # [M, H, n_p]
-
-            # Extract M representatives from this partition
-            reps_k[p*M:(p+1)*M] = torch.einsum('mhn,nhd->mhd', pool_attn, k_p)
-            reps_v[p*M:(p+1)*M] = torch.einsum('mhn,nhd->mhd', pool_attn, v_p)
+            # Partition centroids: simple mean pooling
+            centroids_k[p] = k_p.mean(dim=0)  # [H, D]
+            centroids_v[p] = v_p.mean(dim=0)  # [H, D]
 
         x_local = out_local.mean(dim=1)  # [N, D]
 
-        # ─── GLOBAL: cross-partition attention to representatives ───
-        # Q: [N,H,D] attends to reps_k: [K*M,H,D]
-        cross_attn = torch.einsum('nhd,rhd->nhr', Q, reps_k) / self.scale
-        cross_attn = F.softmax(cross_attn, dim=-1)  # [N, H, K*M]
+        # ─── GLOBAL: cross-attention to partition centroids ───
+        # Q: [N,H,D] attends to centroids_k: [K,H,D]
+        cross_attn = torch.einsum('nhd,khd->nhk', Q, centroids_k) / self.scale
+        cross_attn = F.softmax(cross_attn, dim=-1)  # [N, H, K]
         if self.training and self.attn_dropout > 0:
             cross_attn = F.dropout(cross_attn, p=self.attn_dropout,
                                    training=True)
 
-        out_global = torch.einsum('nhr,rhd->nhd', cross_attn, reps_v)
+        out_global = torch.einsum('nhk,khd->nhd', cross_attn, centroids_v)
         x_global = out_global.mean(dim=1)  # [N, D]
 
         # ─── SELF: each node's own transformed value ───
@@ -164,12 +132,11 @@ class PCGTConvLayer(nn.Module):
 
 
 class PCGTConv(nn.Module):
-    """Multi-layer multi-resolution partition attention."""
+    """Multi-layer multi-resolution partition attention with centroids."""
 
     def __init__(self, in_channels, hidden_channels, num_layers=1, num_heads=1,
                  alpha=0.5, dropout=0.5, use_bn=True, use_residual=True,
-                 use_weight=True, use_act=False, num_partitions=10,
-                 num_reps=4):
+                 use_weight=True, use_act=False, num_partitions=10):
         super().__init__()
 
         self.fcs = nn.ModuleList()
@@ -185,7 +152,7 @@ class PCGTConv(nn.Module):
             self.convs.append(
                 PCGTConvLayer(hidden_channels, hidden_channels,
                               num_heads=num_heads, use_weight=use_weight,
-                              attn_dropout=dropout, num_reps=num_reps))
+                              attn_dropout=dropout))
             self.bns.append(nn.LayerNorm(hidden_channels))
 
         self.dropout = dropout
@@ -234,9 +201,9 @@ class PCGTConv(nn.Module):
 
 
 class PCGT(nn.Module):
-    """Partition-Conditioned Graph Transformer (v4).
+    """Partition-Conditioned Graph Transformer (v6).
 
-    Multi-resolution partition attention + GCN for node classification.
+    Topology-grounded centroid global reps + GCN for node classification.
     """
 
     def __init__(self, in_channels, hidden_channels, out_channels,
@@ -244,13 +211,13 @@ class PCGT(nn.Module):
                  use_bn=True, use_residual=True, use_weight=True,
                  use_graph=True, use_act=False,
                  graph_weight=0.8, gnn=None, aggregate='add',
-                 num_partitions=10, num_reps=4):
+                 num_partitions=10):
         super().__init__()
 
         self.pcgt_conv = PCGTConv(
             in_channels, hidden_channels, num_layers, num_heads,
             alpha, dropout, use_bn, use_residual, use_weight, use_act,
-            num_partitions=num_partitions, num_reps=num_reps)
+            num_partitions=num_partitions)
 
         self.gnn = gnn
         self.use_graph = use_graph

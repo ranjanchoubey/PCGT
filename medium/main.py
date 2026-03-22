@@ -215,7 +215,7 @@ for run in range(args.runs):
             gamma_str = ''
             if args.method == 'pcgt' and hasattr(model, 'get_gamma_values'):
                 gammas = model.get_gamma_values()
-                gamma_str = f' γ={[f"{g:.3f}" for g in gammas]}'
+                gamma_str = f' [{",".join(str(g) for g in gammas)}]'
             print(f'Epoch: {epoch:02d}, '
                   f'Loss: {loss:.4f}, '
                   f'Train: {100 * result[0]:.2f}%, '
