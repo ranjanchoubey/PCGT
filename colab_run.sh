@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # =============================================================
 # PCGT — Colab GPU Runner
 # Copy each section into a separate Colab cell, or run all at once.
