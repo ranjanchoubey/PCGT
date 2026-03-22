@@ -5,35 +5,37 @@
 ## VERIFIED MULTI-RUN RESULTS (FINAL PAPER NUMBERS)
 
 ### Cora (5-run validated)
-# Result: 84.56 ± 0.52 | SGFormer: 84.5 ± 0.8 | ✅ BEATS
+# GPU: 83.80 ± 1.21 | CPU: 84.56 ± 0.52 | SGFormer: 84.5 ± 0.8
+# rand_split_class variance across hardware; both within SGFormer's CI
 python -B main.py --method pcgt --dataset cora --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --num_partitions 7 --graph_weight 0.8 --dropout 0.4 --weight_decay 5e-4 --ours_weight_decay 0.001 --ours_dropout 0.2
 
 ### CiteSeer (5-run validated)
-# Result: 73.02 ± 1.03 | SGFormer: 72.6 ± 0.2 | ✅ BEATS
+# GPU: 73.44 ± 0.21 | CPU: 73.02 ± 1.03 | SGFormer: 72.6 ± 0.2 | ✅ BEATS +0.84
 python -B main.py --method pcgt --dataset citeseer --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --num_partitions 7 --graph_weight 0.7 --dropout 0.5 --weight_decay 0.01 --ours_weight_decay 0.02 --ours_dropout 0.3
 
 ### PubMed (5-run validated)
-# Result: 81.00 ± 0.73 | SGFormer: 80.3 ± 0.6 | ✅ BEATS
+# GPU: 80.46 ± 0.64 | CPU: 81.00 ± 0.73 | SGFormer: 80.3 ± 0.6 | ✅ BEATS +0.16
 python -B main.py --method pcgt --dataset pubmed --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --num_partitions 50 --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3
 
 ### Chameleon (5-run validated)
-# Result: 48.59 ± 3.47 | SGFormer: 44.9 ± 3.9 | ✅ BEATS (+3.69)
+# GPU: 48.09 ± 2.39 | CPU: 48.59 ± 3.47 | SGFormer: 44.9 ± 3.9 | ✅ BEATS +3.19
 python -B main.py --method pcgt --dataset chameleon --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 10 --graph_weight 0.8 --dropout 0.5 --weight_decay 0.001 --ours_weight_decay 0.01 --ours_dropout 0.3
 
 ### Film/Actor (10-run validated, lr=0.05)
-# Result: 38.04 ± 0.84 | SGFormer: 37.9 ± 1.1 | ✅ BEATS
+# GPU: 37.69 ± 0.98 | CPU: 38.04 ± 0.84 | SGFormer: 37.9 ± 1.1
+# All within noise; GPU/CPU diff = 0.35 (< 1 std)
 # Note: Film uses pre-computed 10-fold splits
 # lr=0.1 collapsed on some splits; lr=0.01 overfits; lr=0.05 is the sweet spot
 python -B main.py --method pcgt --dataset film --lr 0.05 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 5 --graph_weight 0.5 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3
 
 ### Squirrel (10-run validated)
-# Result: 45.28 ± 2.08 | SGFormer: 41.8 ± 2.2 | ✅ BEATS (+3.48)
+# GPU: 45.14 ± 2.29 | CPU: 45.28 ± 2.08 | SGFormer: 41.8 ± 2.2 | ✅ BEATS +3.34
 # Note: Squirrel uses pre-computed 10-fold splits
 python -B main.py --method pcgt --dataset squirrel --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 10 --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3
 
-### Deezer (1-run best: 63.81, KMeans partitioning)
-# Result: 63.81 (1-run) | SGFormer: 67.1 ± 1.1 | ❌ Below (-3.29)
-# KMeans feature partitioning better than METIS (62.35 → 63.81)
+### Deezer (5-run GPU validated, KMeans partitioning)
+# Result: 64.94 ± 0.85 | SGFormer: 67.1 ± 1.1 | ❌ Below (-2.16)
+# KMeans feature partitioning better than METIS (62.35 → 64.94)
 # Deezer has homophily ~0.53 (near random) — partitions don't capture label structure
 python -B main.py --method pcgt --dataset deezer-europe --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method kmeans --use_graph --use_residual --backbone gcn --rand_split --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 50 --graph_weight 0.5 --dropout 0.6 --weight_decay 5e-5 --ours_weight_decay 0.01 --ours_dropout 0.4
 
@@ -41,13 +43,13 @@ python -B main.py --method pcgt --dataset deezer-europe --lr 0.01 --num_layers 2
 ## SUMMARY TABLE (22 March 2026 — ALL MEDIUM DATASETS COMPLETE)
 # | Dataset   | SGFormer     | PCGT (multi-run)  | Delta  | Status       |
 # |-----------|------------- |-------------------|--------|--------------|
-# | Cora      | 84.5 ± 0.8  | 84.56 ± 0.52      | +0.06  | ✅ 5-run     |
-# | CiteSeer  | 72.6 ± 0.2  | 73.02 ± 1.03      | +0.42  | ✅ 5-run     |
-# | PubMed    | 80.3 ± 0.6  | 81.00 ± 0.73      | +0.70  | ✅ 5-run     |
-# | Chameleon | 44.9 ± 3.9  | 48.59 ± 3.47      | +3.69  | ✅ 5-run     |
-# | Actor     | 37.9 ± 1.1  | 38.04 ± 0.84      | +0.14  | ✅ 10-run    |
-# | Squirrel  | 41.8 ± 2.2  | 45.28 ± 2.08      | +3.48  | ✅ 10-run    |
-# | Deezer    | 67.1 ± 1.1  | 63.81 (1-run)     | -3.29  | ❌ need 5-run|
+# | Cora      | 84.5 ± 0.8  | 83.80 ± 1.21 (GPU) | -0.70  | ~matched     |
+# | CiteSeer  | 72.6 ± 0.2  | 73.44 ± 0.21 (GPU) | +0.84  | ✅ 5-run     |
+# | PubMed    | 80.3 ± 0.6  | 80.46 ± 0.64 (GPU) | +0.16  | ✅ 5-run     |
+# | Chameleon | 44.9 ± 3.9  | 48.09 ± 2.39 (GPU) | +3.19  | ✅ 5-run     |
+# | Actor     | 37.9 ± 1.1  | 37.69 ± 0.98 (GPU) | -0.21  | ~matched     |
+# | Squirrel  | 41.8 ± 2.2  | 45.14 ± 2.29 (GPU) | +3.34  | ✅ 10-run    |
+# | Deezer    | 67.1 ± 1.1  | 64.94 ± 0.85      | -2.16  | ❌ 5-run GPU |
 
 ## ARCHITECTURE NOTES
 # - V4 (pcgt.py) = production architecture with learned pool_seeds
