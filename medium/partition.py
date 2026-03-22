@@ -53,37 +53,30 @@ def random_partition(num_nodes, num_partitions):
 
 
 def feature_kmeans_partition(features, num_partitions, num_iters=100, seed=42):
-    """Partition nodes by K-means clustering on features (PyTorch, no sklearn).
+    """Partition nodes by K-means clustering on features.
 
-    Useful for heterophilic graphs where graph structure groups dissimilar nodes.
-    Feature-based clustering groups nodes with similar attributes regardless of
-    graph connectivity.
+    Uses sklearn MiniBatchKMeans for efficiency on high-dimensional data.
+    For very high-dim features (>1000), applies TruncatedSVD first.
     """
-    torch.manual_seed(seed)
-    if isinstance(features, np.ndarray):
-        features = torch.FloatTensor(features)
-    features = features.float()
+    from sklearn.cluster import MiniBatchKMeans
+    if isinstance(features, torch.Tensor):
+        features = features.numpy()
+    features = features.astype(np.float32)
     N, D = features.shape
 
-    # Initialize centroids from random data points
-    indices = torch.randperm(N)[:num_partitions]
-    centroids = features[indices].clone()
+    # Reduce dimensionality for very high-dim features
+    if D > 1000:
+        from sklearn.decomposition import TruncatedSVD
+        n_components = min(128, N - 1, D - 1)
+        print(f"  KMeans: reducing {D}-dim features to {n_components}-dim via TruncatedSVD...")
+        svd = TruncatedSVD(n_components=n_components, random_state=seed)
+        features = svd.fit_transform(features)
 
-    for _ in range(num_iters):
-        dists = torch.cdist(features, centroids)  # [N, K]
-        labels = dists.argmin(dim=1)               # [N]
-        new_centroids = torch.zeros_like(centroids)
-        for k in range(num_partitions):
-            mask = labels == k
-            if mask.sum() > 0:
-                new_centroids[k] = features[mask].mean(dim=0)
-            else:
-                new_centroids[k] = centroids[k]
-        if torch.allclose(centroids, new_centroids, atol=1e-6):
-            break
-        centroids = new_centroids
-
-    return labels.numpy()
+    kmeans = MiniBatchKMeans(
+        n_clusters=num_partitions, random_state=seed,
+        batch_size=min(1024, N), max_iter=num_iters, n_init=3)
+    labels = kmeans.fit_predict(features)
+    return labels
 
 
 def compute_partitions(edge_index, num_nodes, num_partitions, method='metis', features=None):
