@@ -113,3 +113,9 @@ ENV/
 .ropeproject
 
 try*.sh
+*.bbl
+*.blg
+*.aux
+main.pdf
+*.fls
+*.fdb_latexmk

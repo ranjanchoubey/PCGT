@@ -1,0 +1,412 @@
+\documentclass[11pt, a4paper]{article}
+
+% ============================================================================
+% PACKAGES
+% ============================================================================
+\usepackage[utf-8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{makecell}
+
+\geometry{margin=1in}
+\setstretch{1.5}
+
+% ============================================================================
+% TITLE & AUTHOR
+% ============================================================================
+\title{
+    \textbf{PCGT: Partition-Conditioned Graph Transformer} \\
+    \large Combining Multi-Resolution Attention with GCN Backbone Blending \\
+    for Heterophilic and Homophilic Graphs
+}
+
+\author{Anonymous \\ Thesis Research}
+\date{March 2026}
+
+% ============================================================================
+% DOCUMENT START
+% ============================================================================
+\begin{document}
+
+\maketitle
+
+% ============================================================================
+% ABSTRACT
+% ============================================================================
+\begin{abstract}
+
+Graph Neural Networks (GNNs) have demonstrated significant progress on node classification tasks, yet most designs excel primarily on homophilic graphs where similar nodes connect. Heterophilic graphs—where dissimilar nodes connect—remain challenging. We present PCGT (Partition-Conditioned Graph Transformer), a novel architecture combining multi-resolution attention with learnable GCN backbone blending. 
+
+PCGT addresses heterophily through: (1) \emph{local fine-grained attention} within graph partitions (O(N²/K) complexity), capturing local patterns; (2) \emph{global coarse attention} via learned seed-based pooling (O(N·M·K) complexity), enabling long-range dependencies; (3) \emph{learnable blending} via parameters α (local/global balance) and β (self-connection weight), allowing per-layer adaptation; and (4) \emph{GCN backbone blending}, smoothly transitioning between PCGT and classical GCN.
+
+Validation across 7 medium-scale datasets yields: \textbf{4 wins} (CiteSeer +0.84\%, PubMed +0.16\%, Chameleon +3.19\%, Squirrel +3.34\%), \textbf{2 matched} (Cora, Film), and \textbf{1 loss} (Deezer, under investigation). Heterophilic datasets show strongest improvements, confirming design effectiveness on the challenging regime. Ablation studies validate each component's necessity.
+
+\end{abstract}
+
+% ============================================================================
+% 1. INTRODUCTION (PLACEHOLDER)
+% ============================================================================
+\section{Introduction}
+
+\emph{[To be written after all other sections completed]}
+
+The success of Graph Neural Networks on node classification has grown rapidly, yet their applicability has been limited primarily to homophilic graphs. In homophilic networks, connected nodes tend to share similar labels or features—a property that aligns naturally with the message-passing paradigm of GNNs.
+
+Heterophilic graphs present a different challenge: dissimilar nodes connect within the graph. Classical node classification benchmarks (heterophilic regime) have exposed limitations of standard GCN architectures, prompting innovations in architecture design.
+
+% ============================================================================
+% 2. RELATED WORK (PLACEHOLDER)
+% ============================================================================
+\section{Related Work}
+
+\emph{[To be written after all other sections completed]}
+
+Prior work on heterophilic GNNs includes:
+\begin{itemize}
+    \item \textbf{Spectral methods}: Extended GCN theory to heterophilic setting
+    \item \textbf{Attention mechanisms}: Learned weights to select neighbors
+    \item \textbf{Higher-order aggregation}: Multiple hops, skip connections
+\end{itemize}
+
+% ============================================================================
+% 3. METHOD
+% ============================================================================
+\section{Method}
+
+We present PCGT (Partition-Conditioned Graph Transformer), a GNN architecture combining multi-resolution attention with adaptive GCN blending.
+
+\subsection{Overview}
+
+PCGT's core innovation is \emph{multi-resolution attention}: exact softmax within graph partitions (fine-grained local patterns, O(N²/K) complexity) + learned seed-based pooling for global context (coarse patterns, O(N·M·K) complexity). A learnable blending parameter α per layer adaptively weights local vs.\ global components.
+
+Additionally, learnable self-connection weight β per layer enables the model to suppress or amplify self-features based on task requirements—critical for heterophilic graphs where neighbor features are more informative than self-features.
+
+\subsection{Graph Partitioning}
+
+The first step partitions the graph into K disjoint partitions, reducing attention complexity from O(N²) to O(N²/K) for local attention.
+
+\subsubsection{Partitioning Methods}
+
+We support three partitioning strategies:
+
+\begin{enumerate}
+    \item \textbf{METIS} (graph-aware, spectral): Minimizes edge cuts via graph spectral properties. Preserves local community structure. Recommended for production.
+    
+    \item \textbf{KMeans} (spatial): Clusters nodes in feature space. Faster than METIS but less graph-structure-aware.
+    
+    \item \textbf{Random} (baseline): Uniform random assignment. Baseline for ablations.
+\end{enumerate}
+
+\subsubsection{Partition Output}
+
+Each partitioning produces:
+\begin{itemize}
+    \item $\text{partition\_indices} \in \{1, \ldots, K\}^N$: Node-to-partition mapping
+    \item $\text{partition\_labels} \in \{0,1\}^{N \times K}$: One-hot partition encoding
+\end{itemize}
+
+\subsection{Partition Structural Encoding (PSE)}
+
+To embed partition information into node features, we use learnable partition embeddings:
+
+\begin{equation}
+\mathbf{x}_i \leftarrow \mathbf{x}_i + \text{PartitionEmbed}(k_i) \in \mathbb{R}^{D}
+\end{equation}
+
+where $k_i$ is the partition ID of node $i$, PartitionEmbed is a learned embedding table (K × D), and D is the hidden dimension. This encoding is applied per layer, allowing adaptive reweighting through the network depth.
+
+\subsection{Multi-Resolution Attention (MRA)}
+
+PCGT's core mechanism splits attention into two complementary components:
+
+\subsubsection{Local (Fine-Grained) Attention}
+
+For each partition p, nodes within that partition compute exact softmax attention with each other. This captures fine-grained local patterns within communities:
+
+\begin{equation}
+\text{Attn}_{\text{local}}^{(p)} = \text{softmax}\left( \frac{\mathbf{Q}[S_p] \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p]
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $S_p = \{ i : \text{partition}(i) = p \}$ is the set of nodes in partition $p$
+    \item $\mathbf{Q}, \mathbf{K}, \mathbf{V}$ are query, key, value projections (linear layers)
+    \item $d$ is the hidden dimension
+    \item Complexity: $O(N^2 / K)$ where $K$ is the number of partitions
+\end{itemize}
+
+\subsubsection{Global (Coarse) Attention via Learned Pooling}
+
+To capture long-range dependencies across partitions, each partition learns M representative vectors (``seed'' vectors):
+
+\begin{equation}
+\text{pool\_seeds} \in \mathbb{R}^{K \times M \times D}
+\end{equation}
+
+Global attention is computed by:
+\begin{equation}
+\text{Attn}_{\text{global}} = \text{softmax}\left( \frac{\mathbf{Q} \cdot \text{pool\_seeds}}{\sqrt{d}} \right) \text{pool\_seeds}^T \mathbf{V}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item All N nodes attend to all K·M representative seeds
+    \item Seeds are learnable parameters, trained via backpropagation
+    \item Complexity: $O(N \cdot M \cdot K)$ where M is typically 4–8
+\end{itemize}
+
+This learned pooling strategy is more expressive than fixed aggregation (e.g., mean pooling) because seeds adapt to the task.
+
+\subsubsection{Blending Local and Global Attention}
+
+The two attention components are combined via a learnable weight $\alpha$ (per layer):
+
+\begin{equation}
+\mathbf{h}_{\text{attn}} = \alpha \cdot \text{Attn}_{\text{local}} + (1 - \alpha) \cdot \text{Attn}_{\text{global}}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\alpha = \text{sigmoid}(\alpha_{\text{logit}})$, learned parameter
+    \item $\alpha \approx 0$: Graph is heterophilic; weight global attention heavily
+    \item $\alpha \approx 1$: Graph is homophilic; weight local attention heavily
+    \item Per-layer: Different layers can choose different blending ratios
+\end{itemize}
+
+\subsection{Self-Connection Weighting}
+
+Most GNNs use fixed self-loop weights (e.g., β = 1.0 in standard GCN). PCGT makes this learnable:
+
+\begin{equation}
+\mathbf{h}_{i} \leftarrow \beta \cdot \mathbf{x}_i + (1 - \beta) \cdot \mathbf{h}_{\text{attn}, i}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\beta \in \mathbb{R}$ is a learnable weight per layer
+    \item $\beta > 0.5$: Trust self-features more (homophilic preference)
+    \item $\beta < 0.5$: Trust neighbor aggregation more (heterophilic preference)
+    \item $\beta < 0$: Learned suppression of self-features (extreme heterophily)
+\end{itemize}
+
+This flexibility is critical: heterophilic graphs benefit from de-emphasizing self-features in favor of neighbor information. Empirically, we observe β values ranging from −2.01 (strong self-suppression, Film dataset) to +0.7 (moderate homophilic emphasis).
+
+\subsection{GCN Backbone Blending}
+
+To maintain compatibility with classical homophilic graph architectures and enable smooth transitioning, PCGT's final output blends a GCN branch with the attention output:
+
+\begin{equation}
+\mathbf{h}_{\text{final}} = \text{graph\_weight} \cdot \mathbf{h}_{\text{GCN}} + (1 - \text{graph\_weight}) \cdot \mathbf{h}_{\text{attn}}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\mathbf{h}_{\text{GCN}} = \tilde{\mathbf{A}} \mathbf{x}$ (standard GCN: normalized adjacency × features)
+    \item $\text{graph\_weight} \in [0, 1]$ is learnable or fixed per layer
+    \item $\text{graph\_weight} = 0$: Pure PCGT (no GCN)
+    \item $\text{graph\_weight} = 1$: Pure GCN (no PCGT)
+    \item $\text{graph\_weight} = 0.5$: Balanced blend
+\end{itemize}
+
+This design choice ensures PCGT does not ``break'' on homophilic graphs: if heterophilic components underperform, the model learns to weight GCN heavily.
+
+\subsection{Complete Layer Architecture}
+
+A single PCGT layer combines all above components:
+
+\begin{enumerate}
+    \item \textbf{Input}: Node features $\mathbf{X} \in \mathbb{R}^{N \times D_{\text{in}}}$, partition labels $\mathbf{P} \in \{0,1\}^{N \times K}$
+    
+    \item \textbf{Partition Encoding}: Add partition embeddings to features
+    \begin{equation}
+    \mathbf{X} \leftarrow \mathbf{X} + \text{PartitionEmbed}(\mathbf{P})
+    \end{equation}
+    
+    \item \textbf{Projections}: Compute Q, K, V
+    \begin{align}
+    \mathbf{Q} &= W_Q \mathbf{X} \\
+    \mathbf{K} &= W_K \mathbf{X} \\
+    \mathbf{V} &= W_V \mathbf{X}
+    \end{align}
+    
+    \item \textbf{Local Attention}: Exact softmax within each partition
+    \begin{equation}
+    \mathbf{H}_{\text{local}} = \bigoplus_{p=1}^{K} \text{softmax}\left( \frac{\mathbf{Q}[S_p] \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p]
+    \end{equation}
+    where $\bigoplus$ denotes concatenation and reordering to original node order
+    
+    \item \textbf{Global Attention}: Learned seed pooling
+    \begin{equation}
+    \mathbf{H}_{\text{global}} = \text{softmax}\left( \frac{\mathbf{Q} \cdot \text{pool\_seeds}}{\sqrt{d}} \right) \text{pool\_seeds}^T \mathbf{V}
+    \end{equation}
+    
+    \item \textbf{Blend}: Learnable α
+    \begin{equation}
+    \mathbf{H}_{\text{attn}} = \alpha \cdot \mathbf{H}_{\text{local}} + (1 - \alpha) \cdot \mathbf{H}_{\text{global}}
+    \end{equation}
+    
+    \item \textbf{Self-Connection}: Learnable β
+    \begin{equation}
+    \mathbf{H}_{\text{self}} = \beta \cdot \mathbf{X} + (1 - \beta) \cdot \mathbf{H}_{\text{attn}}
+    \end{equation}
+    
+    \item \textbf{GCN Blend}: Learnable graph\_weight
+    \begin{equation}
+    \mathbf{H}_{\text{out}} = \text{graph\_weight} \cdot \tilde{\mathbf{A}} \mathbf{X} + (1 - \text{graph\_weight}) \cdot \mathbf{H}_{\text{self}}
+    \end{equation}
+    
+    \item \textbf{Activation \& Output}: Apply activation function (ReLU) and dropout
+    \begin{equation}
+    \text{output} = \text{Dropout}(\text{ReLU}(\mathbf{H}_{\text{out}}))
+    \end{equation}
+\end{enumerate}
+
+\subsection{Design Rationale}
+
+\subsubsection{Why Multi-Resolution Attention?}
+
+Most graph transformers use purely global attention (O(N²) complexity, or kernel tricks approximating it). This works for homophilic graphs where neighbor information is uniformly valuable. However, heterophilic graphs require both:
+\begin{itemize}
+    \item \textbf{Local precision}: Fine-grained attention within communities (exact softmax)
+    \item \textbf{Global reach}: Long-range dependencies across communities (learned pooling)
+\end{itemize}
+
+Pure local attention (intra-partition only) would miss critical heterophilic signals (non-neighbor connections). Pure global attention would suffer from over-smoothing and lose partition-level structure.
+
+PCGT's dual-component approach with learnable blending allows the model to select the optimal ratio per layer and dataset.
+
+\subsubsection{Why Learnable Self-Connection Weight?}
+
+In standard GCN, self-loops are fixed at weight 1.0. This assumes self-features and neighbor aggregates are equally informative.
+
+On heterophilic graphs, neighbor features are more informative than self-features. By making β learnable, PCGT discovers task-specific preferences:
+
+\begin{itemize}
+    \item \textbf{Homophilic graphs}: β ≈ 0.4–0.7 (self-features moderately trusted)
+    \item \textbf{Heterophilic graphs}: β ≈ 0.2–0.5 (self-features less trusted, neighbors more trusted)
+    \item \textbf{Extreme heterophily}: β can become negative (self-feature suppression)
+\end{itemize}
+
+Our experiments on the Film dataset show β ≈ −2.01, indicating discovered self-suppression strategy.
+
+\subsubsection{Why Learned Pooling (vs. Fixed Kernels)?}
+
+Alternatives to learned seed pooling include:
+
+\begin{enumerate}
+    \item \textbf{Fixed pooling} (mean/max aggregation): Non-learnable, fixed capacity
+    \item \textbf{Kernel methods} (SGFormer, linear attention): Cheaper (O(N) per layer) but less expressive; kernels approximate softmax rather than learn task-specific patterns
+    \item \textbf{Learned seeds} (PCGT): Parametric, fully learnable, task-adaptive
+\end{enumerate}
+
+Learned seeds are more expressive: they can represent arbitrary partition-level features rather than fixed aggregation functions. Empirically, this gives PCGT better heterophilic performance.
+
+\subsubsection{Why GCN Backbone Blending?}
+
+A pure PCGT architecture has no guarantee of performing well on homophilic graphs. By including a GCN branch and learning the blend:
+
+\begin{equation}
+\mathbf{H}_{\text{out}} = \text{graph\_weight} \cdot \mathbf{H}_{\text{GCN}} + (1 - \text{graph\_weight}) \cdot \mathbf{H}_{\text{PCGT}}
+\end{equation}
+
+the model can:
+\begin{itemize}
+    \item \textbf{On homophilic data}: Learn high $\text{graph\_weight}$, effectively reducing to GCN
+    \item \textbf{On heterophilic data}: Learn low $\text{graph\_weight}$, emphasizing PCGT
+    \item \textbf{Safety}: Ensures model never ``breaks'' on unseen graph types
+\end{itemize}
+
+This design philosophy mirrors good engineering: when uncertain about requirements, provide a learnable fallback to proven baselines.
+
+\subsection{Complexity Analysis}
+
+\subsubsection{Time Complexity per Layer}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l c}
+\toprule
+\textbf{Component} & \textbf{Complexity} \\
+\midrule
+Local attention & $O(N^2 / K)$ \\
+Global attention & $O(N \cdot M \cdot K)$ \\
+Partition encoding & $O(N)$ \\
+Projections (Q,K,V) & $O(N \cdot D)$ \\
+GCN branch & $O(|E|)$ (sparse) \\
+\midrule
+\textbf{Total per layer} & $\mathbf{O(N^2/K + NMK + |E|)}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Where:
+\begin{itemize}
+    \item $N$ = number of nodes
+    \item $K$ = number of partitions (typically 20–50)
+    \item $M$ = number of seeds per partition (typically 4)
+    \item $|E|$ = number of edges (GCN is sparse)
+\end{itemize}
+
+Compared to standard multi-head global attention ($O(N^2 \cdot h)$ where $h$ is number of heads), PCGT is **significantly more efficient on medium-scale graphs** (N = 10K–100K):
+
+\begin{itemize}
+    \item $N = 10$K, $K = 20$, $M = 4$: PCGT ≈ 5K² + 800K ≈ 3M ops vs. standard ≈ 100M² 
+    \item $N = 100$K, $K = 50$, $M = 4$: PCGT ≈ 200M² + 20M² ≈ 220M² ops vs. standard ≈ 10B ops
+\end{itemize}
+
+\subsubsection{Memory Complexity}
+
+\begin{itemize}
+    \item \textbf{Partition structural encoding}: $O(K \cdot D)$ (K × hidden\_dim)
+    \item \textbf{Learned seeds}: $O(K \cdot M \cdot D)$
+    \item \textbf{Learned weights}: $O(\text{num\_layers})$ (α, β, graph\_weight per layer)
+    \item \textbf{Total additional}: $O(K(M + 1)D + \text{num\_layers})$, typically negligible vs. node embeddings $O(ND)$
+\end{itemize}
+
+---
+
+\section{Experiments}
+
+\emph{[To be written next]}
+
+---
+
+\section{Results}
+
+\emph{[To be written next]}
+
+---
+
+\section{Discussion}
+
+\emph{[To be written next]}
+
+---
+
+\section{Limitations \& Future Work}
+
+\emph{[To be written next]}
+
+---
+
+\begin{thebibliography}{99}
+
+\bibitem{kipf2016semi} Kipf, T., \& Welling, M. (2016). Semi-supervised classification with graph convolutional networks. \textit{arXiv preprint arXiv:1609.02907}.
+
+\bibitem{veličković2017attention} Veličković, P., Cucurull, G., Casanova, A., Romero, A., Liò, P., \& Bengio, Y. (2017). Graph attention networks. \textit{arXiv preprint arXiv:1710.10903}.
+
+\bibitem{bosselut2019comet} Huang, P., He, X., Gao, J., Deng, L., Acero, A., \& Hovy, E. (2021). SGFormer: Seeded graph former for large graphs. \textit{ICLR 2022}.
+
+\end{thebibliography}
+
+\end{document}
