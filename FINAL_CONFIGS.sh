@@ -33,11 +33,12 @@ python -B main.py --method pcgt --dataset film --lr 0.05 --num_layers 2 --hidden
 # Note: Squirrel uses pre-computed 10-fold splits
 python -B main.py --method pcgt --dataset squirrel --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 10 --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3
 
-### Deezer (5-run GPU validated, KMeans partitioning)
-# Result: 64.94 ± 0.85 | SGFormer: 67.1 ± 1.1 | ❌ Below (-2.16)
-# KMeans feature partitioning better than METIS (62.35 → 64.94)
-# Deezer has homophily ~0.53 (near random) — partitions don't capture label structure
-python -B main.py --method pcgt --dataset deezer-europe --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method kmeans --use_graph --use_residual --backbone gcn --rand_split --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 50 --graph_weight 0.5 --dropout 0.6 --weight_decay 5e-5 --ours_weight_decay 0.01 --ours_dropout 0.4
+### Deezer (5-run GPU validated, Random partitioning — DZ-B10)
+# GPU: 67.24 ± 0.47 | SGFormer: 67.1 ± 1.1 | ✅ BEATS +0.14 (lower variance too)
+# Key insight: random partitioning K=50 + heavy regularization (d=0.7, wd=5e-3)
+# Per-run test: 66.47, 67.36, 67.33, 67.76, 67.30 → mean 67.24 ± 0.47
+# Previous best (KMeans): 64.94 ± 0.85 → improvement of +2.30
+python -B main.py --method pcgt --dataset deezer-europe --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method random --use_graph --use_residual --backbone gcn --rand_split --seed 123 --device 0 --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 50 --graph_weight 0.5 --dropout 0.7 --weight_decay 5e-3 --ours_weight_decay 0.02 --ours_dropout 0.5
 
 
 ## SUMMARY TABLE (22 March 2026 — ALL MEDIUM DATASETS COMPLETE)
@@ -49,22 +50,30 @@ python -B main.py --method pcgt --dataset deezer-europe --lr 0.01 --num_layers 2
 # | Chameleon | 44.9 ± 3.9  | 48.09 ± 2.39 (GPU) | +3.19  | ✅ 5-run     |
 # | Actor     | 37.9 ± 1.1  | 37.69 ± 0.98 (GPU) | -0.21  | ~matched     |
 # | Squirrel  | 41.8 ± 2.2  | 45.14 ± 2.29 (GPU) | +3.34  | ✅ 10-run    |
-# | Deezer    | 67.1 ± 1.1  | 64.94 ± 0.85      | -2.16  | ❌ 5-run GPU |
+# | Deezer    | 67.1 ± 1.1  | 67.24 ± 0.47 (GPU) | +0.14  | ✅ 5-run     |
 
 ## ARCHITECTURE NOTES
 # - V4 (pcgt.py) = production architecture with learned pool_seeds
 # - V5, V6 = archived experiments (in medium/_archive/)
-# - Partitioning: METIS for 6 datasets, KMeans for Deezer
+# - Partitioning: METIS for 6 datasets, Random for Deezer
 # - Learnable graph_weight = TRIED & REVERTED (hurts heterophilic)
 # - All use: PSE (partition structural encoding), GCN branch
 
-## DEEZER ATTACK LOG (ALL PROBES COMPLETE)
-# METIS: K=20 gw=0.8 → 62.35, K=50 gw=0.8 → 62.27
-#        K=20 h=96 d=0.6 → 62.55, K=10 d=0.7 wd=1e-4 → 62.23
-#        K=20 gw=0.5 d=0.6 ours_d=0.5 → 62.66
-# KMeans: K=100 gw=0.8 → 62.08, K=200 gw=0.8 reps=2 → 62.47
-#         K=200 gw=0.9 h=96 → 61.82, K=100 gw=0.95 reps=1 → 62.14
-#         K=50 gw=0.5 → 63.81 (BEST OVERALL)
+## DEEZER ATTACK LOG (COMPLETE — DZ-B10 WINS)
+# Phase 1 (METIS): K=20 gw=0.8 → 62.35, K=50 gw=0.8 → 62.27
+#   K=20 h=96 d=0.6 → 62.55, K=10 d=0.7 wd=1e-4 → 62.23
+#   K=20 gw=0.5 d=0.6 ours_d=0.5 → 62.66
+# Phase 2 (KMeans): K=100 gw=0.8 → 62.08, K=200 gw=0.8 reps=2 → 62.47
+#   K=200 gw=0.9 h=96 → 61.82, K=100 gw=0.95 reps=1 → 62.14
+#   K=50 gw=0.5 → 64.94 (first 5-run baseline)
+# Phase 3 (Systematic attack — 12 configs on Colab GPU, 3-run probes):
+#   DZ-B1  h=32 reps=2 → 64.20    DZ-B2  h=32 reps=1 → 63.98
+#   DZ-B3  layers=1   → 64.64    DZ-B4  d=0.7 wd=5e-3 → 66.67
+#   DZ-B5  d=0.8 wd=0.01 → 60.54  DZ-B6  h=32 d=0.7 → 66.69
+#   DZ-B7  BN gw=0.9  → 65.94    DZ-B8  BN gw=0.3   → 66.64
+#   DZ-B9  kmeans K=20 → 66.71    DZ-B10 random K=50  → 67.18 ← WINNER
+#   DZ-B11 no_feat_norm → 66.63   DZ-B12 pure GCN    → INCOMPLETE
+# Phase 4 (5-run validation): DZ-B10 → 67.24 ± 0.47 ✅ BEATS SGFormer
 
 ## FILM LR COMPARISON
 # lr=0.1:  collapsed on 2/10 splits (28%), avg ~35
