@@ -2,6 +2,15 @@ from collections import defaultdict
 import numpy as np
 import torch
 import torch.nn.functional as F
+
+# Fix for PyTorch 2.6+: weights_only defaults to True, breaking OGB pickle caches
+if not hasattr(torch, '_pcgt_original_load'):
+    torch._pcgt_original_load = torch.load
+    def _patched_torch_load(*args, **kwargs):
+        kwargs.setdefault('weights_only', False)
+        return torch._pcgt_original_load(*args, **kwargs)
+    torch.load = _patched_torch_load
+
 import scipy
 import scipy.io
 from sklearn.preprocessing import label_binarize
