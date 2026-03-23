@@ -59,7 +59,8 @@ class PCGTConvLayer(nn.Module):
     """
 
     def __init__(self, in_channels, out_channels, num_heads=1,
-                 use_weight=True, attn_dropout=0.0, num_reps=4):
+                 use_weight=True, attn_dropout=0.0, num_reps=4,
+                 local_only=False, global_only=False):
         super().__init__()
         self.Wq = nn.Linear(in_channels, out_channels * num_heads)
         self.Wk = nn.Linear(in_channels, out_channels * num_heads)
@@ -77,6 +78,10 @@ class PCGTConvLayer(nn.Module):
         self.use_weight = use_weight
         self.scale = math.sqrt(out_channels)
         self.attn_dropout = attn_dropout
+
+        # Ablation flags
+        self.local_only = local_only
+        self.global_only = global_only
 
         # α blends local (intra-partition) and global (cross-partition)
         self.alpha_logit = nn.Parameter(torch.tensor(0.0))
@@ -158,8 +163,13 @@ class PCGTConvLayer(nn.Module):
         x_self = V.mean(dim=1)  # [N, D]
 
         # ─── COMBINE: local + global + self ───
-        alpha = torch.sigmoid(self.alpha_logit)
-        x_context = alpha * x_local + (1 - alpha) * x_global
+        if self.local_only:
+            x_context = x_local
+        elif self.global_only:
+            x_context = x_global
+        else:
+            alpha = torch.sigmoid(self.alpha_logit)
+            x_context = alpha * x_local + (1 - alpha) * x_global
         return x_context + self.beta * x_self
 
 
@@ -169,7 +179,7 @@ class PCGTConv(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_layers=1, num_heads=1,
                  alpha=0.5, dropout=0.5, use_bn=True, use_residual=True,
                  use_weight=True, use_act=False, num_partitions=10,
-                 num_reps=4):
+                 num_reps=4, no_pse=False, local_only=False, global_only=False):
         super().__init__()
 
         self.fcs = nn.ModuleList()
@@ -178,6 +188,7 @@ class PCGTConv(nn.Module):
         self.bns.append(nn.LayerNorm(hidden_channels))
 
         # Partition Structural Encoding
+        self.no_pse = no_pse
         self.partition_pe = nn.Embedding(num_partitions, hidden_channels)
 
         self.convs = nn.ModuleList()
@@ -185,7 +196,8 @@ class PCGTConv(nn.Module):
             self.convs.append(
                 PCGTConvLayer(hidden_channels, hidden_channels,
                               num_heads=num_heads, use_weight=use_weight,
-                              attn_dropout=dropout, num_reps=num_reps))
+                              attn_dropout=dropout, num_reps=num_reps,
+                              local_only=local_only, global_only=global_only))
             self.bns.append(nn.LayerNorm(hidden_channels))
 
         self.dropout = dropout
@@ -214,7 +226,7 @@ class PCGTConv(nn.Module):
         x = self.activation(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
 
-        if partition_labels is not None:
+        if partition_labels is not None and not self.no_pse:
             x = x + self.partition_pe(partition_labels)
 
         layer_.append(x)
@@ -244,13 +256,15 @@ class PCGT(nn.Module):
                  use_bn=True, use_residual=True, use_weight=True,
                  use_graph=True, use_act=False,
                  graph_weight=0.8, gnn=None, aggregate='add',
-                 num_partitions=10, num_reps=4):
+                 num_partitions=10, num_reps=4,
+                 no_pse=False, local_only=False, global_only=False):
         super().__init__()
 
         self.pcgt_conv = PCGTConv(
             in_channels, hidden_channels, num_layers, num_heads,
             alpha, dropout, use_bn, use_residual, use_weight, use_act,
-            num_partitions=num_partitions, num_reps=num_reps)
+            num_partitions=num_partitions, num_reps=num_reps,
+            no_pse=no_pse, local_only=local_only, global_only=global_only)
 
         self.gnn = gnn
         self.use_graph = use_graph

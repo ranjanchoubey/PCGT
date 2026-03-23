@@ -108,7 +108,10 @@ def parse_method(method, args, c, d, device):
         model = PCGT(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
                 use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, gnn=gnn, aggregate=args.aggregate,
                 num_partitions=args.num_partitions,
-                num_reps=args.num_reps).to(device)
+                num_reps=args.num_reps,
+                no_pse=getattr(args, 'no_pse', False),
+                local_only=getattr(args, 'local_only', False),
+                global_only=getattr(args, 'global_only', False)).to(device)
 
     else:
         raise ValueError(f'Invalid method {method}')
@@ -219,6 +222,14 @@ def parser_add_main_args(parser):
     parser.add_argument('--partition_method', type=str, default='metis',
                         choices=['metis', 'spectral', 'random', 'kmeans'],
                         help='graph partitioning algorithm')
+
+    # ablation flags
+    parser.add_argument('--no_pse', action='store_true',
+                        help='Ablation: disable Partition Structural Encoding')
+    parser.add_argument('--local_only', action='store_true',
+                        help='Ablation: use only local (intra-partition) attention')
+    parser.add_argument('--global_only', action='store_true',
+                        help='Ablation: use only global (cross-partition) attention')
 
 
 def parser_add_default_args(args):

@@ -17,9 +17,10 @@ python -B main.py --method pcgt --dataset citeseer --lr 0.01 --num_layers 2 --hi
 # GPU: 80.46 ± 0.64 | CPU: 81.00 ± 0.73 | SGFormer: 80.3 ± 0.6 | ✅ BEATS +0.16
 python -B main.py --method pcgt --dataset pubmed --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --num_partitions 50 --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3
 
-### Chameleon (5-run validated)
+### Chameleon (5-run validated — NEEDS 10-run rerun to match SGFormer protocol)
 # GPU: 48.09 ± 2.39 | CPU: 48.59 ± 3.47 | SGFormer: 44.9 ± 3.9 | ✅ BEATS +3.19
-python -B main.py --method pcgt --dataset chameleon --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 5 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 10 --graph_weight 0.8 --dropout 0.5 --weight_decay 0.001 --ours_weight_decay 0.01 --ours_dropout 0.3
+# TODO: Rerun with --runs 10 (10 pre-computed filtered splits, same as Squirrel/Film)
+python -B main.py --method pcgt --dataset chameleon --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --num_reps 4 --partition_method metis --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --num_partitions 10 --graph_weight 0.8 --dropout 0.5 --weight_decay 0.001 --ours_weight_decay 0.01 --ours_dropout 0.3
 
 ### Film/Actor (10-run validated, lr=0.05)
 # GPU: 37.69 ± 0.98 | CPU: 38.04 ± 0.84 | SGFormer: 37.9 ± 1.1

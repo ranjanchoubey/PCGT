@@ -108,7 +108,7 @@ print(f"num nodes {n} | num classes {c} | num node feats {d}")
 
 ### PCGT: Partition preprocessing (computed once before training) ###
 partition_indices = None
-if args.method == 'pcgt':
+if args.method in ('pcgt',):
     from partition import compute_partitions
     print(f"Computing {args.num_partitions} partitions using {args.partition_method}...")
     edge_index_cpu = dataset.graph['edge_index'].cpu()
@@ -127,7 +127,7 @@ if args.method == 'pcgt':
 model = parse_method(args.method, args, c, d, device)
 
 # Set partition info on PCGT model
-if args.method == 'pcgt' and partition_indices is not None:
+if args.method in ('pcgt',) and partition_indices is not None:
     model.set_partition_info(partition_indices, partition_labels)
 
 # using rocauc as the eval function
@@ -213,7 +213,7 @@ for run in range(args.runs):
 
         if epoch % args.display_step == 0:
             gamma_str = ''
-            if args.method == 'pcgt' and hasattr(model, 'get_gamma_values'):
+            if args.method in ('pcgt',) and hasattr(model, 'get_gamma_values'):
                 gammas = model.get_gamma_values()
                 gamma_str = f' [{",".join(str(g) for g in gammas)}]'
             print(f'Epoch: {epoch:02d}, '
