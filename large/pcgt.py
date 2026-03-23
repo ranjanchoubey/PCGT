@@ -161,6 +161,8 @@ class PCGTConv(nn.Module):
         layer_.append(x)
 
         for i, conv in enumerate(self.convs):
+            # If partition_indices is None (e.g. batch has no valid partitions),
+            # skip partition attention and just use identity
             x = conv(x, partition_indices)
             if self.use_residual:
                 x = (x + layer_[i]) / 2.
@@ -232,8 +234,29 @@ class PCGTFormer(nn.Module):
         self.partition_indices = [idx.to(device) for idx in partition_indices]
         self.partition_labels = torch.LongTensor(partition_labels).to(device)
 
-    def forward(self, x, edge_index):
-        x1 = self.pcgt_conv(x, self.partition_indices, self.partition_labels)
+    def forward(self, x, edge_index, node_idx=None):
+        # For batch mode: remap partition info to local batch indices
+        if node_idx is not None and self.partition_labels is not None:
+            batch_labels = self.partition_labels[node_idx]
+            # Build batch-local partition_indices
+            # Create reverse map: global_id -> local_id for this batch
+            local_map = torch.full((self.partition_labels.size(0),), -1,
+                                   dtype=torch.long, device=x.device)
+            local_map[node_idx] = torch.arange(len(node_idx), device=x.device)
+            batch_part_indices = []
+            for part_idx in self.partition_indices:
+                local_ids = local_map[part_idx]
+                valid = local_ids >= 0
+                if valid.any():
+                    batch_part_indices.append(local_ids[valid])
+            # If no valid partitions in batch, fall back to single partition
+            if not batch_part_indices:
+                batch_part_indices = [torch.arange(len(node_idx), device=x.device)]
+        else:
+            batch_labels = self.partition_labels
+            batch_part_indices = self.partition_indices
+
+        x1 = self.pcgt_conv(x, batch_part_indices, batch_labels)
         if self.use_graph:
             x2 = self.graph_conv(x, edge_index)
             if self.aggregate == 'add':

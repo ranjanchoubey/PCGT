@@ -164,7 +164,10 @@ for run in range(args.runs):
             edge_index_i = edge_index_i.to(device)
             y_i = true_label[idx_i].to(device)
             optimizer.zero_grad()
-            out_i = model(x_i, edge_index_i)
+            if args.method == 'pcgt':
+                out_i = model(x_i, edge_index_i, node_idx=idx_i.to(device))
+            else:
+                out_i = model(x_i, edge_index_i)
             if args.dataset in ('yelp-chi', 'deezer-europe', 'twitch-e', 'fb100', 'ogbn-proteins'):
                 loss = criterion(out_i[train_mask_i], y_i.squeeze(1)[train_mask_i].to(torch.float))
 
