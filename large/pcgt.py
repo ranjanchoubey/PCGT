@@ -235,6 +235,11 @@ class PCGTFormer(nn.Module):
         self.partition_labels = torch.LongTensor(partition_labels).to(device)
 
     def forward(self, x, edge_index, node_idx=None):
+        # Ensure partition tensors follow model device (e.g. CPU eval)
+        if self.partition_labels is not None and self.partition_labels.device != x.device:
+            self.partition_labels = self.partition_labels.to(x.device)
+            self.partition_indices = [idx.to(x.device) for idx in self.partition_indices]
+
         # For batch mode: remap partition info to local batch indices
         if node_idx is not None and self.partition_labels is not None:
             batch_labels = self.partition_labels[node_idx]
