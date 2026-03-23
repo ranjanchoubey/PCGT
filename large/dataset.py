@@ -14,7 +14,10 @@ from torch_geometric.transforms import NormalizeFeatures
 from os import path
 
 from torch_sparse import SparseTensor
-from google_drive_downloader import GoogleDriveDownloader as gdd
+try:
+    from google_drive_downloader import GoogleDriveDownloader as gdd
+except ImportError:
+    gdd = None  # Not needed for ogbn-arxiv
 
 import networkx as nx
 import scipy.sparse as sp
