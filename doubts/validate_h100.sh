@@ -245,6 +245,33 @@ sgformer_baselines() {
 }
 
 # ============================================================================
+# Results collection — grep "Highest Test" from all logs into a summary
+# ============================================================================
+
+collect_results() {
+    local summary="$LOG_DIR/SUMMARY.txt"
+    log "=== Collecting results into $summary ==="
+    {
+        echo "============================================"
+        echo "PCGT H100 Validation Results Summary"
+        echo "Generated: $(date)"
+        echo "============================================"
+        echo ""
+        for logfile in "$LOG_DIR"/*.log; do
+            local name=$(basename "$logfile" .log)
+            local result=$(grep -E "Highest Test:|Best Test:" "$logfile" | tail -1)
+            if [ -n "$result" ]; then
+                printf "%-40s %s\n" "$name" "$result"
+            else
+                printf "%-40s %s\n" "$name" "(no result found)"
+            fi
+        done
+    } > "$summary"
+    echo ""
+    cat "$summary"
+}
+
+# ============================================================================
 # Dispatcher
 # ============================================================================
 
