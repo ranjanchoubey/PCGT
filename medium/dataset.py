@@ -13,7 +13,7 @@ import torch.nn.functional as F
 import torch_geometric.transforms as T
 from data_utils import normalize_feat, rand_train_test_idx
 from sklearn.preprocessing import label_binarize
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import Planetoid, Coauthor, Amazon
 from torch_geometric.transforms import ToUndirected
 from torch_geometric.utils import add_self_loops, remove_self_loops, degree, to_dense_adj
 
@@ -96,6 +96,10 @@ def load_nc_dataset(args):
         # dataset = load_wikipedia(dataname,args.no_feat_norm)
     elif dataname in ('roman-empire', 'amazon-ratings', 'minesweeper', 'tolokers', 'questions'):
         dataset = load_heterophily_dataset(dataname)
+    elif dataname in ('coauthor-cs', 'coauthor-physics'):
+        dataset = load_coauthor_dataset(dataname, args.no_feat_norm)
+    elif dataname in ('amazon-computers', 'amazon-photo'):
+        dataset = load_amazon_dataset(dataname, args.no_feat_norm)
     else:
         raise ValueError('Invalid dataname')
     return dataset
@@ -265,6 +269,45 @@ def load_wiki_new(name, no_feat_norm=False):
     dataset.label = labels
 
     return dataset
+
+
+def load_coauthor_dataset(name, no_feat_norm=False):
+    """Load Coauthor-CS or Coauthor-Physics from PyG."""
+    pyg_name = name.split('-')[1].capitalize()  # 'cs' -> 'CS', 'physics' -> 'Physics'
+    if pyg_name == 'Cs':
+        pyg_name = 'CS'
+    transform = None if no_feat_norm else T.NormalizeFeatures()
+    torch_dataset = Coauthor(root=f'{DATAPATH}Coauthor', name=pyg_name, transform=transform)
+    data = torch_dataset[0]
+
+    dataset = NCDataset(name)
+    dataset.graph = {'edge_index': data.edge_index,
+                     'node_feat': data.x,
+                     'edge_feat': None,
+                     'num_nodes': data.num_nodes}
+    dataset.label = data.y
+    print(f"{name}: nodes={data.num_nodes}, edges={data.edge_index.size(1)}, "
+          f"feats={data.x.size(1)}, classes={data.y.max().item()+1}")
+    return dataset
+
+
+def load_amazon_dataset(name, no_feat_norm=False):
+    """Load Amazon-Computers or Amazon-Photo from PyG."""
+    pyg_name = name.split('-')[1].capitalize()  # 'computers' -> 'Computers', 'photo' -> 'Photo'
+    transform = None if no_feat_norm else T.NormalizeFeatures()
+    torch_dataset = Amazon(root=f'{DATAPATH}Amazon', name=pyg_name, transform=transform)
+    data = torch_dataset[0]
+
+    dataset = NCDataset(name)
+    dataset.graph = {'edge_index': data.edge_index,
+                     'node_feat': data.x,
+                     'edge_feat': None,
+                     'num_nodes': data.num_nodes}
+    dataset.label = data.y
+    print(f"{name}: nodes={data.num_nodes}, edges={data.edge_index.size(1)}, "
+          f"feats={data.x.size(1)}, classes={data.y.max().item()+1}")
+    return dataset
+
 
 def load_heterophily_dataset(name):
     # load data elements
