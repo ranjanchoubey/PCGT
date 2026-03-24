@@ -4,11 +4,36 @@
 # Push to 'final' branch. User pulls on H100 and runs:
 #   bash run_round2.sh all
 #
+# Output goes to BOTH terminal AND log files.
 # Logs go to: logs/h100_round2/
 # ============================================================================
 
-cd "$(dirname "$0")/medium"
-source ../venv/bin/activate
+set -uo pipefail
+
+# Use absolute path based on where this script lives
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/medium" || { echo "FATAL: cannot cd to $SCRIPT_DIR/medium"; exit 1; }
+
+# Activate venv — try multiple paths
+if [ -f "../venv/bin/activate" ]; then
+    source ../venv/bin/activate
+elif [ -f "$SCRIPT_DIR/venv/bin/activate" ]; then
+    source "$SCRIPT_DIR/venv/bin/activate"
+else
+    echo "FATAL: cannot find venv. Tried ../venv/bin/activate and $SCRIPT_DIR/venv/bin/activate"
+    exit 1
+fi
+
+# Sanity check before running anything
+echo "=== SANITY CHECK ==="
+echo "Python: $(which python)"
+echo "PWD: $(pwd)"
+echo "CUDA: $(python -c 'import torch; print(torch.cuda.is_available())' 2>&1)"
+python -c "import pymetis; print('pymetis OK')" 2>&1
+python -c "import torch_geometric; print(f'PyG {torch_geometric.__version__}')" 2>&1
+echo "Data dir: $(ls ../data/ 2>&1)"
+echo "=== SANITY CHECK DONE ==="
+echo ""
 
 LOG_DIR="../logs/h100_round2"
 mkdir -p "$LOG_DIR"
@@ -28,12 +53,15 @@ run_one() {
 
     log "START $name"
     python -u main.py "$@" --data_dir ../data --device $DEVICE > "$logfile" 2>&1
-    local rc=$?
+    local rc=${PIPESTATUS[0]:-$?}
     if [ $rc -eq 0 ]; then
         local result=$(grep "Highest Test:" "$logfile" | tail -1)
         log "DONE  $name -> $result"
     else
         log "FAIL  $name (exit=$rc)"
+        echo "--- LAST 10 LINES OF $logfile ---"
+        tail -10 "$logfile"
+        echo "--- END ---"
     fi
     return 0
 }
@@ -171,6 +199,19 @@ group_a() {
 
     wait
     log "=== GROUP A DONE ==="
+    echo ""
+    echo "--- GROUP A RESULTS ---"
+    for f in "$LOG_DIR"/cora_pcgt_*.log "$LOG_DIR"/deezer_pcgt_*.log; do
+        [ -f "$f" ] || continue
+        name=$(basename "$f" .log)
+        result=$(grep "Highest Test:" "$f" | tail -1)
+        if [ -n "$result" ]; then
+            printf "  %-40s %s\n" "$name" "$result"
+        else
+            printf "  %-40s %s\n" "$name" "** FAILED — check log **"
+        fi
+    done
+    echo ""
 }
 
 # ============================================================================
@@ -251,6 +292,19 @@ group_b() {
 
     wait
     log "=== GROUP B DONE ==="
+    echo ""
+    echo "--- GROUP B RESULTS (5-run protocol) ---"
+    for f in "$LOG_DIR"/*_5run.log; do
+        [ -f "$f" ] || continue
+        name=$(basename "$f" .log)
+        result=$(grep "Highest Test:" "$f" | tail -1)
+        if [ -n "$result" ]; then
+            printf "  %-40s %s\n" "$name" "$result"
+        else
+            printf "  %-40s %s\n" "$name" "** FAILED — check log **"
+        fi
+    done
+    echo ""
 }
 
 # ============================================================================
@@ -334,6 +388,15 @@ group_d() {
 
     wait
     log "=== GROUP D DONE ==="
+    echo ""
+    echo "--- GROUP D TIMING RESULTS ---"
+    for f in "$LOG_DIR"/timing_*.log; do
+        [ -f "$f" ] || continue
+        name=$(basename "$f" .log)
+        timing=$(grep -i "time" "$f" | tail -1)
+        printf "  %-40s %s\n" "$name" "$timing"
+    done
+    echo ""
 }
 
 # ============================================================================
