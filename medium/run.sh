@@ -59,13 +59,13 @@ run_cora() {
         --seed 123 --runs 5
 
     run "cora_pcgt" --dataset cora --method pcgt \
-        --backbone gcn --lr 0.01 --num_layers 4 --hidden_channels 64 \
+        --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
         --weight_decay 5e-4 --dropout 0.4 --ours_layers 1 \
         --use_graph --graph_weight 0.8 --ours_dropout 0.2 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
-        --num_partitions 7 --partition_method metis \
+        --num_partitions 10 --partition_method metis \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 }
 
 run_citeseer() {
@@ -78,13 +78,13 @@ run_citeseer() {
         --seed 123 --runs 5
 
     run "citeseer_pcgt" --dataset citeseer --method pcgt \
-        --backbone gcn --lr 0.005 --num_layers 4 --hidden_channels 64 \
+        --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
         --weight_decay 0.01 --dropout 0.5 --ours_layers 1 \
-        --use_graph --graph_weight 0.8 --ours_dropout 0.3 --use_residual \
+        --use_graph --graph_weight 0.7 --ours_dropout 0.3 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.01 --no_feat_norm \
         --num_partitions 20 --partition_method metis \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 }
 
 run_pubmed() {
@@ -97,13 +97,13 @@ run_pubmed() {
         --seed 123 --runs 5
 
     run "pubmed_pcgt" --dataset pubmed --method pcgt \
-        --backbone gcn --lr 0.005 --num_layers 4 --hidden_channels 64 \
-        --weight_decay 5e-4 --dropout 0.5 --ours_layers 1 \
-        --use_graph --graph_weight 0.9 --ours_dropout 0.3 --use_residual \
+        --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
+        --weight_decay 0.0005 --dropout 0.5 --ours_layers 1 \
+        --use_graph --graph_weight 0.8 --ours_dropout 0.3 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.01 --no_feat_norm \
-        --num_partitions 10 --partition_method metis \
+        --num_partitions 50 --partition_method metis \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 }
 
 run_chameleon() {
@@ -139,22 +139,20 @@ run_squirrel() {
 }
 
 run_film() {
-    run "film_sgformer" --dataset film --method difformer \
-        --backbone gcn --lr 0.1 --num_layers 8 --hidden_channels 64 \
-        --weight_decay 0.0005 --dropout 0.6 \
-        --use_graph --graph_weight 0.5 --num_heads 1 \
-        --ours_use_residual --ours_use_act \
-        --alpha 0.5 --ours_dropout 0.6 --ours_weight_decay 0.0005 \
+    run "film_sgformer" --dataset film --method sgformer \
+        --backbone gcn --lr 0.01 --num_layers 4 --hidden_channels 64 \
+        --weight_decay 5e-4 --dropout 0.5 --ours_layers 1 \
+        --use_graph --graph_weight 0.8 --ours_dropout 0.3 --use_residual \
+        --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
         --seed 123 --runs 10 --epochs 500
 
     run "film_pcgt" --dataset film --method pcgt \
-        --backbone gcn --lr 0.1 --num_layers 8 --hidden_channels 64 \
-        --weight_decay 0.0005 --dropout 0.6 --ours_layers 2 \
-        --use_graph --graph_weight 0.6 --ours_dropout 0.6 \
-        --ours_use_residual --ours_use_act \
-        --alpha 0.5 --ours_weight_decay 0.0005 \
+        --backbone gcn --lr 0.05 --num_layers 2 --hidden_channels 64 \
+        --weight_decay 0.0005 --dropout 0.5 --ours_layers 1 \
+        --use_graph --graph_weight 0.5 --ours_dropout 0.3 --use_residual \
+        --alpha 0.5 --ours_weight_decay 0.01 --no_feat_norm \
         --num_partitions 5 --partition_method metis \
-        --seed 42 --runs 10 --epochs 500
+        --seed 123 --runs 10 --epochs 500
 }
 
 run_deezer() {
@@ -167,10 +165,10 @@ run_deezer() {
     run "deezer_pcgt" --dataset deezer-europe --method pcgt \
         --backbone gcn --rand_split --lr 0.01 --num_layers 2 \
         --hidden_channels 96 --weight_decay 5e-05 --dropout 0.4 \
-        --ours_layers 1 --use_graph --graph_weight 0.7 --ours_dropout 0.4 \
+        --ours_layers 1 --use_graph --graph_weight 0.5 --ours_dropout 0.4 \
         --ours_use_residual --alpha 0.5 --ours_weight_decay 5e-05 \
         --num_partitions 20 --partition_method metis \
-        --seed 42 --runs 5 --epochs 500
+        --seed 42 --runs 10 --epochs 500
 }
 
 # ============================================================================
