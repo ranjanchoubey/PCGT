@@ -10,11 +10,12 @@
 #   bash run_all_large.sh all            # Run everything (sgformer + pcgt)
 #   bash run_all_large.sh check          # Check log progress
 #   bash run_all_large.sh <dataset>      # Run one dataset (sgformer + pcgt)
+#   bash run_all_large.sh night          # Run only MISSING experiments (safe overnight)
 #
 # Supported datasets: arxiv, proteins, amazon2m, pokec
 # ============================================================================
 
-set -euo pipefail
+set -uo pipefail  # NO set -e: one failure must NOT stop the rest
 
 # Auto-detect python
 if command -v /system/conda/miniconda3/envs/cloudspace/bin/python &>/dev/null; then
@@ -80,8 +81,14 @@ for name in ['ogbn-arxiv', 'ogbn-proteins', 'ogbn-products']:
 }
 
 # ============================================================================
-# RUN EXPERIMENT: generic runner with logging
+# RUN EXPERIMENT: generic runner with logging (error-tolerant)
 # ============================================================================
+is_done() {
+    local name="$1"
+    local logfile="$LOG_DIR/${name}.log"
+    [ -f "$logfile" ] && grep -q "Final Test:" "$logfile" 2>/dev/null
+}
+
 run_exp() {
     local name="$1"
     local script="$2"
@@ -89,9 +96,22 @@ run_exp() {
     local logfile="$LOG_DIR/${name}.log"
     log "START $name -> $logfile"
     cd "$LARGE_DIR"
-    $PYU "$script" "$@" --data_dir "$DATA_DIR" --device $DEVICE 2>&1 | tee "$logfile"
-    log "DONE  $name"
+    if $PYU "$script" "$@" --data_dir "$DATA_DIR" --device $DEVICE 2>&1 | tee "$logfile"; then
+        log "DONE  $name (success)"
+    else
+        log "DONE  $name (exit code $?)"
+    fi
     echo ""
+}
+
+# Skip if already completed
+run_exp_skip() {
+    local name="$1"
+    if is_done "$name"; then
+        log "SKIP $name (already completed — has Final Test in log)"
+        return 0
+    fi
+    run_exp "$@"
 }
 
 run_exp_bg() {
@@ -301,6 +321,77 @@ case "$CMD" in
     check)
         do_check
         ;;
+    night)
+        log "=== OVERNIGHT RUN: only experiments that haven't completed ==="
+        log "=== Each experiment is independent — failures won't stop others ==="
+        # Order: sgformer first (simpler, validates data), then pcgt
+        # Skip arxiv — already done from previous runs
+        run_exp_skip "proteins_sgformer" main-batch.py \
+            --method sgformer --dataset ogbn-proteins --metric rocauc \
+            --lr 0.01 --hidden_channels 64 \
+            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --batch_size 10000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
+
+        run_exp_skip "proteins_pcgt_k256" main-batch.py \
+            --method pcgt --dataset ogbn-proteins --metric rocauc \
+            --lr 0.01 --hidden_channels 64 \
+            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --num_partitions 256 --partition_method metis \
+            --batch_size 10000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
+
+        run_exp_skip "amazon2m_sgformer" main-batch.py \
+            --method sgformer --dataset amazon2m --metric acc \
+            --lr 0.01 --hidden_channels 256 \
+            --gnn_num_layers 3 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --batch_size 100000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
+
+        run_exp_skip "amazon2m_pcgt_k1000" main-batch.py \
+            --method pcgt --dataset amazon2m --metric acc \
+            --lr 0.01 --hidden_channels 256 \
+            --gnn_num_layers 3 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --num_partitions 1000 --partition_method metis \
+            --batch_size 100000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
+
+        run_exp_skip "pokec_sgformer" main-batch.py \
+            --method sgformer --dataset pokec --rand_split --metric acc \
+            --lr 0.01 --hidden_channels 64 \
+            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --batch_size 100000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
+
+        run_exp_skip "pokec_pcgt_k500" main-batch.py \
+            --method pcgt --dataset pokec --rand_split --metric acc \
+            --lr 0.01 --hidden_channels 64 \
+            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --num_partitions 500 --partition_method metis \
+            --batch_size 100000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
+
+        log "=== OVERNIGHT RUN COMPLETE ==="
+        do_check
+        ;;
     *)
         echo "Usage: bash run_all_large.sh <command>"
         echo ""
@@ -309,6 +400,7 @@ case "$CMD" in
         echo "  sgformer   Run SGFormer baselines on all 4 datasets"
         echo "  pcgt       Run PCGT on all 4 datasets"
         echo "  all        Run everything sequentially"
+        echo "  night      Run only MISSING experiments (skip completed, safe overnight)"
         echo "  check      Show progress of all logs"
         echo ""
         echo "Per-dataset (runs both sgformer + pcgt):"
