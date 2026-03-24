@@ -28,9 +28,9 @@ fi
 echo "=== SANITY CHECK ==="
 echo "Python: $(which python)"
 echo "PWD: $(pwd)"
-echo "CUDA: $(python -c 'import torch; print(torch.cuda.is_available())' 2>&1)"
-python -c "import pymetis; print('pymetis OK')" 2>&1
-python -c "import torch_geometric; print(f'PyG {torch_geometric.__version__}')" 2>&1
+timeout 10 python -c 'import torch; print("CUDA:", torch.cuda.is_available())' 2>&1 || echo "WARN: CUDA check timed out (10s) — continuing anyway"
+timeout 5 python -c "import pymetis; print('pymetis OK')" 2>&1 || echo "WARN: pymetis check failed"
+timeout 5 python -c "import torch_geometric; print(f'PyG {torch_geometric.__version__}')" 2>&1 || echo "WARN: PyG check failed"
 echo "Data dir: $(ls ../data/ 2>&1)"
 echo "=== SANITY CHECK DONE ==="
 echo ""
