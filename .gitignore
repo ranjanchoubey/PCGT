@@ -55,6 +55,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+main.synctex.gz
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
