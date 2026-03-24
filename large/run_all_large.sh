@@ -322,20 +322,11 @@ case "$CMD" in
         do_check
         ;;
     night)
-        log "=== OVERNIGHT RUN: only experiments that haven't completed ==="
+        log "=== 4-HOUR GPU RUN: PCGT only (use SGFormer published numbers) ==="
+        log "=== Priority: proteins > pokec > amazon2m ==="
         log "=== Each experiment is independent — failures won't stop others ==="
-        # Order: sgformer first (simpler, validates data), then pcgt
-        # Skip arxiv — already done from previous runs
-        run_exp_skip "proteins_sgformer" main-batch.py \
-            --method sgformer --dataset ogbn-proteins --metric rocauc \
-            --lr 0.01 --hidden_channels 64 \
-            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
-            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_act \
-            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
-            --trans_use_residual --trans_use_weight --trans_use_bn \
-            --use_graph --graph_weight 0.5 \
-            --batch_size 10000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
 
+        # 1. proteins_pcgt (~2h): 132K nodes, 3 runs
         run_exp_skip "proteins_pcgt_k256" main-batch.py \
             --method pcgt --dataset ogbn-proteins --metric rocauc \
             --lr 0.01 --hidden_channels 64 \
@@ -347,37 +338,7 @@ case "$CMD" in
             --num_partitions 256 --partition_method metis \
             --batch_size 10000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
 
-        run_exp_skip "amazon2m_sgformer" main-batch.py \
-            --method sgformer --dataset amazon2m --metric acc \
-            --lr 0.01 --hidden_channels 256 \
-            --gnn_num_layers 3 --gnn_dropout 0. --gnn_weight_decay 0. \
-            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
-            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
-            --trans_use_residual --trans_use_weight --trans_use_bn \
-            --use_graph --graph_weight 0.5 \
-            --batch_size 100000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
-
-        run_exp_skip "amazon2m_pcgt_k1000" main-batch.py \
-            --method pcgt --dataset amazon2m --metric acc \
-            --lr 0.01 --hidden_channels 256 \
-            --gnn_num_layers 3 --gnn_dropout 0. --gnn_weight_decay 0. \
-            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
-            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
-            --trans_use_residual --trans_use_weight --trans_use_bn \
-            --use_graph --graph_weight 0.5 \
-            --num_partitions 1000 --partition_method metis \
-            --batch_size 100000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
-
-        run_exp_skip "pokec_sgformer" main-batch.py \
-            --method sgformer --dataset pokec --rand_split --metric acc \
-            --lr 0.01 --hidden_channels 64 \
-            --gnn_num_layers 2 --gnn_dropout 0. --gnn_weight_decay 0. \
-            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
-            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
-            --trans_use_residual --trans_use_weight --trans_use_bn \
-            --use_graph --graph_weight 0.5 \
-            --batch_size 100000 --seed 123 --runs 5 --epochs 1000 --eval_step 9
-
+        # 2. pokec_pcgt (~1h): 1.6M nodes, 3 runs
         run_exp_skip "pokec_pcgt_k500" main-batch.py \
             --method pcgt --dataset pokec --rand_split --metric acc \
             --lr 0.01 --hidden_channels 64 \
@@ -389,7 +350,19 @@ case "$CMD" in
             --num_partitions 500 --partition_method metis \
             --batch_size 100000 --seed 123 --runs 3 --epochs 1000 --eval_step 9
 
-        log "=== OVERNIGHT RUN COMPLETE ==="
+        # 3. amazon2m_pcgt (~1-1.5h): 2.4M nodes, 1 run only to fit in time
+        run_exp_skip "amazon2m_pcgt_k1000" main-batch.py \
+            --method pcgt --dataset amazon2m --metric acc \
+            --lr 0.01 --hidden_channels 256 \
+            --gnn_num_layers 3 --gnn_dropout 0. --gnn_weight_decay 0. \
+            --gnn_use_residual --gnn_use_weight --gnn_use_bn --gnn_use_init --gnn_use_act \
+            --trans_num_layers 1 --trans_dropout 0. --trans_weight_decay 0. \
+            --trans_use_residual --trans_use_weight --trans_use_bn \
+            --use_graph --graph_weight 0.5 \
+            --num_partitions 1000 --partition_method metis \
+            --batch_size 100000 --seed 123 --runs 1 --epochs 1000 --eval_step 9
+
+        log "=== 4-HOUR GPU RUN COMPLETE ==="
         do_check
         ;;
     *)
@@ -400,7 +373,7 @@ case "$CMD" in
         echo "  sgformer   Run SGFormer baselines on all 4 datasets"
         echo "  pcgt       Run PCGT on all 4 datasets"
         echo "  all        Run everything sequentially"
-        echo "  night      Run only MISSING experiments (skip completed, safe overnight)"
+        echo "  night      PCGT-only for 4h GPU (proteins→pokec→amazon2m, skip SGFormer)"
         echo "  check      Show progress of all logs"
         echo ""
         echo "Per-dataset (runs both sgformer + pcgt):"
