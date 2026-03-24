@@ -1,4 +1,4 @@
-from ours import *
+from sgformer import *
 
 def parse_method(args, c, d, device):
     if args.method == 'sgformer':

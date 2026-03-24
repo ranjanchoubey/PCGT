@@ -1,5 +1,5 @@
 from gnns import *
-from ours import *
+from sgformer import *
 from pcgt import PCGTFormer
 
 def parse_method(args, c, d, device):

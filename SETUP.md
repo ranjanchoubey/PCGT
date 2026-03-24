@@ -246,7 +246,7 @@ python main.py ... --hidden_channels 32 --num_layers 2 --batch_size 32
 
 - **torch (2.10.0+):** Deep learning framework with support for graphs
 - **torch-scatter & torch-sparse:** Required for efficient GNN operations
-  - Used throughout `models.py` and `ours.py`
+  - Used throughout `models.py` and `sgformer.py`
   - Must build with PyTorch available (hence `--no-build-isolation`)
   - Pre-built wheels exist for Python 3.10 but not 3.12
 
@@ -428,7 +428,7 @@ PCGT/
 │   ├── main.py
 │   ├── models.py
 │   ├── dataset.py
-│   ├── ours.py
+│   ├── sgformer.py
 │   └── run.sh
 ├── large/                   # Large-scale experiments
 ├── 100M/                    # 100M parameter experiments

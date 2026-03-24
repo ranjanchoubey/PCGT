@@ -1,5 +1,5 @@
 from models import *
-from ours import *
+from sgformer import *
 from pcgt import PCGT
 from nodeformer import *
 from difformer import *

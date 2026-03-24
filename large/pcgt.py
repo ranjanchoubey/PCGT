@@ -1,9 +1,9 @@
 """
 PCGT for Large-Scale Graphs (adapted from medium/pcgt.py v4)
 
-Matches the SGFormer interface in large/ours.py:
+Matches the SGFormer interface in large/sgformer.py:
   - forward(x, edge_index) — raw tensors, no data object
-  - Uses large/ours.py GraphConv for GNN branch
+  - Uses large/sgformer.py GraphConv for GNN branch
   - params1 / params2 for differential weight decay
   - set_partition_info() called from main.py after partition computation
 """
@@ -12,7 +12,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ours import GraphConv
+from sgformer import GraphConv
 
 
 class PCGTConvLayer(nn.Module):
@@ -180,7 +180,7 @@ class PCGTFormer(nn.Module):
     """PCGT for large-scale graphs.
 
     Matches SGFormer interface: forward(x, edge_index), params1/params2.
-    Uses large/ours.py GraphConv for GNN branch.
+    Uses large/sgformer.py GraphConv for GNN branch.
     """
 
     def __init__(self, in_channels, hidden_channels, out_channels,

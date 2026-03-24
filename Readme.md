@@ -21,7 +21,7 @@ PCGT/
 ├── medium/          # Medium-scale experiments (Cora, CiteSeer, PubMed, Chameleon, etc.)
 │   ├── main.py      # Training & evaluation entry point
 │   ├── pcgt.py      # PCGT model implementation
-│   ├── ours.py      # SGFormer baseline (original code, method='sgformer')
+│   ├── sgformer.py  # SGFormer baseline (original code, method='sgformer')
 │   ├── partition.py  # Graph partitioning utilities (METIS, spectral, random)
 │   ├── run.sh       # Example run commands
 │   └── results/     # Experiment result logs
@@ -29,7 +29,7 @@ PCGT/
 │   ├── main.py      # Full-batch training
 │   ├── main-batch.py # Mini-batch training for large graphs
 │   ├── pcgt.py      # PCGT model (large-scale version)
-│   ├── ours.py      # SGFormer baseline
+│   ├── sgformer.py  # SGFormer baseline
 │   └── run.sh       # Example run commands
 ├── 100M/            # ogbn-papers100M (SGFormer baseline only)
 ├── data/            # Datasets (auto-downloaded or manual)
