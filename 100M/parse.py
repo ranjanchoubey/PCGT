@@ -1,7 +1,7 @@
 from ours import *
 
 def parse_method(args, c, d, device):
-    if args.method == 'ours':
+    if args.method == 'sgformer':
         model = SGFormer(d, args.hidden_channels, c, trans_num_layers=args.ours_layers, alpha=args.alpha,
                      trans_dropout=args.ours_dropout, trans_num_heads=args.num_heads, trans_use_bn=args.use_bn, trans_use_residual=args.ours_use_residual, trans_use_weight=args.ours_use_weight, trans_use_act=args.ours_use_act,
                      gnn_num_layers=args.num_layers, gnn_dropout=args.dropout, gnn_use_bn=args.use_bn, gnn_use_residual=args.use_residual, gnn_use_weight=args.use_weight, gnn_use_init=args.use_init, gnn_use_act=args.use_act,
@@ -35,7 +35,7 @@ def parser_add_main_args(parser):
     parser.add_argument('--label_num_per_class', type=int, default=20, help='labeled nodes randomly selected')
 
     # model
-    parser.add_argument('--method', type=str, default='ours')
+    parser.add_argument('--method', type=str, default='sgformer')
     parser.add_argument('--hidden_channels', type=int, default=32)
     parser.add_argument('--num_layers', type=int, default=2,
                         help='number of layers for deep methods')

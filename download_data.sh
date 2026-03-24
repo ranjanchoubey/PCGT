@@ -1,13 +1,20 @@
 #!/bin/bash
-# Safe re-download script for all SGFormer paper datasets (11 total)
-# Sources used are the same ones already used in this workspace:
-# - Planetoid: PyG auto download (inline in this script)
-# - Medium non-Planetoid: Google Drive + yandex-research filtered splits
-# - Large OGB: OGB auto download via one-epoch runs
+# ============================================================================
+# Download all PCGT paper datasets
+# Usage: bash download_data.sh
+#
+# Sources:
+#   Planetoid (cora/citeseer/pubmed)  — PyG auto-download
+#   Film, Deezer                      — Google Drive
+#   Chameleon, Squirrel (filtered)    — yandex-research GitHub
+#   Coauthor-CS/Physics, Amazon-*     — PyG auto-download
+#   OGB (arxiv/proteins/products)     — OGB auto-download
+#   Pokec                             — Google Drive
+# ============================================================================
 
 set -euo pipefail
 
-ROOT_DIR="/Users/vn59a0h/thesis/PCGT"
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DATA_DIR="$ROOT_DIR/data"
 MEDIUM_DIR="$ROOT_DIR/medium"
 LARGE_DIR="$ROOT_DIR/large"
@@ -256,11 +263,25 @@ PY
   check_file "$DATA_DIR/ogb/ogbn_proteins/processed/data_processed" "ogbn-proteins"
   check_file "$DATA_DIR/ogb/ogbn_products/processed/data_processed" "amazon2m"
 
+  # New datasets (auto-downloaded by PyG on first use)
+  check_dir() {
+    local d="$1"
+    local name="$2"
+    if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then
+      echo "  [OK] $name"
+      ok=$((ok+1))
+    else
+      echo "  [INFO] $name (auto-downloads on first run)"
+    fi
+  }
+  check_dir "$DATA_DIR/Coauthor" "coauthor-cs/physics"
+  check_dir "$DATA_DIR/Amazon" "amazon-computers/photo"
+
   # pokec validity check: mat must exist and not be tiny placeholder
   if [ -f "$DATA_DIR/pokec/pokec.mat" ]; then
-    sz=$(python - <<'PY'
+    sz=$(python - <<PY
 import os
-print(os.path.getsize('data/pokec/pokec.mat'))
+print(os.path.getsize('$DATA_DIR/pokec/pokec.mat'))
 PY
 )
     if [ "$sz" -gt 1000000 ]; then

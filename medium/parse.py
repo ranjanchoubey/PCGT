@@ -95,14 +95,10 @@ def parse_method(method, args, c, d, device):
                           alpha=args.alpha,
                           dropout=args.dropout,
                           num_heads=args.num_heads).to(device)
-    elif method == 'ours':
-        if args.use_graph:
-            gnn=parse_method(args.backbone, args, args.hidden_channels, d, device)
-            model = SGFormer(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
-                    use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, gnn=gnn, aggregate=args.aggregate).to(device)
-        else:
-            model = Ours(d, args.hidden_channels, c, num_layers=args.num_layers, alpha=args.alpha, dropout=args.dropout, num_heads=args.num_heads,
-                     use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, aggregate=args.aggregate).to(device)
+    elif method == 'sgformer':
+        gnn = parse_method(args.backbone, args, args.hidden_channels, d, device) if args.use_graph else None
+        model = SGFormer(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
+                use_bn=args.use_bn, use_residual=args.ours_use_residual, use_graph=args.use_graph, use_weight=args.ours_use_weight, use_act=args.ours_use_act, graph_weight=args.graph_weight, gnn=gnn, aggregate=args.aggregate).to(device)
     elif method == 'pcgt':
         gnn = parse_method(args.backbone, args, args.hidden_channels, d, device) if args.use_graph else None
         model = PCGT(d, args.hidden_channels, c, num_layers=args.ours_layers, alpha=args.alpha, dropout=args.ours_dropout, num_heads=args.num_heads,
@@ -233,7 +229,7 @@ def parser_add_main_args(parser):
 
 
 def parser_add_default_args(args):
-    if args.method in ('ours', 'pcgt'):
+    if args.method in ('sgformer', 'pcgt'):
         if args.ours_weight_decay is None:
             args.ours_weight_decay=args.weight_decay
         if args.ours_dropout is None:

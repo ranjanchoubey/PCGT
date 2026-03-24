@@ -128,10 +128,10 @@ def load_deezer_dataset():
 def load_planetoid_dataset(name, no_feat_norm=False):
     if not no_feat_norm:
         transform = T.NormalizeFeatures()
-        torch_dataset = Planetoid(root=f'{DATAPATH}Planetoid',
+        torch_dataset = Planetoid(root=os.path.join(DATAPATH, 'Planetoid'),
                                   name=name, transform=transform)
     else:
-        torch_dataset = Planetoid(root=f'{DATAPATH}Planetoid', name=name)
+        torch_dataset = Planetoid(root=os.path.join(DATAPATH, 'Planetoid'), name=name)
     data = torch_dataset[0]
 
     edge_index = data.edge_index
@@ -277,7 +277,7 @@ def load_coauthor_dataset(name, no_feat_norm=False):
     if pyg_name == 'Cs':
         pyg_name = 'CS'
     transform = None if no_feat_norm else T.NormalizeFeatures()
-    torch_dataset = Coauthor(root=f'{DATAPATH}Coauthor', name=pyg_name, transform=transform)
+    torch_dataset = Coauthor(root=os.path.join(DATAPATH, 'Coauthor'), name=pyg_name, transform=transform)
     data = torch_dataset[0]
 
     dataset = NCDataset(name)
@@ -295,7 +295,7 @@ def load_amazon_dataset(name, no_feat_norm=False):
     """Load Amazon-Computers or Amazon-Photo from PyG."""
     pyg_name = name.split('-')[1].capitalize()  # 'computers' -> 'Computers', 'photo' -> 'Photo'
     transform = None if no_feat_norm else T.NormalizeFeatures()
-    torch_dataset = Amazon(root=f'{DATAPATH}Amazon', name=pyg_name, transform=transform)
+    torch_dataset = Amazon(root=os.path.join(DATAPATH, 'Amazon'), name=pyg_name, transform=transform)
     data = torch_dataset[0]
 
     dataset = NCDataset(name)

@@ -1,6 +1,11 @@
 # PCGT Project Setup Guide
 
-Complete setup guide for the PCGT (Simplified Graph Transformers) project on macOS.
+Complete setup guide for the PCGT (Partition-Conditioned Graph Transformer) project.
+
+## Environments
+
+- **CPU (macOS/Linux)**: Sufficient for medium-scale experiments (Cora, CiteSeer, etc.)
+- **GPU (Linux + CUDA)**: Required for large-scale experiments (ogbn-arxiv, ogbn-proteins, Pokec)
 
 ## ⚡ Quick Start (5 minutes)
 

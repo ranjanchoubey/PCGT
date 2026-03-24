@@ -12,12 +12,20 @@ nodeformer/
 
 # Dataset
 /data/
+/data_bkp/
 **/results/
 
 # Saved models
 **/model/
 **/checkpoint/
 *.pkl
+
+# Archive (old/cleaned files)
+/archive/
+**/_archive/
+
+# Logs (experiment outputs)
+/logs/
 
 # Results
 #**/results/
@@ -119,4 +127,3 @@ try*.sh
 main.pdf
 *.fls
 *.fdb_latexmk
-ranjeet

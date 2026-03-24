@@ -179,13 +179,13 @@ echo "" | tee -a "$LOG"
 echo "=== ABLATION 8: SGFormer baseline ===" | tee -a "$LOG"
 
 run_experiment "08_sgformer" "cora" \
-    "python -B main.py --method ours --dataset cora --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 3 --display_step 100 --aggregate add --graph_weight 0.8 --dropout 0.4 --weight_decay 5e-4 --ours_weight_decay 0.001 --ours_dropout 0.2"
+    "python -B main.py --method sgformer --dataset cora --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --rand_split_class --label_num_per_class 20 --valid_num 500 --test_num 1000 --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 3 --display_step 100 --aggregate add --graph_weight 0.8 --dropout 0.4 --weight_decay 5e-4 --ours_weight_decay 0.001 --ours_dropout 0.2"
 
 run_experiment "08_sgformer" "chameleon" \
-    "python -B main.py --method ours --dataset chameleon --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --graph_weight 0.8 --dropout 0.5 --weight_decay 0.001 --ours_weight_decay 0.01 --ours_dropout 0.3"
+    "python -B main.py --method sgformer --dataset chameleon --lr 0.01 --num_layers 2 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --graph_weight 0.8 --dropout 0.5 --weight_decay 0.001 --ours_weight_decay 0.01 --ours_dropout 0.3"
 
 run_experiment "08_sgformer" "squirrel" \
-    "python -B main.py --method ours --dataset squirrel --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3"
+    "python -B main.py --method sgformer --dataset squirrel --lr 0.01 --num_layers 4 --hidden_channels 64 --ours_layers 1 --use_graph --use_residual --backbone gcn --no_feat_norm --seed 123 --cpu --epochs 500 --patience 200 --runs 10 --display_step 100 --aggregate add --data_dir ../data/ --graph_weight 0.8 --dropout 0.5 --weight_decay 5e-4 --ours_weight_decay 0.01 --ours_dropout 0.3"
 
 # ============================================================
 # ABLATION 9: K sweep (varying num_partitions)

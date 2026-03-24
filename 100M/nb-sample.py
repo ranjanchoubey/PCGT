@@ -52,7 +52,7 @@ def make_print(args):
         print_str += f"use pretrained: {args.model_dir} "
     if method == "gcn":
         print_str += f"method: {args.method} layers:{args.num_layers} hidden: {args.hidden_channels} lr:{args.lr} decay:{args.weight_decay}\n"
-    elif method == "ours":
+    elif method == "sgformer":
         print_str += (
             f"method: {args.method} hidden:{args.hidden_channels} num_layers:{args.num_layers} ours_layers:{args.ours_layers} lr:{args.lr} alpha:{args.alpha} decay:{args.weight_decay}\n"
             + f"  dropout:{args.dropout} ours_dropout:{args.ours_dropout} epochs:{args.epochs} use_bn:{args.use_bn} use_residual:{args.use_residual}, use_weight:{args.use_weight}, use_init:{args.use_init}, use_act:{args.use_act}, ours_use_weight:{args.ours_use_weight},\n"

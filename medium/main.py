@@ -144,7 +144,7 @@ model.train()
 
 ### Training loop ###
 patience = 0
-if args.method in ('ours', 'pcgt') and args.use_graph:
+if args.method in ('sgformer', 'pcgt') and args.use_graph:
     optimizer = torch.optim.Adam([
         {'params': model.params1, 'weight_decay': args.ours_weight_decay},
         {'params': model.params2, 'weight_decay': args.weight_decay}
@@ -236,7 +236,7 @@ def make_print(method):
         print_str += f'label per class:{args.label_num_per_class}, valid:{args.valid_num},test:{args.test_num}\n'
     else:
         print_str += f'train_prop:{args.train_prop}, valid_prop:{args.valid_prop}'
-    if method in ('ours', 'pcgt'):
+    if method in ('sgformer', 'pcgt'):
         use_weight=' ours_use_weight' if args.ours_use_weight else ''
         print_str += f'method: {args.method} hidden: {args.hidden_channels} ours_layers:{args.ours_layers} lr:{args.lr} use_graph:{args.use_graph} aggregate:{args.aggregate} graph_weight:{args.graph_weight} alpha:{args.alpha} ours_decay:{args.ours_weight_decay} ours_dropout:{args.ours_dropout} epochs:{args.epochs} use_feat_norm:{not args.no_feat_norm} use_bn:{args.use_bn} use_residual:{args.ours_use_residual} use_act:{args.ours_use_act}{use_weight}\n'
         if method == 'pcgt':
@@ -251,7 +251,7 @@ def make_print(method):
 
 
 file_name = f'{args.dataset}_{args.method}'
-if args.method in ('ours', 'pcgt') and args.use_graph:
+if args.method in ('sgformer', 'pcgt') and args.use_graph:
     file_name += '_' + args.backbone
 file_name += '.txt'
 out_path = os.path.join(out_folder, file_name)
@@ -276,7 +276,7 @@ if parsed:
                            'highest_test_mean','highest_test_std',
                            'final_test_mean','final_test_std',
                            'highest_val_epoch','notes'])
-        method_label = 'sgformer' if args.method == 'ours' else args.method
+        method_label = args.method
         k = args.num_partitions if args.method == 'pcgt' else 0
         notes = f'auto-logged run_time={run_time:.1f}ms'
         writer.writerow([args.dataset, method_label, k, args.runs,
