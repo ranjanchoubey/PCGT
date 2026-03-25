@@ -147,3 +147,6 @@ visualization/outputs
 study
 .DS_Store
 *.mmd
+
+# Paper LaTeX source (keep private until after defense)
+paper/

@@ -147,10 +147,11 @@ PCGT/
 ├── experiments/           # Logs, results, scripts
 │   ├── logs/              # H100 GPU training logs
 │   ├── results/           # Parsed results
-│   └── MANIFEST.md        # Full experiment docs
+│   └── MANIFEST.md        # Experiment documentation
 ├── visualization/         # Partition & analysis plots
 ├── data/                  # Datasets (auto-downloaded)
 ├── requirements.txt
+├── SETUP.md               # Detailed setup & troubleshooting
 └── reproduce_paper_results.sh
 ```
 
