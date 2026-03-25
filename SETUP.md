@@ -2,7 +2,13 @@
 
 ## Quick Setup (Recommended)
 
+**Prerequisite:** Python 3.10, 3.11, or 3.12 must be installed.
+
 ```bash
+# Install Python 3.10 if you don't have it:
+#   macOS:  brew install python@3.10
+#   Ubuntu: sudo apt install python3.10 python3.10-venv
+
 git clone https://github.com/ranjanchoubey/PCGT.git
 cd PCGT
 bash setup.sh        # installs everything + downloads data
@@ -17,7 +23,7 @@ That's it. If you see `Final Test: ~84%`, everything works.
 
 ### Requirements
 
-- Python 3.10 or 3.11 (3.10 recommended)
+- Python 3.10, 3.11, or 3.12 (3.10 recommended)
 - macOS or Linux
 - GPU optional (CPU works fine for testing)
 

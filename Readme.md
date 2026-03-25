@@ -117,6 +117,8 @@ Best partition: **80.0%** accuracy (12/15 test nodes correct)
 
 ## Quick Start
 
+> **Requires Python 3.10, 3.11, or 3.12.** Install via `brew install python@3.10` (macOS) or `sudo apt install python3.10` (Ubuntu) if needed.
+
 ```bash
 # Clone and setup (installs everything + downloads data)
 git clone https://github.com/ranjanchoubey/PCGT.git && cd PCGT
@@ -155,7 +157,7 @@ PCGT/
 
 ## Requirements
 
-- Python ≥ 3.10 · PyTorch ≥ 2.0 · PyTorch Geometric ≥ 2.3 · pymetis · OGB ≥ 1.3
+- Python 3.10–3.12 · PyTorch ≥ 2.0 · PyTorch Geometric ≥ 2.3 · pymetis · OGB ≥ 1.3
 
 ```bash
 pip install -r requirements.txt
@@ -165,9 +167,9 @@ For GPU: install matching CUDA versions of torch-scatter, torch-sparse, torch-cl
 
 ## Datasets
 
-**Auto-downloaded:** Cora, CiteSeer, PubMed, Coauthor-CS/Physics, Amazon-Computers/Photo, OGB datasets.
+**Auto-downloaded by `bash setup.sh`:** Cora, CiteSeer, PubMed, Coauthor-CS/Physics, Amazon-Computers/Photo, OGB datasets, Chameleon, Squirrel, Film, Deezer.
 
-**Manual download:** Chameleon, Squirrel, Film, Deezer, Pokec → [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link) or `bash download_data.sh`
+**Manual download (if setup.sh fails for pokec):** Pokec → [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link)
 
 ---
 
