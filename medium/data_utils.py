@@ -263,7 +263,6 @@ def preprocess_graph(graph):
     # edge_input = algos.gen_edge_input(max_dist, path, attn_edge_type.numpy())
     max_node_num = x.size(0)
     x = x.unsqueeze(0)
-    print('x',x.size())
     # spatial_pos = torch.from_numpy((shortest_path_result)).long()
     spatial_pos = torch.randint(0,1000,size=(max_node_num,max_node_num))
     attn_bias = torch.zeros([N, N], dtype=torch.float)  # with graph token
