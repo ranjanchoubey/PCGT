@@ -1,0 +1,45 @@
+Namespace(data_dir='../data/', dataset='deezer-europe', device=0, seed=42, cpu=False, epochs=500, runs=5, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=True, rand_split_class=False, label_num_per_class=20, valid_num=500, test_num=500, directed=False, method='pcgt', hidden_channels=96, num_layers=2, num_heads=1, alpha=0.5, use_bn=False, use_residual=False, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=5e-05, dropout=0.4, display_step=50, no_feat_norm=False, patience=200, graph_weight=0.8, ours_weight_decay=5e-05, ours_use_weight=False, ours_use_residual=True, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.4, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+deezer-europe
+features shape=torch.Size([28281, 31241])
+num nodes 28281 | num classes 2 | num node feats 31241
+Computing 10 partitions using metis...
+Partitions: 10, Boundary nodes: 13626/28281 (48.2%)
+Intra-partition edges: 143018/185504 (77.1%)
+Epoch: 00, Loss: 0.6944, Train: 55.91%, Valid: 56.00%, Test: 54.86% [α=0.50,β=0.99]
+Epoch: 50, Loss: 0.2748, Train: 91.00%, Valid: 65.01%, Test: 65.31% [α=0.54,β=1.39]
+Epoch: 100, Loss: 0.1464, Train: 97.16%, Valid: 63.42%, Test: 63.07% [α=0.54,β=1.72]
+Epoch: 150, Loss: 0.0837, Train: 99.37%, Valid: 63.85%, Test: 63.20% [α=0.55,β=2.03]
+Epoch: 200, Loss: 0.0680, Train: 99.55%, Valid: 63.93%, Test: 63.23% [α=0.53,β=2.30]
+Run 01:Highest Train: 99.57 Highest Valid: 67.37 Highest Test: 67.09 Chosen epoch: 16
+Final Train: 79.31 Final Test: 66.74
+Epoch: 00, Loss: 0.6928, Train: 55.81%, Valid: 55.76%, Test: 55.32% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.2977, Train: 91.78%, Valid: 64.58%, Test: 64.59% [α=0.49,β=1.60]
+Epoch: 100, Loss: 0.1945, Train: 95.68%, Valid: 63.44%, Test: 63.20% [α=0.55,β=2.51]
+Epoch: 150, Loss: 0.1447, Train: 97.93%, Valid: 63.18%, Test: 62.96% [α=0.60,β=3.15]
+Epoch: 200, Loss: 0.0716, Train: 99.47%, Valid: 62.31%, Test: 62.57% [α=0.60,β=3.60]
+Run 02:Highest Train: 99.52 Highest Valid: 66.99 Highest Test: 66.47 Chosen epoch: 34
+Final Train: 84.74 Final Test: 66.47
+Epoch: 00, Loss: 0.6959, Train: 55.11%, Valid: 54.44%, Test: 54.70% [α=0.50,β=1.01]
+Epoch: 50, Loss: 0.4320, Train: 82.87%, Valid: 63.73%, Test: 63.06% [α=0.50,β=1.13]
+Epoch: 100, Loss: 0.2022, Train: 95.94%, Valid: 63.69%, Test: 62.90% [α=0.51,β=1.53]
+Epoch: 150, Loss: 0.1319, Train: 98.35%, Valid: 62.72%, Test: 62.62% [α=0.53,β=1.96]
+Epoch: 200, Loss: 0.1017, Train: 99.21%, Valid: 63.18%, Test: 63.03% [α=0.55,β=2.29]
+Run 03:Highest Train: 99.41 Highest Valid: 65.59 Highest Test: 65.73 Chosen epoch: 37
+Final Train: 76.61 Final Test: 65.73
+Epoch: 00, Loss: 0.6903, Train: 56.13%, Valid: 55.88%, Test: 54.52% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.3712, Train: 86.92%, Valid: 65.56%, Test: 65.93% [α=0.50,β=1.35]
+Epoch: 100, Loss: 0.1996, Train: 95.61%, Valid: 63.01%, Test: 63.88% [α=0.52,β=1.98]
+Epoch: 150, Loss: 0.1034, Train: 99.05%, Valid: 63.54%, Test: 64.04% [α=0.55,β=2.42]
+Epoch: 200, Loss: 0.0876, Train: 99.34%, Valid: 63.52%, Test: 63.44% [α=0.58,β=2.82]
+Run 04:Highest Train: 99.61 Highest Valid: 66.01 Highest Test: 66.61 Chosen epoch: 47
+Final Train: 83.71 Final Test: 66.41
+Epoch: 00, Loss: 0.6935, Train: 55.91%, Valid: 56.11%, Test: 55.92% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.3491, Train: 88.76%, Valid: 64.79%, Test: 64.91% [α=0.50,β=1.35]
+Epoch: 100, Loss: 0.1781, Train: 97.84%, Valid: 64.21%, Test: 63.41% [α=0.50,β=1.98]
+Epoch: 150, Loss: 0.1029, Train: 98.95%, Valid: 63.35%, Test: 62.07% [α=0.53,β=2.46]
+Epoch: 200, Loss: 0.0705, Train: 99.38%, Valid: 63.68%, Test: 63.44% [α=0.55,β=2.77]
+Epoch: 250, Loss: 0.0634, Train: 99.47%, Valid: 63.80%, Test: 63.31% [α=0.57,β=2.97]
+Run 05:Highest Train: 99.52 Highest Valid: 65.73 Highest Test: 65.63 Chosen epoch: 52
+Final Train: 87.50 Final Test: 64.93
+5 runs: Highest Train: 99.53 ± 0.07 Highest val epoch:51
+Highest Test: 66.31 ± 0.62 Final Test: 66.06 ± 0.73

@@ -1,0 +1,5 @@
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:2 lr:0.01 use_graph:False aggregate:add graph_weight:0.8 alpha:0.5 ours_decay:0.0005 ours_dropout:0.5 epochs:500 use_feat_norm:True use_bn:False use_residual:False use_act:False
+num_partitions:10 partition_method:metis
+1 runs: Highest Train: 100.00 ± nan Highest val epoch:305
+Highest Test: 66.30 ± nan Final Test: 65.60 ± nan run_time: 25.344261108000865
+

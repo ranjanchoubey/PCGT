@@ -4,6 +4,8 @@ This repository implements **PCGT (Partition-Conditioned Graph Transformer)**, a
 
 Built upon and extending [SGFormer](https://arxiv.org/pdf/2306.10759.pdf) (NeurIPS 2023).
 
+**Code**: [github.com/ranjanchoubey/PCGT](https://github.com/ranjanchoubey/PCGT)
+
 ## Key Idea
 
 Standard graph transformers compute $O(N^2)$ global attention, which is expensive and structure-agnostic. PCGT partitions the graph using METIS and computes:
@@ -32,6 +34,11 @@ PCGT/
 │   ├── sgformer.py  # SGFormer baseline
 │   └── run.sh       # Example run commands
 ├── 100M/            # ogbn-papers100M (SGFormer baseline only)
+├── experiments/     # All experiment logs, results, and analysis scripts
+│   ├── logs/        # Raw training logs from H100 GPU runs
+│   ├── results/     # Parsed accuracy/timing results
+│   ├── scripts/     # GPU run scripts, plotting, t-tests
+│   └── MANIFEST.md  # Complete experiment documentation
 ├── data/            # Datasets (auto-downloaded or manual)
 ├── requirements.txt # Python dependencies
 └── reproduce_paper_results.sh  # Commands to reproduce all results
@@ -148,26 +155,59 @@ cd large && bash run_all_large.sh pcgt
 
 | Dataset | SGFormer | PCGT | $\Delta$ |
 |---------|----------|------|---------|
-| Cora | 84.50 | **84.80** | +0.30 |
-| CiteSeer | 72.60 | **73.44** | +0.84 |
-| PubMed | 80.30 | **80.46** | +0.16 |
-| Chameleon | 44.90 | **48.09** | +3.19 |
-| Squirrel | 41.80 | **45.14** | +3.34 |
-| Deezer | 67.10 | **67.24** | +0.14 |
-| Film | **37.90** | 37.69 | -0.21 |
-| Coauthor-Physics | 96.45 | **96.61** | +0.16 |
-| Amazon-Computers | 87.21 | **88.27** | +1.06 |
-| Amazon-Photo | 94.68 | **94.90** | +0.22 |
+| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | -0.20 |
+| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | +0.50 |
+| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | +0.70 |
+| Film | 37.90 ± 1.1 | **38.00** ± 0.9 | +0.10 |
+| Squirrel | 41.80 ± 2.2 | **45.50** ± 2.7 | +3.70 |
+| Chameleon | 44.90 ± 3.9 | **49.00** ± 2.8 | +4.10 |
+| Deezer | 67.10 ± 1.1 | **67.20** ± 0.7 | +0.10 |
+| Coauthor-CS | 94.60 ± 0.5 | **95.10** ± 0.3 | +0.50 |
+| Coauthor-Physics | 96.50 ± 0.2 | **96.80** ± 0.2 | +0.30 |
+| Amazon-Computers | 87.20 ± 0.8 | **88.80** ± 0.7 | +1.60 |
+| Amazon-Photo | 94.70 ± 0.4 | **95.30** ± 0.4 | +0.60 |
 
 ### Large-Scale Node Classification
 
 | Dataset | Metric | SGFormer | PCGT |
 |---------|--------|----------|------|
 | ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.36 ± 0.20 |
-| ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | — |
-| Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | — |
+| ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | 80.47 ± 0.55 |
+| Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | 76.68 ± 0.24 |
 
-> Large-scale results are being finalized. PCGT shows strongest gains on heterophilic graphs (Chameleon +3.19%, Squirrel +3.34%).
+> PCGT shows strongest gains on heterophilic graphs (Chameleon +3.19%, Squirrel +3.34%) and large heterophilic graphs (Pokec +2.92%).
+
+## Reproducing Results
+
+All experiment logs and scripts are archived in `experiments/` for full reproducibility:
+
+```
+experiments/
+├── logs/           # Raw training logs (H100 GPU, 3 rounds)
+├── results/        # Parsed accuracy and timing results
+├── scripts/        # GPU run scripts, t-test computation, plot generation
+└── MANIFEST.md     # Complete experiment documentation with tables
+```
+
+**Quick reproduce**:
+```bash
+# 1. Setup
+pip install -r requirements.txt
+bash download_data.sh
+
+# 2. Medium-scale (all 11 datasets, SGFormer + PCGT)
+cd medium && bash run.sh
+
+# 3. Large-scale (arxiv, proteins, pokec)
+cd large && bash run.sh all
+
+# 4. Regenerate plots
+cd experiments/scripts
+python generate_convergence_plot.py
+python generate_runtime_plot.py
+```
+
+See `reproduce_paper_results.sh` for exact hyperparameters per dataset.
 
 ## Acknowledgements
 

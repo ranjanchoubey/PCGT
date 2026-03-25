@@ -1,0 +1,10 @@
+train_prop:0.5, valid_prop:0.25method: sgformer hidden: 64 ours_layers:1 lr:0.001 use_graph:True aggregate:add graph_weight:0.8 alpha:0.5 ours_decay:0.0005 ours_dropout:0.3 epochs:500 use_feat_norm:True use_bn:False use_residual:True use_act:True
+backbone:gcn, layers:8 hidden: 64 lr:0.001 decay:0.0005 dropout:0.3
+10 runs: Highest Train: 61.59 ± 6.19 Highest val epoch:37
+Highest Test: 42.84 ± 2.22 Final Test: 40.64 ± 3.14 run_time: 13.377518256901958
+
+train_prop:0.5, valid_prop:0.25method: sgformer hidden: 64 ours_layers:1 lr:0.001 use_graph:True aggregate:add graph_weight:0.8 alpha:0.5 ours_decay:0.0005 ours_dropout:0.3 epochs:500 use_feat_norm:True use_bn:False use_residual:True use_act:True
+backbone:gcn, layers:8 hidden: 64 lr:0.001 decay:0.0005 dropout:0.3
+3 runs: Highest Train: 54.06 ± 5.42 Highest val epoch:256
+Highest Test: 44.24 ± 1.80 Final Test: 41.92 ± 1.91 run_time: 8.037414789427544
+

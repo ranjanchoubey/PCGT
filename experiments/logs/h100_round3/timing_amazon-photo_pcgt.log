@@ -1,0 +1,42 @@
+Namespace(data_dir='data', dataset='amazon-photo', device=0, seed=123, cpu=False, epochs=500, runs=3, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=True, rand_split_class=False, label_num_per_class=20, valid_num=500, test_num=500, directed=False, method='pcgt', hidden_channels=64, num_layers=4, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=0.0005, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.8, ours_weight_decay=0.001, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.2, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+amazon-photo
+amazon-photo: nodes=7650, edges=238162, feats=745, classes=8
+features shape=torch.Size([7650, 745])
+num nodes 7650 | num classes 8 | num node feats 745
+Computing 10 partitions using metis...
+Partitions: 10, Boundary nodes: 4381/7650 (57.3%)
+Intra-partition edges: 192940/238162 (81.0%)
+Epoch: 00, Loss: 2.0657, Train: 21.65%, Valid: 23.48%, Test: 21.38% [α=0.50,β=1.01]
+Epoch: 50, Loss: 0.2901, Train: 93.59%, Valid: 90.38%, Test: 92.26% [α=0.60,β=1.21]
+Epoch: 100, Loss: 0.1124, Train: 98.30%, Valid: 93.83%, Test: 94.62% [α=0.61,β=1.37]
+Epoch: 150, Loss: 0.0618, Train: 99.32%, Valid: 94.04%, Test: 95.03% [α=0.63,β=1.49]
+Epoch: 200, Loss: 0.0408, Train: 99.35%, Valid: 93.88%, Test: 94.56% [α=0.65,β=1.61]
+Epoch: 250, Loss: 0.0295, Train: 99.84%, Valid: 93.88%, Test: 94.82% [α=0.68,β=1.71]
+Epoch: 300, Loss: 0.0654, Train: 98.61%, Valid: 91.84%, Test: 92.58% [α=0.70,β=1.81]
+Epoch: 350, Loss: 0.1946, Train: 97.12%, Valid: 92.21%, Test: 92.37% [α=0.70,β=1.97]
+Epoch: 400, Loss: 0.0913, Train: 98.90%, Valid: 92.83%, Test: 93.62% [α=0.70,β=2.10]
+Run 01:Highest Train: 99.92 Highest Valid: 94.77 Highest Test: 95.35 Chosen epoch: 217
+Final Train: 99.69 Final Test: 95.19
+Epoch: 00, Loss: 2.0877, Train: 22.35%, Valid: 21.29%, Test: 22.16% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.3390, Train: 92.34%, Valid: 91.63%, Test: 91.95% [α=0.53,β=1.29]
+Epoch: 100, Loss: 0.1439, Train: 97.57%, Valid: 94.82%, Test: 94.46% [α=0.53,β=1.50]
+Epoch: 150, Loss: 0.0902, Train: 98.75%, Valid: 94.87%, Test: 94.77% [α=0.55,β=1.66]
+Epoch: 200, Loss: 0.0614, Train: 99.35%, Valid: 95.14%, Test: 94.77% [α=0.58,β=1.80]
+Epoch: 250, Loss: 0.0838, Train: 99.11%, Valid: 94.30%, Test: 94.20% [α=0.60,β=1.91]
+Epoch: 300, Loss: 0.0613, Train: 99.53%, Valid: 95.29%, Test: 94.98% [α=0.63,β=2.01]
+Epoch: 350, Loss: 0.0360, Train: 99.69%, Valid: 94.98%, Test: 94.72% [α=0.65,β=2.11]
+Epoch: 400, Loss: 0.0405, Train: 99.74%, Valid: 95.08%, Test: 94.88% [α=0.67,β=2.20]
+Epoch: 450, Loss: 0.0313, Train: 99.87%, Valid: 94.98%, Test: 94.51% [α=0.69,β=2.28]
+Run 02:Highest Train: 99.92 Highest Valid: 95.55 Highest Test: 95.24 Chosen epoch: 305
+Final Train: 99.58 Final Test: 94.77
+Epoch: 00, Loss: 2.0467, Train: 23.08%, Valid: 21.13%, Test: 20.86% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.3290, Train: 93.73%, Valid: 91.74%, Test: 91.90% [α=0.65,β=1.51]
+Epoch: 100, Loss: 0.1544, Train: 97.25%, Valid: 93.83%, Test: 94.35% [α=0.66,β=1.96]
+Epoch: 150, Loss: 0.0961, Train: 98.30%, Valid: 93.62%, Test: 94.25% [α=0.66,β=2.25]
+Epoch: 200, Loss: 0.6093, Train: 85.73%, Valid: 80.86%, Test: 80.82% [α=0.67,β=2.47]
+Epoch: 250, Loss: 0.1128, Train: 98.61%, Valid: 93.46%, Test: 94.25% [α=0.72,β=2.66]
+Epoch: 300, Loss: 0.0589, Train: 99.56%, Valid: 93.51%, Test: 94.51% [α=0.72,β=2.78]
+Run 03:Highest Train: 99.79 Highest Valid: 94.77 Highest Test: 95.24 Chosen epoch: 135
+Final Train: 98.67 Final Test: 94.77
+3 runs: Highest Train: 99.88 ± 0.08 Highest val epoch:134
+Highest Test: 95.28 ± 0.06 Final Test: 94.91 ± 0.24

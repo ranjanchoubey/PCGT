@@ -21,11 +21,11 @@ pip install --no-build-isolation torch-scatter torch-sparse
 pip install -r requirements.txt
 
 # 3. Download datasets
-python download_data.py
+bash download_data.sh
 
 # 4. Run training
 cd medium
-python main.py --backbone gcn --dataset cora --epochs 10 --cpu --runs 1
+python main.py --method pcgt --backbone gcn --dataset cora --epochs 10 --cpu --runs 1
 ```
 
 ---
@@ -120,8 +120,8 @@ python -c "import torch; import torch_geometric; import torch_sparse; print('✓
 ### Step 8: Download Datasets (Optional)
 
 ```bash
-python download_data.py
-# Downloads Cora, Citeseer, Pubmed (~100MB total)
+bash download_data.sh
+# Downloads all datasets (Planetoid auto-downloaded, others from Google Drive)
 ```
 
 ---
@@ -150,7 +150,7 @@ python main.py \
     --hidden_channels 64 \
     --weight_decay 5e-4 \
     --dropout 0.5 \
-    --method ours \
+    --method pcgt \
     --use_graph \
     --graph_weight 0.8 \
     --epochs 100 \
@@ -281,8 +281,6 @@ The **correct approach** is fixing the dependency installation process (which we
 
 The PCGT project supports multiple datasets across different categories. Here's what works out-of-the-box:
 
-👉 **Full dataset guide**: See [DATASETS.md](DATASETS.md) for complete reference with all 20+ supported datasets.
-
 ### ✅ Planetoid Datasets (Recommended for Quick Start)
 
 Automatically downloaded and work immediately:
@@ -329,13 +327,10 @@ These require **manual data download**. See section below.
 
 ## Downloading Additional Datasets
 
-### Verify & Auto-Download Planetoid
+### Download All Datasets
 ```bash
-# Verify all Planetoid datasets exist
-python download_data.py --verify-only
-
-# Re-download if needed
-python download_data.py --datasets cora citeseer pubmed
+bash download_data.sh
+# Planetoid datasets auto-download via PyG; others are fetched from Google Drive
 ```
 
 ### Manual Dataset Downloads

@@ -1,0 +1,46 @@
+Namespace(data_dir='../data/', dataset='pubmed', device=0, seed=123, cpu=False, epochs=500, runs=5, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=True, label_num_per_class=20, valid_num=500, test_num=1000, directed=False, method='pcgt', hidden_channels=64, num_layers=4, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.005, weight_decay=0.0005, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.7, ours_weight_decay=0.01, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.3, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=5, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+pubmed
+Num nodes: 19717
+train:torch.Size([60]), valid:torch.Size([500]), test:torch.Size([1000])
+features shape=torch.Size([19717, 500])
+num nodes 19717 | num classes 3 | num node feats 500
+Computing 5 partitions using metis...
+Partitions: 5, Boundary nodes: 3752/19717 (19.0%)
+Intra-partition edges: 81208/88648 (91.6%)
+Epoch: 00, Loss: 1.0991, Train: 35.00%, Valid: 36.80%, Test: 41.10% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.0432, Train: 100.00%, Valid: 74.80%, Test: 78.40% [α=0.54,β=1.11]
+Epoch: 100, Loss: 0.0102, Train: 100.00%, Valid: 73.00%, Test: 77.80% [α=0.52,β=0.98]
+Epoch: 150, Loss: 0.0068, Train: 100.00%, Valid: 75.00%, Test: 78.80% [α=0.51,β=0.81]
+Epoch: 200, Loss: 0.0172, Train: 100.00%, Valid: 73.00%, Test: 76.60% [α=0.50,β=0.66]
+Run 01:Highest Train: 100.00 Highest Valid: 77.00 Highest Test: 79.10 Chosen epoch: 27
+Final Train: 95.00 Final Test: 77.00
+Epoch: 00, Loss: 1.1003, Train: 33.33%, Valid: 23.20%, Test: 21.50% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.0241, Train: 100.00%, Valid: 75.20%, Test: 76.10% [α=0.56,β=1.16]
+Epoch: 100, Loss: 0.0052, Train: 100.00%, Valid: 72.20%, Test: 75.40% [α=0.53,β=0.98]
+Epoch: 150, Loss: 0.0025, Train: 100.00%, Valid: 74.20%, Test: 77.30% [α=0.51,β=0.81]
+Epoch: 200, Loss: 0.0069, Train: 100.00%, Valid: 71.60%, Test: 75.50% [α=0.50,β=0.66]
+Run 02:Highest Train: 100.00 Highest Valid: 77.40 Highest Test: 79.10 Chosen epoch: 36
+Final Train: 96.67 Final Test: 78.50
+Epoch: 00, Loss: 1.0990, Train: 43.33%, Valid: 29.40%, Test: 29.10% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.1723, Train: 95.00%, Valid: 74.20%, Test: 73.70% [α=0.60,β=1.34]
+Epoch: 100, Loss: 0.0163, Train: 100.00%, Valid: 75.80%, Test: 76.60% [α=0.56,β=1.26]
+Epoch: 150, Loss: 0.0014, Train: 100.00%, Valid: 72.00%, Test: 74.00% [α=0.53,β=1.09]
+Epoch: 200, Loss: 0.0019, Train: 100.00%, Valid: 75.40%, Test: 76.60% [α=0.51,β=0.92]
+Run 03:Highest Train: 100.00 Highest Valid: 78.80 Highest Test: 79.30 Chosen epoch: 43
+Final Train: 86.67 Final Test: 77.50
+Epoch: 00, Loss: 1.0993, Train: 51.67%, Valid: 62.20%, Test: 59.90% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.2490, Train: 86.67%, Valid: 73.80%, Test: 73.50% [α=0.58,β=1.34]
+Epoch: 100, Loss: 0.0145, Train: 100.00%, Valid: 73.20%, Test: 73.70% [α=0.58,β=1.43]
+Epoch: 150, Loss: 0.0031, Train: 100.00%, Valid: 71.80%, Test: 75.00% [α=0.55,β=1.27]
+Epoch: 200, Loss: 0.0052, Train: 100.00%, Valid: 73.40%, Test: 76.90% [α=0.52,β=1.11]
+Run 04:Highest Train: 100.00 Highest Valid: 78.80 Highest Test: 78.80 Chosen epoch: 43
+Final Train: 86.67 Final Test: 77.30
+Epoch: 00, Loss: 1.1009, Train: 33.33%, Valid: 23.20%, Test: 21.50% [α=0.50,β=1.00]
+Epoch: 50, Loss: 0.2478, Train: 88.33%, Valid: 76.40%, Test: 75.20% [α=0.58,β=1.31]
+Epoch: 100, Loss: 0.0029, Train: 100.00%, Valid: 73.00%, Test: 75.40% [α=0.57,β=1.32]
+Epoch: 150, Loss: 0.0105, Train: 100.00%, Valid: 74.20%, Test: 76.60% [α=0.54,β=1.17]
+Epoch: 200, Loss: 0.0035, Train: 100.00%, Valid: 73.80%, Test: 76.70% [α=0.52,β=1.03]
+Run 05:Highest Train: 100.00 Highest Valid: 79.20 Highest Test: 79.00 Chosen epoch: 40
+Final Train: 86.67 Final Test: 77.40
+5 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:39
+Highest Test: 79.06 ± 0.18 Final Test: 77.54 ± 0.57

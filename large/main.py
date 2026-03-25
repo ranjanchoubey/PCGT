@@ -128,6 +128,8 @@ model.train()
 print('MODEL:', model)
 
 ### Training loop ###
+run_time_list = []
+
 for run in range(args.runs):
     if args.dataset in ['cora', 'citeseer', 'pubmed'] and args.protocol == 'semi':
         split_idx = split_idx_lst[0]
@@ -165,6 +167,8 @@ for run in range(args.runs):
                 out[train_idx], dataset.label.squeeze(1)[train_idx])
         loss.backward()
         optimizer.step()
+        train_end = time.time()
+        run_time_list.append(1000 * (train_end - train_start))
 
         if epoch % args.eval_step == 0:
             result = evaluate(model, dataset, split_idx, eval_func, criterion, args)
@@ -179,4 +183,6 @@ for run in range(args.runs):
                 print(print_str)
     logger.print_statistics(run)
 
+run_time = sum(run_time_list) / len(run_time_list) if run_time_list else 0
+print(f'Average epoch time: {run_time:.2f} ms')
 logger.print_statistics()

@@ -1,0 +1,35 @@
+label per class:20, valid:500,test:1000
+method: pcgt hidden: 64 ours_layers:1 lr:0.01 use_graph:True aggregate:add graph_weight:0.7 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:7 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.01 decay:0.01 dropout:0.5
+10 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:50
+Highest Test: 71.71 ± 0.38 Final Test: 70.62 ± 0.86 run_time: 11.686883715053503
+
+label per class:20, valid:500,test:1000
+method: pcgt hidden: 64 ours_layers:1 lr:0.01 use_graph:True aggregate:add graph_weight:0.7 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:20 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.01 decay:0.01 dropout:0.5
+10 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:37
+Highest Test: 73.12 ± 0.42 Final Test: 72.15 ± 0.47 run_time: 27.875796417614634
+
+label per class:20, valid:500,test:1000
+method: pcgt hidden: 64 ours_layers:1 lr:0.005 use_graph:True aggregate:add graph_weight:0.8 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:20 partition_method:metis
+backbone:gcn, layers:4 hidden: 64 lr:0.005 decay:0.01 dropout:0.5
+10 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:62
+Highest Test: 69.15 ± 1.20 Final Test: 67.72 ± 1.31 run_time: 30.303660423617124
+
+label per class:20, valid:500,test:1000
+method: pcgt hidden: 64 ours_layers:1 lr:0.01 use_graph:True aggregate:add graph_weight:0.7 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:20 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.01 decay:0.01 dropout:0.5
+5 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:33
+Highest Test: 73.42 ± 0.56 Final Test: 71.78 ± 0.61 run_time: 51.398212022377265
+
+label per class:20, valid:500,test:1000
+method: pcgt hidden: 64 ours_layers:1 lr:0.01 use_graph:True aggregate:add graph_weight:0.7 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:20 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.01 decay:0.01 dropout:0.5
+5 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:60
+Highest Test: 73.16 ± 0.38 Final Test: 72.56 ± 0.82 run_time: 44.82660982993372
+

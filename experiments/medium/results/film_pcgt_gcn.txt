@@ -1,0 +1,42 @@
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.1 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.0001 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:10 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.1 decay:0.0005 dropout:0.6
+10 runs: Highest Train: 81.54 ± 3.88 Highest val epoch:32
+Highest Test: 37.22 ± 0.54 Final Test: 35.83 ± 1.28 run_time: 21.16843196310329
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.05 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.05 decay:0.0005 dropout:0.5
+10 runs: Highest Train: 47.64 ± 1.25 Highest val epoch:355
+Highest Test: 38.00 ± 0.90 Final Test: 36.28 ± 1.37 run_time: 14.635452080960741
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:2 lr:0.1 use_graph:True aggregate:add graph_weight:0.6 alpha:0.5 ours_decay:0.0005 ours_dropout:0.6 epochs:500 use_feat_norm:True use_bn:False use_residual:True use_act:True
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:8 hidden: 64 lr:0.1 decay:0.0005 dropout:0.6
+10 runs: Highest Train: 33.08 ± 3.81 Highest val epoch:407
+Highest Test: 31.21 ± 3.44 Final Test: 30.84 ± 3.50 run_time: 27.0500257504882
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.05 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.05 decay:0.0005 dropout:0.5
+5 runs: Highest Train: 47.62 ± 1.40 Highest val epoch:290
+Highest Test: 37.68 ± 0.83 Final Test: 36.30 ± 0.80 run_time: 48.44595039551007
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.05 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.05 decay:0.0005 dropout:0.5
+5 runs: Highest Train: 47.54 ± 1.62 Highest val epoch:466
+Highest Test: 37.51 ± 0.85 Final Test: 36.18 ± 1.13 run_time: 31.233187303946373
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.05 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.05 decay:0.0005 dropout:0.5
+5 runs: Highest Train: 47.41 ± 1.43 Highest val epoch:260
+Highest Test: 37.71 ± 0.97 Final Test: 36.34 ± 1.41 run_time: 27.869967213893222
+
+train_prop:0.5, valid_prop:0.25method: pcgt hidden: 64 ours_layers:1 lr:0.05 use_graph:True aggregate:add graph_weight:0.5 alpha:0.5 ours_decay:0.01 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
+num_partitions:5 partition_method:metis
+backbone:gcn, layers:2 hidden: 64 lr:0.05 decay:0.0005 dropout:0.5
+3 runs: Highest Train: 47.68 ± 0.65 Highest val epoch:387
+Highest Test: 37.61 ± 1.25 Final Test: 35.99 ± 0.50 run_time: 10.236476087334873
+

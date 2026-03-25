@@ -1,0 +1,31 @@
+Namespace(data_dir='data', dataset='citeseer', device=0, seed=123, cpu=False, epochs=500, runs=3, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=True, label_num_per_class=20, valid_num=500, test_num=1000, directed=False, method='sgformer', hidden_channels=64, num_layers=4, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.005, weight_decay=0.01, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.7, ours_weight_decay=0.01, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.3, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+citeseer
+Num nodes: 3327
+train:torch.Size([120]), valid:torch.Size([500]), test:torch.Size([1000])
+features shape=torch.Size([3327, 3703])
+num nodes 3327 | num classes 6 | num node feats 3703
+Epoch: 00, Loss: 1.7956, Train: 36.67%, Valid: 28.80%, Test: 29.40%
+Epoch: 50, Loss: 0.1396, Train: 100.00%, Valid: 60.80%, Test: 66.10%
+Epoch: 100, Loss: 0.0823, Train: 100.00%, Valid: 62.20%, Test: 66.20%
+Epoch: 150, Loss: 0.0766, Train: 100.00%, Valid: 61.40%, Test: 66.00%
+Epoch: 200, Loss: 0.0545, Train: 100.00%, Valid: 60.60%, Test: 65.50%
+Epoch: 250, Loss: 0.0538, Train: 100.00%, Valid: 63.20%, Test: 67.50%
+Run 01:Highest Train: 100.00 Highest Valid: 65.20 Highest Test: 69.40 Chosen epoch: 74
+Final Train: 99.17 Final Test: 67.90
+Epoch: 00, Loss: 1.7993, Train: 29.17%, Valid: 16.40%, Test: 18.20%
+Epoch: 50, Loss: 0.0658, Train: 100.00%, Valid: 61.40%, Test: 64.70%
+Epoch: 100, Loss: 0.0544, Train: 100.00%, Valid: 60.40%, Test: 66.70%
+Epoch: 150, Loss: 0.0923, Train: 100.00%, Valid: 62.80%, Test: 68.20%
+Epoch: 200, Loss: 0.0665, Train: 100.00%, Valid: 59.40%, Test: 66.10%
+Epoch: 250, Loss: 0.0578, Train: 100.00%, Valid: 61.20%, Test: 66.40%
+Run 02:Highest Train: 100.00 Highest Valid: 65.60 Highest Test: 68.80 Chosen epoch: 55
+Final Train: 100.00 Final Test: 67.50
+Epoch: 00, Loss: 1.7981, Train: 20.83%, Valid: 16.00%, Test: 18.10%
+Epoch: 50, Loss: 0.1302, Train: 99.17%, Valid: 65.20%, Test: 68.40%
+Epoch: 100, Loss: 0.0527, Train: 99.17%, Valid: 59.80%, Test: 64.30%
+Epoch: 150, Loss: 0.0614, Train: 100.00%, Valid: 59.60%, Test: 66.40%
+Epoch: 200, Loss: 0.0490, Train: 99.17%, Valid: 59.20%, Test: 66.20%
+Run 03:Highest Train: 100.00 Highest Valid: 65.20 Highest Test: 69.10 Chosen epoch: 51
+Final Train: 99.17 Final Test: 68.40
+3 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:50
+Highest Test: 69.10 ± 0.30 Final Test: 67.93 ± 0.45
