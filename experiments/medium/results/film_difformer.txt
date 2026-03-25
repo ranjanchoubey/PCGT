@@ -1,4 +1,0 @@
-train_prop:0.5, valid_prop:0.25method: difformer hidden: 64 lr:0.1
-10 runs: Highest Train: 26.05 ± 0.48 Highest val epoch:49
-Highest Test: 25.49 ± 1.08 Final Test: 25.26 ± 1.14 run_time: 39.74961358707066
-

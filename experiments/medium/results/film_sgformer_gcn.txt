@@ -1,5 +1,0 @@
-train_prop:0.5, valid_prop:0.25method: sgformer hidden: 64 ours_layers:1 lr:0.01 use_graph:True aggregate:add graph_weight:0.8 alpha:0.5 ours_decay:0.001 ours_dropout:0.3 epochs:500 use_feat_norm:False use_bn:False use_residual:False use_act:False
-backbone:gcn, layers:4 hidden: 64 lr:0.01 decay:0.0005 dropout:0.5
-3 runs: Highest Train: 39.46 ± 0.49 Highest val epoch:41
-Highest Test: 37.06 ± 0.77 Final Test: 36.75 ± 0.85 run_time: 5.873930508994664
-

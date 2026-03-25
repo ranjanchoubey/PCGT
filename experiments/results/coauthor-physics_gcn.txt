@@ -1,8 +1,0 @@
-train_prop:0.5, valid_prop:0.25method: gcn hidden: 64 lr:0.01
-10 runs: Highest Train: 96.50 ± 0.10 Highest val epoch:471
-Highest Test: 95.88 ± 0.16 Final Test: 95.70 ± 0.15 run_time: 6.41384088570843
-
-train_prop:0.5, valid_prop:0.25method: gcn hidden: 64 lr:0.01
-3 runs: Highest Train: 96.59 ± 0.10 Highest val epoch:332
-Highest Test: 95.72 ± 0.17 Final Test: 95.57 ± 0.17 run_time: 6.58184958005564
-

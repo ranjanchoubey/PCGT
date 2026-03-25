@@ -144,10 +144,7 @@ PCGT/
 ├── large/                 # Large-scale (arxiv, proteins, pokec)
 │   ├── main.py            # Full-batch training
 │   └── main-batch.py      # Mini-batch for >100K nodes
-├── experiments/           # Logs, results, scripts
-│   ├── logs/              # H100 GPU training logs
-│   ├── results/           # Parsed results
-│   └── MANIFEST.md        # Experiment documentation
+├── 100M/                  # 100M-scale experiments
 ├── visualization/         # Partition & analysis plots
 ├── data/                  # Datasets (auto-downloaded)
 ├── download_data.sh       # Dataset downloader

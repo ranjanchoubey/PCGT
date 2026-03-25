@@ -1,261 +1,0 @@
-/teamspace/studios/this_studio/PCGT/large/logger.py:76: SyntaxWarning: invalid escape sequence '\p'
-  f"{results.mean():.2f} $\pm$ {results.std():.2f} \n")
-Namespace(dataset='ogbn-proteins', sub_dataset='', data_dir='../data', device=0, seed=123, cpu=False, epochs=1000, runs=3, directed=False, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=False, label_num_per_class=20, metric='rocauc', method='pcgt', hidden_channels=64, use_graph=True, aggregate='add', graph_weight=0.5, gnn_use_bn=True, gnn_use_residual=True, gnn_use_weight=True, gnn_use_init=False, gnn_use_act=True, gnn_num_layers=2, gnn_dropout=0.0, gnn_weight_decay=0.0, trans_num_heads=1, trans_use_weight=True, trans_use_bn=True, trans_use_residual=True, trans_use_act=False, trans_num_layers=1, trans_dropout=0.0, trans_weight_decay=0.0, lr=0.01, batch_size=10000, patience=200, display_step=1, eval_step=9, cached=False, print_prop=False, save_result=False, save_model=False, use_pretrained=False, save_att=False, model_dir='../../model/', hops=2, gat_heads=4, out_heads=1, num_partitions=256, partition_method='metis')
-ogbn-proteins
-Downloading http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip
-  0%|          | 0/216 [00:00<?, ?it/s]Downloaded 0.00 GB:   0%|          | 0/216 [00:02<?, ?it/s]Downloaded 0.00 GB:   0%|          | 1/216 [00:02<09:17,  2.59s/it]Downloaded 0.00 GB:   0%|          | 1/216 [00:03<09:17,  2.59s/it]Downloaded 0.00 GB:   1%|          | 2/216 [00:03<05:23,  1.51s/it]Downloaded 0.00 GB:   1%|          | 2/216 [00:03<05:23,  1.51s/it]Downloaded 0.00 GB:   1%|▏         | 3/216 [00:03<03:26,  1.03it/s]Downloaded 0.00 GB:   1%|▏         | 3/216 [00:03<03:26,  1.03it/s]Downloaded 0.00 GB:   2%|▏         | 4/216 [00:03<02:30,  1.40it/s]Downloaded 0.00 GB:   2%|▏         | 4/216 [00:04<02:30,  1.40it/s]Downloaded 0.00 GB:   2%|▏         | 5/216 [00:04<02:00,  1.76it/s]Downloaded 0.01 GB:   2%|▏         | 5/216 [00:04<02:00,  1.76it/s]Downloaded 0.01 GB:   3%|▎         | 6/216 [00:04<01:30,  2.32it/s]Downloaded 0.01 GB:   3%|▎         | 6/216 [00:04<01:30,  2.32it/s]Downloaded 0.01 GB:   3%|▎         | 7/216 [00:04<01:11,  2.91it/s]Downloaded 0.01 GB:   3%|▎         | 7/216 [00:04<01:11,  2.91it/s]Downloaded 0.01 GB:   4%|▎         | 8/216 [00:04<00:59,  3.51it/s]Downloaded 0.01 GB:   4%|▎         | 8/216 [00:04<00:59,  3.51it/s]Downloaded 0.01 GB:   4%|▍         | 9/216 [00:04<00:50,  4.07it/s]Downloaded 0.01 GB:   4%|▍         | 9/216 [00:05<00:50,  4.07it/s]Downloaded 0.01 GB:   5%|▍         | 10/216 [00:05<00:45,  4.57it/s]Downloaded 0.01 GB:   5%|▍         | 10/216 [00:05<00:45,  4.57it/s]Downloaded 0.01 GB:   5%|▌         | 11/216 [00:05<00:40,  5.01it/s]Downloaded 0.01 GB:   5%|▌         | 11/216 [00:05<00:40,  5.01it/s]Downloaded 0.01 GB:   5%|▌         | 11/216 [00:05<00:40,  5.01it/s]Downloaded 0.01 GB:   6%|▌         | 13/216 [00:05<00:29,  6.90it/s]Downloaded 0.01 GB:   6%|▌         | 13/216 [00:05<00:29,  6.90it/s]Downloaded 0.01 GB:   6%|▋         | 14/216 [00:05<00:29,  6.82it/s]Downloaded 0.01 GB:   6%|▋         | 14/216 [00:05<00:29,  6.82it/s]Downloaded 0.02 GB:   6%|▋         | 14/216 [00:05<00:29,  6.82it/s]Downloaded 0.02 GB:   7%|▋         | 16/216 [00:05<00:23,  8.44it/s]Downloaded 0.02 GB:   7%|▋         | 16/216 [00:05<00:23,  8.44it/s]Downloaded 0.02 GB:   7%|▋         | 16/216 [00:05<00:23,  8.44it/s]Downloaded 0.02 GB:   7%|▋         | 16/216 [00:05<00:23,  8.44it/s]Downloaded 0.02 GB:   9%|▉         | 19/216 [00:05<00:17, 11.32it/s]Downloaded 0.02 GB:   9%|▉         | 19/216 [00:05<00:17, 11.32it/s]Downloaded 0.02 GB:   9%|▉         | 19/216 [00:05<00:17, 11.32it/s]Downloaded 0.02 GB:   9%|▉         | 19/216 [00:06<00:17, 11.32it/s]Downloaded 0.02 GB:  10%|█         | 22/216 [00:06<00:14, 13.39it/s]Downloaded 0.02 GB:  10%|█         | 22/216 [00:06<00:14, 13.39it/s]Downloaded 0.02 GB:  10%|█         | 22/216 [00:06<00:14, 13.39it/s]Downloaded 0.02 GB:  10%|█         | 22/216 [00:06<00:14, 13.39it/s]Downloaded 0.02 GB:  12%|█▏        | 25/216 [00:06<00:12, 14.85it/s]Downloaded 0.03 GB:  12%|█▏        | 25/216 [00:06<00:12, 14.85it/s]Downloaded 0.03 GB:  12%|█▏        | 25/216 [00:06<00:12, 14.85it/s]Downloaded 0.03 GB:  12%|█▏        | 25/216 [00:06<00:12, 14.85it/s]Downloaded 0.03 GB:  13%|█▎        | 28/216 [00:06<00:11, 15.86it/s]Downloaded 0.03 GB:  13%|█▎        | 28/216 [00:06<00:11, 15.86it/s]Downloaded 0.03 GB:  13%|█▎        | 28/216 [00:06<00:11, 15.86it/s]Downloaded 0.03 GB:  13%|█▎        | 28/216 [00:06<00:11, 15.86it/s]Downloaded 0.03 GB:  14%|█▍        | 31/216 [00:06<00:11, 16.54it/s]Downloaded 0.03 GB:  14%|█▍        | 31/216 [00:06<00:11, 16.54it/s]Downloaded 0.03 GB:  14%|█▍        | 31/216 [00:06<00:11, 16.54it/s]Downloaded 0.03 GB:  14%|█▍        | 31/216 [00:06<00:11, 16.54it/s]Downloaded 0.03 GB:  16%|█▌        | 34/216 [00:06<00:10, 17.04it/s]Downloaded 0.03 GB:  16%|█▌        | 34/216 [00:06<00:10, 17.04it/s]Downloaded 0.04 GB:  16%|█▌        | 34/216 [00:06<00:10, 17.04it/s]Downloaded 0.04 GB:  16%|█▌        | 34/216 [00:06<00:10, 17.04it/s]Downloaded 0.04 GB:  17%|█▋        | 37/216 [00:06<00:10, 17.39it/s]Downloaded 0.04 GB:  17%|█▋        | 37/216 [00:06<00:10, 17.39it/s]Downloaded 0.04 GB:  17%|█▋        | 37/216 [00:06<00:10, 17.39it/s]Downloaded 0.04 GB:  17%|█▋        | 37/216 [00:07<00:10, 17.39it/s]Downloaded 0.04 GB:  19%|█▊        | 40/216 [00:07<00:09, 17.61it/s]Downloaded 0.04 GB:  19%|█▊        | 40/216 [00:07<00:09, 17.61it/s]Downloaded 0.04 GB:  19%|█▊        | 40/216 [00:07<00:09, 17.61it/s]Downloaded 0.04 GB:  19%|█▊        | 40/216 [00:07<00:09, 17.61it/s]Downloaded 0.04 GB:  20%|█▉        | 43/216 [00:07<00:09, 17.83it/s]Downloaded 0.04 GB:  20%|█▉        | 43/216 [00:07<00:09, 17.83it/s]Downloaded 0.04 GB:  20%|█▉        | 43/216 [00:07<00:09, 17.83it/s]Downloaded 0.04 GB:  20%|█▉        | 43/216 [00:07<00:09, 17.83it/s]Downloaded 0.04 GB:  21%|██▏       | 46/216 [00:07<00:09, 17.94it/s]Downloaded 0.05 GB:  21%|██▏       | 46/216 [00:07<00:09, 17.94it/s]Downloaded 0.05 GB:  21%|██▏       | 46/216 [00:07<00:09, 17.94it/s]Downloaded 0.05 GB:  21%|██▏       | 46/216 [00:07<00:09, 17.94it/s]Downloaded 0.05 GB:  23%|██▎       | 49/216 [00:07<00:09, 18.01it/s]Downloaded 0.05 GB:  23%|██▎       | 49/216 [00:07<00:09, 18.01it/s]Downloaded 0.05 GB:  23%|██▎       | 49/216 [00:07<00:09, 18.01it/s]Downloaded 0.05 GB:  23%|██▎       | 49/216 [00:07<00:09, 18.01it/s]Downloaded 0.05 GB:  24%|██▍       | 52/216 [00:07<00:09, 18.06it/s]Downloaded 0.05 GB:  24%|██▍       | 52/216 [00:07<00:09, 18.06it/s]Downloaded 0.05 GB:  24%|██▍       | 52/216 [00:07<00:09, 18.06it/s]Downloaded 0.05 GB:  24%|██▍       | 52/216 [00:07<00:09, 18.06it/s]Downloaded 0.05 GB:  25%|██▌       | 55/216 [00:07<00:08, 18.08it/s]Downloaded 0.05 GB:  25%|██▌       | 55/216 [00:07<00:08, 18.08it/s]Downloaded 0.06 GB:  25%|██▌       | 55/216 [00:07<00:08, 18.08it/s]Downloaded 0.06 GB:  25%|██▌       | 55/216 [00:08<00:08, 18.08it/s]Downloaded 0.06 GB:  27%|██▋       | 58/216 [00:08<00:08, 18.12it/s]Downloaded 0.06 GB:  27%|██▋       | 58/216 [00:08<00:08, 18.12it/s]Downloaded 0.06 GB:  27%|██▋       | 58/216 [00:08<00:08, 18.12it/s]Downloaded 0.06 GB:  27%|██▋       | 58/216 [00:08<00:08, 18.12it/s]Downloaded 0.06 GB:  28%|██▊       | 61/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  28%|██▊       | 61/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  28%|██▊       | 61/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  28%|██▊       | 61/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  30%|██▉       | 64/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  30%|██▉       | 64/216 [00:08<00:08, 18.14it/s]Downloaded 0.06 GB:  30%|██▉       | 64/216 [00:08<00:08, 18.14it/s]Downloaded 0.07 GB:  30%|██▉       | 64/216 [00:08<00:08, 18.14it/s]Downloaded 0.07 GB:  31%|███       | 67/216 [00:08<00:08, 18.15it/s]Downloaded 0.07 GB:  31%|███       | 67/216 [00:08<00:08, 18.15it/s]Downloaded 0.07 GB:  31%|███       | 67/216 [00:08<00:08, 18.15it/s]Downloaded 0.07 GB:  31%|███       | 67/216 [00:08<00:08, 18.15it/s]Downloaded 0.07 GB:  32%|███▏      | 70/216 [00:08<00:08, 18.16it/s]Downloaded 0.07 GB:  32%|███▏      | 70/216 [00:08<00:08, 18.16it/s]Downloaded 0.07 GB:  32%|███▏      | 70/216 [00:08<00:08, 18.16it/s]Downloaded 0.07 GB:  32%|███▏      | 70/216 [00:08<00:08, 18.16it/s]Downloaded 0.07 GB:  34%|███▍      | 73/216 [00:08<00:07, 18.16it/s]Downloaded 0.07 GB:  34%|███▍      | 73/216 [00:08<00:07, 18.16it/s]Downloaded 0.07 GB:  34%|███▍      | 73/216 [00:08<00:07, 18.16it/s]Downloaded 0.07 GB:  34%|███▍      | 73/216 [00:09<00:07, 18.16it/s]Downloaded 0.07 GB:  35%|███▌      | 76/216 [00:09<00:07, 18.15it/s]Downloaded 0.08 GB:  35%|███▌      | 76/216 [00:09<00:07, 18.15it/s]Downloaded 0.08 GB:  35%|███▌      | 76/216 [00:09<00:07, 18.15it/s]Downloaded 0.08 GB:  36%|███▌      | 78/216 [00:09<00:08, 16.62it/s]Downloaded 0.08 GB:  36%|███▌      | 78/216 [00:09<00:08, 16.62it/s]Downloaded 0.08 GB:  36%|███▌      | 78/216 [00:09<00:08, 16.62it/s]Downloaded 0.08 GB:  36%|███▌      | 78/216 [00:09<00:08, 16.62it/s]Downloaded 0.08 GB:  36%|███▌      | 78/216 [00:09<00:08, 16.62it/s]Downloaded 0.08 GB:  38%|███▊      | 82/216 [00:09<00:07, 18.67it/s]Downloaded 0.08 GB:  38%|███▊      | 82/216 [00:09<00:07, 18.67it/s]Downloaded 0.08 GB:  38%|███▊      | 82/216 [00:09<00:07, 18.67it/s]Downloaded 0.08 GB:  38%|███▊      | 82/216 [00:09<00:07, 18.67it/s]Downloaded 0.08 GB:  39%|███▉      | 85/216 [00:09<00:07, 18.53it/s]Downloaded 0.08 GB:  39%|███▉      | 85/216 [00:09<00:07, 18.53it/s]Downloaded 0.08 GB:  39%|███▉      | 85/216 [00:09<00:07, 18.53it/s]Downloaded 0.09 GB:  39%|███▉      | 85/216 [00:09<00:07, 18.53it/s]Downloaded 0.09 GB:  41%|████      | 88/216 [00:09<00:06, 18.47it/s]Downloaded 0.09 GB:  41%|████      | 88/216 [00:09<00:06, 18.47it/s]Downloaded 0.09 GB:  41%|████      | 88/216 [00:09<00:06, 18.47it/s]Downloaded 0.09 GB:  41%|████      | 88/216 [00:09<00:06, 18.47it/s]Downloaded 0.09 GB:  42%|████▏     | 91/216 [00:09<00:06, 18.36it/s]Downloaded 0.09 GB:  42%|████▏     | 91/216 [00:09<00:06, 18.36it/s]Downloaded 0.09 GB:  42%|████▏     | 91/216 [00:10<00:06, 18.36it/s]Downloaded 0.09 GB:  43%|████▎     | 93/216 [00:10<00:07, 16.76it/s]Downloaded 0.09 GB:  43%|████▎     | 93/216 [00:10<00:07, 16.76it/s]Downloaded 0.09 GB:  43%|████▎     | 93/216 [00:10<00:07, 16.76it/s]Downloaded 0.09 GB:  43%|████▎     | 93/216 [00:10<00:07, 16.76it/s]Downloaded 0.09 GB:  44%|████▍     | 96/216 [00:10<00:06, 17.18it/s]Downloaded 0.09 GB:  44%|████▍     | 96/216 [00:10<00:06, 17.18it/s]Downloaded 0.10 GB:  44%|████▍     | 96/216 [00:10<00:06, 17.18it/s]Downloaded 0.10 GB:  44%|████▍     | 96/216 [00:10<00:06, 17.18it/s]Downloaded 0.10 GB:  46%|████▌     | 99/216 [00:10<00:06, 17.46it/s]Downloaded 0.10 GB:  46%|████▌     | 99/216 [00:10<00:06, 17.46it/s]Downloaded 0.10 GB:  46%|████▌     | 99/216 [00:10<00:06, 17.46it/s]Downloaded 0.10 GB:  46%|████▌     | 99/216 [00:10<00:06, 17.46it/s]Downloaded 0.10 GB:  47%|████▋     | 102/216 [00:10<00:06, 17.66it/s]Downloaded 0.10 GB:  47%|████▋     | 102/216 [00:10<00:06, 17.66it/s]Downloaded 0.10 GB:  47%|████▋     | 102/216 [00:10<00:06, 17.66it/s]Downloaded 0.10 GB:  47%|████▋     | 102/216 [00:10<00:06, 17.66it/s]Downloaded 0.10 GB:  49%|████▊     | 105/216 [00:10<00:06, 17.80it/s]Downloaded 0.10 GB:  49%|████▊     | 105/216 [00:10<00:06, 17.80it/s]Downloaded 0.10 GB:  49%|████▊     | 105/216 [00:10<00:06, 17.80it/s]Downloaded 0.11 GB:  49%|████▊     | 105/216 [00:10<00:06, 17.80it/s]Downloaded 0.11 GB:  50%|█████     | 108/216 [00:10<00:06, 17.89it/s]Downloaded 0.11 GB:  50%|█████     | 108/216 [00:10<00:06, 17.89it/s]Downloaded 0.11 GB:  50%|█████     | 108/216 [00:10<00:06, 17.89it/s]Downloaded 0.11 GB:  50%|█████     | 108/216 [00:11<00:06, 17.89it/s]Downloaded 0.11 GB:  51%|█████▏    | 111/216 [00:11<00:05, 17.96it/s]Downloaded 0.11 GB:  51%|█████▏    | 111/216 [00:11<00:05, 17.96it/s]Downloaded 0.11 GB:  51%|█████▏    | 111/216 [00:11<00:05, 17.96it/s]Downloaded 0.11 GB:  51%|█████▏    | 111/216 [00:11<00:05, 17.96it/s]Downloaded 0.11 GB:  53%|█████▎    | 114/216 [00:11<00:05, 18.03it/s]Downloaded 0.11 GB:  53%|█████▎    | 114/216 [00:11<00:05, 18.03it/s]Downloaded 0.11 GB:  53%|█████▎    | 114/216 [00:11<00:05, 18.03it/s]Downloaded 0.11 GB:  53%|█████▎    | 114/216 [00:11<00:05, 18.03it/s]Downloaded 0.11 GB:  54%|█████▍    | 117/216 [00:11<00:05, 18.07it/s]Downloaded 0.12 GB:  54%|█████▍    | 117/216 [00:11<00:05, 18.07it/s]Downloaded 0.12 GB:  54%|█████▍    | 117/216 [00:11<00:05, 18.07it/s]Downloaded 0.12 GB:  54%|█████▍    | 117/216 [00:11<00:05, 18.07it/s]Downloaded 0.12 GB:  56%|█████▌    | 120/216 [00:11<00:05, 18.10it/s]Downloaded 0.12 GB:  56%|█████▌    | 120/216 [00:11<00:05, 18.10it/s]Downloaded 0.12 GB:  56%|█████▌    | 120/216 [00:11<00:05, 18.10it/s]Downloaded 0.12 GB:  56%|█████▌    | 120/216 [00:11<00:05, 18.10it/s]Downloaded 0.12 GB:  57%|█████▋    | 123/216 [00:11<00:05, 18.12it/s]Downloaded 0.12 GB:  57%|█████▋    | 123/216 [00:11<00:05, 18.12it/s]Downloaded 0.12 GB:  57%|█████▋    | 123/216 [00:11<00:05, 18.12it/s]Downloaded 0.12 GB:  57%|█████▋    | 123/216 [00:11<00:05, 18.12it/s]Downloaded 0.12 GB:  58%|█████▊    | 126/216 [00:11<00:04, 18.12it/s]Downloaded 0.12 GB:  58%|█████▊    | 126/216 [00:11<00:04, 18.12it/s]Downloaded 0.12 GB:  58%|█████▊    | 126/216 [00:11<00:04, 18.12it/s]Downloaded 0.13 GB:  58%|█████▊    | 126/216 [00:11<00:04, 18.12it/s]Downloaded 0.13 GB:  58%|█████▊    | 126/216 [00:12<00:04, 18.12it/s]Downloaded 0.13 GB:  60%|██████    | 130/216 [00:12<00:04, 19.62it/s]Downloaded 0.13 GB:  60%|██████    | 130/216 [00:12<00:04, 19.62it/s]Downloaded 0.13 GB:  60%|██████    | 130/216 [00:12<00:04, 19.62it/s]Downloaded 0.13 GB:  60%|██████    | 130/216 [00:12<00:04, 19.62it/s]Downloaded 0.13 GB:  62%|██████▏   | 133/216 [00:12<00:04, 19.18it/s]Downloaded 0.13 GB:  62%|██████▏   | 133/216 [00:12<00:04, 19.18it/s]Downloaded 0.13 GB:  62%|██████▏   | 133/216 [00:12<00:04, 19.18it/s]Downloaded 0.13 GB:  62%|██████▏   | 133/216 [00:12<00:04, 19.18it/s]Downloaded 0.13 GB:  63%|██████▎   | 136/216 [00:12<00:04, 18.87it/s]Downloaded 0.13 GB:  63%|██████▎   | 136/216 [00:12<00:04, 18.87it/s]Downloaded 0.13 GB:  63%|██████▎   | 136/216 [00:12<00:04, 18.87it/s]Downloaded 0.13 GB:  64%|██████▍   | 138/216 [00:12<00:04, 17.13it/s]Downloaded 0.14 GB:  64%|██████▍   | 138/216 [00:12<00:04, 17.13it/s]Downloaded 0.14 GB:  64%|██████▍   | 138/216 [00:12<00:04, 17.13it/s]Downloaded 0.14 GB:  64%|██████▍   | 138/216 [00:12<00:04, 17.13it/s]Downloaded 0.14 GB:  65%|██████▌   | 141/216 [00:12<00:04, 17.45it/s]Downloaded 0.14 GB:  65%|██████▌   | 141/216 [00:12<00:04, 17.45it/s]Downloaded 0.14 GB:  65%|██████▌   | 141/216 [00:12<00:04, 17.45it/s]Downloaded 0.14 GB:  65%|██████▌   | 141/216 [00:12<00:04, 17.45it/s]Downloaded 0.14 GB:  67%|██████▋   | 144/216 [00:12<00:04, 17.71it/s]Downloaded 0.14 GB:  67%|██████▋   | 144/216 [00:12<00:04, 17.71it/s]Downloaded 0.14 GB:  67%|██████▋   | 144/216 [00:12<00:04, 17.71it/s]Downloaded 0.14 GB:  67%|██████▋   | 144/216 [00:12<00:04, 17.71it/s]Downloaded 0.14 GB:  68%|██████▊   | 147/216 [00:12<00:03, 17.86it/s]Downloaded 0.14 GB:  68%|██████▊   | 147/216 [00:12<00:03, 17.86it/s]Downloaded 0.15 GB:  68%|██████▊   | 147/216 [00:13<00:03, 17.86it/s]Downloaded 0.15 GB:  68%|██████▊   | 147/216 [00:13<00:03, 17.86it/s]Downloaded 0.15 GB:  69%|██████▉   | 150/216 [00:13<00:03, 17.95it/s]Downloaded 0.15 GB:  69%|██████▉   | 150/216 [00:13<00:03, 17.95it/s]Downloaded 0.15 GB:  69%|██████▉   | 150/216 [00:13<00:03, 17.95it/s]Downloaded 0.15 GB:  69%|██████▉   | 150/216 [00:13<00:03, 17.95it/s]Downloaded 0.15 GB:  71%|███████   | 153/216 [00:13<00:03, 18.04it/s]Downloaded 0.15 GB:  71%|███████   | 153/216 [00:13<00:03, 18.04it/s]Downloaded 0.15 GB:  71%|███████   | 153/216 [00:13<00:03, 18.04it/s]Downloaded 0.15 GB:  71%|███████   | 153/216 [00:13<00:03, 18.04it/s]Downloaded 0.15 GB:  72%|███████▏  | 156/216 [00:13<00:03, 18.06it/s]Downloaded 0.15 GB:  72%|███████▏  | 156/216 [00:13<00:03, 18.06it/s]Downloaded 0.15 GB:  72%|███████▏  | 156/216 [00:13<00:03, 18.06it/s]Downloaded 0.16 GB:  72%|███████▏  | 156/216 [00:13<00:03, 18.06it/s]Downloaded 0.16 GB:  74%|███████▎  | 159/216 [00:13<00:03, 18.11it/s]Downloaded 0.16 GB:  74%|███████▎  | 159/216 [00:13<00:03, 18.11it/s]Downloaded 0.16 GB:  74%|███████▎  | 159/216 [00:13<00:03, 18.11it/s]Downloaded 0.16 GB:  74%|███████▎  | 159/216 [00:13<00:03, 18.11it/s]Downloaded 0.16 GB:  75%|███████▌  | 162/216 [00:13<00:02, 18.11it/s]Downloaded 0.16 GB:  75%|███████▌  | 162/216 [00:13<00:02, 18.11it/s]Downloaded 0.16 GB:  75%|███████▌  | 162/216 [00:13<00:02, 18.11it/s]Downloaded 0.16 GB:  75%|███████▌  | 162/216 [00:13<00:02, 18.11it/s]Downloaded 0.16 GB:  76%|███████▋  | 165/216 [00:13<00:02, 18.09it/s]Downloaded 0.16 GB:  76%|███████▋  | 165/216 [00:13<00:02, 18.09it/s]Downloaded 0.16 GB:  76%|███████▋  | 165/216 [00:14<00:02, 18.09it/s]Downloaded 0.16 GB:  76%|███████▋  | 165/216 [00:14<00:02, 18.09it/s]Downloaded 0.16 GB:  78%|███████▊  | 168/216 [00:14<00:02, 18.09it/s]Downloaded 0.17 GB:  78%|███████▊  | 168/216 [00:14<00:02, 18.09it/s]Downloaded 0.17 GB:  78%|███████▊  | 168/216 [00:14<00:02, 18.09it/s]Downloaded 0.17 GB:  78%|███████▊  | 168/216 [00:14<00:02, 18.09it/s]Downloaded 0.17 GB:  79%|███████▉  | 171/216 [00:14<00:02, 18.11it/s]Downloaded 0.17 GB:  79%|███████▉  | 171/216 [00:14<00:02, 18.11it/s]Downloaded 0.17 GB:  79%|███████▉  | 171/216 [00:14<00:02, 18.11it/s]Downloaded 0.17 GB:  79%|███████▉  | 171/216 [00:14<00:02, 18.11it/s]Downloaded 0.17 GB:  81%|████████  | 174/216 [00:14<00:02, 18.12it/s]Downloaded 0.17 GB:  81%|████████  | 174/216 [00:14<00:02, 18.12it/s]Downloaded 0.17 GB:  81%|████████  | 174/216 [00:14<00:02, 18.12it/s]Downloaded 0.17 GB:  81%|████████  | 174/216 [00:14<00:02, 18.12it/s]Downloaded 0.17 GB:  82%|████████▏ | 177/216 [00:14<00:02, 18.13it/s]Downloaded 0.17 GB:  82%|████████▏ | 177/216 [00:14<00:02, 18.13it/s]Downloaded 0.17 GB:  82%|████████▏ | 177/216 [00:14<00:02, 18.13it/s]Downloaded 0.18 GB:  82%|████████▏ | 177/216 [00:14<00:02, 18.13it/s]Downloaded 0.18 GB:  83%|████████▎ | 180/216 [00:14<00:01, 18.14it/s]Downloaded 0.18 GB:  83%|████████▎ | 180/216 [00:14<00:01, 18.14it/s]Downloaded 0.18 GB:  83%|████████▎ | 180/216 [00:14<00:01, 18.14it/s]Downloaded 0.18 GB:  83%|████████▎ | 180/216 [00:14<00:01, 18.14it/s]Downloaded 0.18 GB:  85%|████████▍ | 183/216 [00:14<00:01, 18.12it/s]Downloaded 0.18 GB:  85%|████████▍ | 183/216 [00:14<00:01, 18.12it/s]Downloaded 0.18 GB:  85%|████████▍ | 183/216 [00:15<00:01, 18.12it/s]Downloaded 0.18 GB:  85%|████████▍ | 183/216 [00:15<00:01, 18.12it/s]Downloaded 0.18 GB:  86%|████████▌ | 186/216 [00:15<00:01, 18.11it/s]Downloaded 0.18 GB:  86%|████████▌ | 186/216 [00:15<00:01, 18.11it/s]Downloaded 0.18 GB:  86%|████████▌ | 186/216 [00:15<00:01, 18.11it/s]Downloaded 0.18 GB:  86%|████████▌ | 186/216 [00:15<00:01, 18.11it/s]Downloaded 0.18 GB:  88%|████████▊ | 189/216 [00:15<00:01, 18.10it/s]Downloaded 0.19 GB:  88%|████████▊ | 189/216 [00:15<00:01, 18.10it/s]Downloaded 0.19 GB:  88%|████████▊ | 189/216 [00:15<00:01, 18.10it/s]Downloaded 0.19 GB:  88%|████████▊ | 189/216 [00:15<00:01, 18.10it/s]Downloaded 0.19 GB:  89%|████████▉ | 192/216 [00:15<00:01, 18.09it/s]Downloaded 0.19 GB:  89%|████████▉ | 192/216 [00:15<00:01, 18.09it/s]Downloaded 0.19 GB:  89%|████████▉ | 192/216 [00:15<00:01, 18.09it/s]Downloaded 0.19 GB:  89%|████████▉ | 192/216 [00:15<00:01, 18.09it/s]Downloaded 0.19 GB:  90%|█████████ | 195/216 [00:15<00:01, 18.12it/s]Downloaded 0.19 GB:  90%|█████████ | 195/216 [00:15<00:01, 18.12it/s]Downloaded 0.19 GB:  90%|█████████ | 195/216 [00:15<00:01, 18.12it/s]Downloaded 0.19 GB:  90%|█████████ | 195/216 [00:15<00:01, 18.12it/s]Downloaded 0.19 GB:  92%|█████████▏| 198/216 [00:15<00:00, 18.11it/s]Downloaded 0.19 GB:  92%|█████████▏| 198/216 [00:15<00:00, 18.11it/s]Downloaded 0.20 GB:  92%|█████████▏| 198/216 [00:15<00:00, 18.11it/s]Downloaded 0.20 GB:  92%|█████████▏| 198/216 [00:15<00:00, 18.11it/s]Downloaded 0.20 GB:  93%|█████████▎| 201/216 [00:15<00:00, 18.13it/s]Downloaded 0.20 GB:  93%|█████████▎| 201/216 [00:15<00:00, 18.13it/s]Downloaded 0.20 GB:  93%|█████████▎| 201/216 [00:16<00:00, 18.13it/s]Downloaded 0.20 GB:  93%|█████████▎| 201/216 [00:16<00:00, 18.13it/s]Downloaded 0.20 GB:  94%|█████████▍| 204/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  94%|█████████▍| 204/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  94%|█████████▍| 204/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  94%|█████████▍| 204/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  96%|█████████▌| 207/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  96%|█████████▌| 207/216 [00:16<00:00, 18.14it/s]Downloaded 0.20 GB:  96%|█████████▌| 207/216 [00:16<00:00, 18.14it/s]Downloaded 0.21 GB:  96%|█████████▌| 207/216 [00:16<00:00, 18.14it/s]Downloaded 0.21 GB:  97%|█████████▋| 210/216 [00:16<00:00, 18.15it/s]Downloaded 0.21 GB:  97%|█████████▋| 210/216 [00:16<00:00, 18.15it/s]Downloaded 0.21 GB:  97%|█████████▋| 210/216 [00:16<00:00, 18.15it/s]Downloaded 0.21 GB:  97%|█████████▋| 210/216 [00:16<00:00, 18.15it/s]Downloaded 0.21 GB:  99%|█████████▊| 213/216 [00:16<00:00, 18.13it/s]Downloaded 0.21 GB:  99%|█████████▊| 213/216 [00:16<00:00, 18.13it/s]Downloaded 0.21 GB:  99%|█████████▊| 213/216 [00:16<00:00, 18.13it/s]Downloaded 0.21 GB:  99%|█████████▊| 213/216 [00:16<00:00, 18.13it/s]Downloaded 0.21 GB: 100%|██████████| 216/216 [00:16<00:00, 12.96it/s]
-Extracting ../dataogb/proteins.zip
-Loading necessary files...
-This might take a while.
-Processing graphs...
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.63s/it]100%|██████████| 1/1 [00:01<00:00,  1.63s/it]
-Saving...
-dataset ogbn-proteins | num nodes 132534 | num edge 79122504 | num node feats 8 | num classes 112
-Computing 256 partitions using metis...
-Partitions: 256, avg size: 518, max size: 533, boundary: 130811/132534 (98.7%)
-MODEL: PCGTFormer(
-  (pcgt_conv): PCGTConv(
-    (fcs): ModuleList(
-      (0): Linear(in_features=8, out_features=64, bias=True)
-    )
-    (bns): ModuleList(
-      (0-1): 2 x LayerNorm((64,), eps=1e-05, elementwise_affine=True)
-    )
-    (partition_pe): Embedding(256, 64)
-    (convs): ModuleList(
-      (0): PCGTConvLayer(
-        (Wq): Linear(in_features=64, out_features=64, bias=True)
-        (Wk): Linear(in_features=64, out_features=64, bias=True)
-        (Wv): Linear(in_features=64, out_features=64, bias=True)
-      )
-    )
-  )
-  (graph_conv): GraphConv(
-    (convs): ModuleList(
-      (0-1): 2 x GraphConvLayer(
-        (W): Linear(in_features=64, out_features=64, bias=True)
-      )
-    )
-    (fcs): ModuleList(
-      (0): Linear(in_features=8, out_features=64, bias=True)
-    )
-    (bns): ModuleList(
-      (0-2): 3 x BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-    )
-  )
-  (fc): Linear(in_features=64, out_features=112, bias=True)
-)
-Epoch: 00, Loss: 0.3246, Train: 69.17%, Valid: 69.31%, Test: 68.10%
-Epoch: 09, Loss: 0.2601, Train: 85.42%, Valid: 79.43%, Test: 75.24%
-Epoch: 18, Loss: 0.2455, Train: 87.45%, Valid: 81.71%, Test: 76.31%
-Epoch: 27, Loss: 0.2493, Train: 87.77%, Valid: 81.72%, Test: 75.53%
-Epoch: 36, Loss: 0.2506, Train: 87.81%, Valid: 81.32%, Test: 76.94%
-Epoch: 45, Loss: 0.2471, Train: 88.17%, Valid: 81.40%, Test: 76.28%
-Epoch: 54, Loss: 0.2504, Train: 89.03%, Valid: 82.58%, Test: 76.58%
-Epoch: 63, Loss: 0.2477, Train: 88.69%, Valid: 81.92%, Test: 75.45%
-Epoch: 72, Loss: 0.2538, Train: 88.64%, Valid: 80.97%, Test: 75.21%
-Epoch: 81, Loss: 0.2288, Train: 86.38%, Valid: 78.76%, Test: 72.98%
-Epoch: 90, Loss: 0.2341, Train: 88.61%, Valid: 82.08%, Test: 75.23%
-Epoch: 99, Loss: 0.2405, Train: 88.87%, Valid: 82.49%, Test: 75.91%
-Epoch: 108, Loss: 0.2415, Train: 89.10%, Valid: 81.29%, Test: 74.49%
-Epoch: 117, Loss: 0.2382, Train: 89.61%, Valid: 82.62%, Test: 77.33%
-Epoch: 126, Loss: 0.2481, Train: 89.61%, Valid: 82.72%, Test: 76.51%
-Epoch: 135, Loss: 0.2323, Train: 89.12%, Valid: 81.17%, Test: 75.10%
-Epoch: 144, Loss: 0.2279, Train: 89.76%, Valid: 82.77%, Test: 76.06%
-Epoch: 153, Loss: 0.2349, Train: 89.64%, Valid: 82.89%, Test: 76.50%
-Epoch: 162, Loss: 0.2467, Train: 89.21%, Valid: 81.94%, Test: 75.40%
-Epoch: 171, Loss: 0.2343, Train: 90.00%, Valid: 83.43%, Test: 77.34%
-Epoch: 180, Loss: 0.2293, Train: 89.78%, Valid: 82.57%, Test: 75.83%
-Epoch: 189, Loss: 0.2353, Train: 89.46%, Valid: 81.54%, Test: 75.73%
-Epoch: 198, Loss: 0.2315, Train: 89.63%, Valid: 82.43%, Test: 75.87%
-Epoch: 207, Loss: 0.2430, Train: 89.80%, Valid: 82.63%, Test: 74.20%
-Epoch: 216, Loss: 0.2346, Train: 89.75%, Valid: 81.84%, Test: 76.09%
-Epoch: 225, Loss: 0.2363, Train: 89.69%, Valid: 82.04%, Test: 75.82%
-Epoch: 234, Loss: 0.2396, Train: 90.05%, Valid: 82.92%, Test: 75.92%
-Epoch: 243, Loss: 0.2323, Train: 89.46%, Valid: 82.41%, Test: 74.97%
-Epoch: 252, Loss: 0.2288, Train: 88.88%, Valid: 81.30%, Test: 73.45%
-Epoch: 261, Loss: 0.2381, Train: 89.42%, Valid: 82.54%, Test: 74.45%
-Epoch: 270, Loss: 0.2338, Train: 90.16%, Valid: 83.24%, Test: 75.05%
-Epoch: 279, Loss: 0.2369, Train: 89.49%, Valid: 80.99%, Test: 74.67%
-Epoch: 288, Loss: 0.2335, Train: 88.44%, Valid: 80.67%, Test: 74.37%
-Epoch: 297, Loss: 0.2410, Train: 89.72%, Valid: 82.59%, Test: 75.60%
-Epoch: 306, Loss: 0.2303, Train: 89.69%, Valid: 81.16%, Test: 74.96%
-Epoch: 315, Loss: 0.2316, Train: 88.82%, Valid: 79.02%, Test: 73.34%
-Epoch: 324, Loss: 0.2428, Train: 89.66%, Valid: 82.39%, Test: 74.36%
-Epoch: 333, Loss: 0.2320, Train: 88.97%, Valid: 78.07%, Test: 72.40%
-Epoch: 342, Loss: 0.2436, Train: 90.45%, Valid: 83.12%, Test: 75.77%
-Epoch: 351, Loss: 0.2284, Train: 90.31%, Valid: 83.15%, Test: 76.20%
-Epoch: 360, Loss: 0.2409, Train: 90.04%, Valid: 82.27%, Test: 74.33%
-Epoch: 369, Loss: 0.2378, Train: 90.18%, Valid: 83.00%, Test: 75.63%
-Epoch: 378, Loss: 0.2273, Train: 89.37%, Valid: 79.81%, Test: 74.40%
-Epoch: 387, Loss: 0.2194, Train: 90.31%, Valid: 82.34%, Test: 74.83%
-Epoch: 396, Loss: 0.2315, Train: 90.20%, Valid: 81.76%, Test: 74.42%
-Epoch: 405, Loss: 0.2349, Train: 90.18%, Valid: 82.43%, Test: 75.75%
-Epoch: 414, Loss: 0.2368, Train: 90.40%, Valid: 83.25%, Test: 75.27%
-Epoch: 423, Loss: 0.2224, Train: 89.38%, Valid: 80.88%, Test: 75.41%
-Epoch: 432, Loss: 0.2323, Train: 90.10%, Valid: 82.95%, Test: 76.75%
-Epoch: 441, Loss: 0.2331, Train: 89.82%, Valid: 82.62%, Test: 75.01%
-Epoch: 450, Loss: 0.2380, Train: 90.42%, Valid: 82.84%, Test: 75.23%
-Epoch: 459, Loss: 0.2395, Train: 90.06%, Valid: 83.73%, Test: 76.52%
-Epoch: 468, Loss: 0.2291, Train: 90.30%, Valid: 82.50%, Test: 75.19%
-Epoch: 477, Loss: 0.2406, Train: 89.64%, Valid: 80.78%, Test: 75.58%
-Epoch: 486, Loss: 0.2333, Train: 90.27%, Valid: 82.90%, Test: 74.71%
-Epoch: 495, Loss: 0.2264, Train: 90.48%, Valid: 83.02%, Test: 75.65%
-Epoch: 504, Loss: 0.2307, Train: 90.20%, Valid: 81.96%, Test: 75.60%
-Epoch: 513, Loss: 0.2389, Train: 90.32%, Valid: 82.80%, Test: 75.56%
-Epoch: 522, Loss: 0.2345, Train: 89.93%, Valid: 81.15%, Test: 74.66%
-Epoch: 531, Loss: 0.2353, Train: 90.49%, Valid: 83.24%, Test: 75.58%
-Epoch: 540, Loss: 0.2298, Train: 90.23%, Valid: 83.46%, Test: 75.36%
-Epoch: 549, Loss: 0.2329, Train: 89.56%, Valid: 81.49%, Test: 73.27%
-Epoch: 558, Loss: 0.2375, Train: 90.11%, Valid: 82.49%, Test: 74.58%
-Epoch: 567, Loss: 0.2382, Train: 90.30%, Valid: 82.23%, Test: 73.92%
-Epoch: 576, Loss: 0.2394, Train: 89.99%, Valid: 82.08%, Test: 73.52%
-Epoch: 585, Loss: 0.2268, Train: 90.24%, Valid: 81.64%, Test: 74.39%
-Epoch: 594, Loss: 0.2334, Train: 90.14%, Valid: 82.69%, Test: 74.18%
-Epoch: 603, Loss: 0.2361, Train: 90.50%, Valid: 83.08%, Test: 75.23%
-Epoch: 612, Loss: 0.2189, Train: 90.35%, Valid: 83.84%, Test: 75.74%
-Epoch: 621, Loss: 0.2398, Train: 90.38%, Valid: 82.74%, Test: 75.59%
-Epoch: 630, Loss: 0.2311, Train: 90.44%, Valid: 83.26%, Test: 75.08%
-Epoch: 639, Loss: 0.2324, Train: 90.33%, Valid: 83.29%, Test: 76.67%
-Epoch: 648, Loss: 0.2335, Train: 90.54%, Valid: 83.39%, Test: 75.53%
-Epoch: 657, Loss: 0.2266, Train: 90.29%, Valid: 82.69%, Test: 75.02%
-Epoch: 666, Loss: 0.2210, Train: 90.41%, Valid: 82.67%, Test: 75.71%
-Epoch: 675, Loss: 0.2270, Train: 90.64%, Valid: 83.20%, Test: 75.56%
-Epoch: 684, Loss: 0.2357, Train: 90.32%, Valid: 82.22%, Test: 73.74%
-Epoch: 693, Loss: 0.2346, Train: 90.43%, Valid: 82.64%, Test: 75.02%
-Epoch: 702, Loss: 0.2390, Train: 90.36%, Valid: 83.47%, Test: 76.16%
-Epoch: 711, Loss: 0.2355, Train: 90.54%, Valid: 83.24%, Test: 75.35%
-Epoch: 720, Loss: 0.2328, Train: 90.08%, Valid: 81.89%, Test: 75.05%
-Epoch: 729, Loss: 0.2322, Train: 90.50%, Valid: 83.30%, Test: 75.33%
-Epoch: 738, Loss: 0.2324, Train: 89.67%, Valid: 80.18%, Test: 73.90%
-Epoch: 747, Loss: 0.2335, Train: 90.52%, Valid: 83.44%, Test: 74.11%
-Epoch: 756, Loss: 0.2313, Train: 90.27%, Valid: 82.30%, Test: 75.34%
-Epoch: 765, Loss: 0.2240, Train: 89.57%, Valid: 83.04%, Test: 75.22%
-Epoch: 774, Loss: 0.2292, Train: 90.27%, Valid: 83.07%, Test: 74.94%
-Epoch: 783, Loss: 0.2390, Train: 90.69%, Valid: 83.93%, Test: 75.56%
-Epoch: 792, Loss: 0.2337, Train: 90.51%, Valid: 83.16%, Test: 75.28%
-Epoch: 801, Loss: 0.2281, Train: 90.45%, Valid: 82.40%, Test: 74.36%
-Epoch: 810, Loss: 0.2374, Train: 90.38%, Valid: 83.21%, Test: 75.29%
-Epoch: 819, Loss: 0.2375, Train: 90.52%, Valid: 83.16%, Test: 74.72%
-Epoch: 828, Loss: 0.2292, Train: 90.28%, Valid: 82.06%, Test: 72.92%
-Epoch: 837, Loss: 0.2241, Train: 90.63%, Valid: 83.18%, Test: 75.52%
-Epoch: 846, Loss: 0.2415, Train: 90.53%, Valid: 83.20%, Test: 74.92%
-Epoch: 855, Loss: 0.2417, Train: 90.65%, Valid: 83.07%, Test: 74.48%
-Epoch: 864, Loss: 0.2335, Train: 90.30%, Valid: 82.80%, Test: 73.89%
-Epoch: 873, Loss: 0.2383, Train: 90.47%, Valid: 83.74%, Test: 76.00%
-Epoch: 882, Loss: 0.2391, Train: 90.44%, Valid: 82.69%, Test: 74.00%
-Epoch: 891, Loss: 0.2310, Train: 90.60%, Valid: 83.24%, Test: 74.54%
-Epoch: 900, Loss: 0.2452, Train: 90.41%, Valid: 82.22%, Test: 73.77%
-Epoch: 909, Loss: 0.2296, Train: 90.30%, Valid: 83.57%, Test: 75.78%
-Epoch: 918, Loss: 0.2368, Train: 90.61%, Valid: 83.37%, Test: 75.09%
-Epoch: 927, Loss: 0.2328, Train: 90.38%, Valid: 82.41%, Test: 75.40%
-Epoch: 936, Loss: 0.2363, Train: 90.42%, Valid: 83.01%, Test: 74.10%
-Epoch: 945, Loss: 0.2370, Train: 90.34%, Valid: 82.86%, Test: 73.93%
-Epoch: 954, Loss: 0.2265, Train: 90.63%, Valid: 83.21%, Test: 74.69%
-Epoch: 963, Loss: 0.2337, Train: 90.27%, Valid: 81.53%, Test: 73.81%
-Epoch: 972, Loss: 0.2285, Train: 90.67%, Valid: 83.75%, Test: 75.45%
-Epoch: 981, Loss: 0.2289, Train: 90.26%, Valid: 82.81%, Test: 76.05%
-Epoch: 990, Loss: 0.2351, Train: 90.00%, Valid: 81.25%, Test: 73.62%
-Epoch: 999, Loss: 0.2243, Train: 90.65%, Valid: 83.28%, Test: 74.58%
-Run 01:Highest Train: 90.69 Highest Valid: 83.93 Highest Test: 77.34
-Chosen epoch: 88 Final Train: 90.69 Final Test: 75.56
-Epoch: 00, Loss: 0.3254, Train: 70.41%, Valid: 69.18%, Test: 68.23%
-Epoch: 09, Loss: 0.2584, Train: 86.09%, Valid: 80.17%, Test: 75.02%
-Epoch: 18, Loss: 0.2630, Train: 87.29%, Valid: 81.01%, Test: 75.07%
-Epoch: 27, Loss: 0.2553, Train: 88.05%, Valid: 81.89%, Test: 75.26%
-Epoch: 36, Loss: 0.2415, Train: 87.54%, Valid: 79.19%, Test: 72.57%
-Epoch: 45, Loss: 0.2416, Train: 88.61%, Valid: 82.26%, Test: 74.21%
-Epoch: 54, Loss: 0.2470, Train: 87.13%, Valid: 79.34%, Test: 72.57%
-Epoch: 63, Loss: 0.2383, Train: 88.56%, Valid: 82.28%, Test: 73.65%
-Epoch: 72, Loss: 0.2436, Train: 88.68%, Valid: 81.73%, Test: 73.98%
-Epoch: 81, Loss: 0.2442, Train: 88.62%, Valid: 81.73%, Test: 73.31%
-Epoch: 90, Loss: 0.2365, Train: 88.43%, Valid: 81.42%, Test: 72.65%
-Epoch: 99, Loss: 0.2351, Train: 89.05%, Valid: 81.66%, Test: 72.15%
-Epoch: 108, Loss: 0.2433, Train: 88.75%, Valid: 82.13%, Test: 74.28%
-Epoch: 117, Loss: 0.2381, Train: 89.03%, Valid: 81.34%, Test: 73.71%
-Epoch: 126, Loss: 0.2413, Train: 88.92%, Valid: 80.04%, Test: 72.42%
-Epoch: 135, Loss: 0.2304, Train: 89.40%, Valid: 82.19%, Test: 74.30%
-Epoch: 144, Loss: 0.2307, Train: 88.96%, Valid: 82.16%, Test: 74.12%
-Epoch: 153, Loss: 0.2376, Train: 89.44%, Valid: 82.68%, Test: 73.91%
-Epoch: 162, Loss: 0.2469, Train: 89.36%, Valid: 81.00%, Test: 72.73%
-Epoch: 171, Loss: 0.2474, Train: 89.08%, Valid: 82.44%, Test: 74.73%
-Epoch: 180, Loss: 0.2380, Train: 89.41%, Valid: 81.35%, Test: 73.90%
-Epoch: 189, Loss: 0.2407, Train: 89.67%, Valid: 81.92%, Test: 72.74%
-Epoch: 198, Loss: 0.2370, Train: 88.51%, Valid: 79.07%, Test: 72.51%
-Epoch: 207, Loss: 0.2438, Train: 89.67%, Valid: 82.42%, Test: 73.03%
-Epoch: 216, Loss: 0.2334, Train: 88.95%, Valid: 81.87%, Test: 72.36%
-Epoch: 225, Loss: 0.2336, Train: 88.95%, Valid: 80.74%, Test: 72.13%
-Epoch: 234, Loss: 0.2419, Train: 89.76%, Valid: 81.50%, Test: 72.37%
-Epoch: 243, Loss: 0.2329, Train: 89.36%, Valid: 82.28%, Test: 73.12%
-Epoch: 252, Loss: 0.2316, Train: 89.51%, Valid: 81.02%, Test: 72.79%
-Epoch: 261, Loss: 0.2379, Train: 88.79%, Valid: 81.00%, Test: 72.40%
-Epoch: 270, Loss: 0.2347, Train: 89.72%, Valid: 82.71%, Test: 73.15%
-Epoch: 279, Loss: 0.2349, Train: 89.77%, Valid: 82.09%, Test: 73.11%
-Epoch: 288, Loss: 0.2462, Train: 89.97%, Valid: 83.07%, Test: 73.43%
-Epoch: 297, Loss: 0.2350, Train: 90.13%, Valid: 82.56%, Test: 73.30%
-Epoch: 306, Loss: 0.2285, Train: 89.22%, Valid: 81.61%, Test: 72.97%
-Epoch: 315, Loss: 0.2480, Train: 89.53%, Valid: 82.45%, Test: 72.15%
-Epoch: 324, Loss: 0.2346, Train: 89.64%, Valid: 81.79%, Test: 73.21%
-Epoch: 333, Loss: 0.2315, Train: 89.57%, Valid: 82.56%, Test: 74.18%
-Epoch: 342, Loss: 0.2353, Train: 90.02%, Valid: 83.38%, Test: 73.61%
-Epoch: 351, Loss: 0.2440, Train: 89.81%, Valid: 82.36%, Test: 71.95%
-Epoch: 360, Loss: 0.2315, Train: 89.54%, Valid: 82.32%, Test: 73.71%
-Epoch: 369, Loss: 0.2323, Train: 90.06%, Valid: 83.24%, Test: 73.04%
-Epoch: 378, Loss: 0.2367, Train: 89.86%, Valid: 82.72%, Test: 73.81%
-Epoch: 387, Loss: 0.2452, Train: 89.07%, Valid: 81.87%, Test: 72.82%
-Epoch: 396, Loss: 0.2290, Train: 89.87%, Valid: 82.79%, Test: 73.74%
-Epoch: 405, Loss: 0.2306, Train: 90.17%, Valid: 83.00%, Test: 74.29%
-Epoch: 414, Loss: 0.2339, Train: 90.15%, Valid: 83.26%, Test: 74.27%
-Epoch: 423, Loss: 0.2323, Train: 90.15%, Valid: 82.92%, Test: 73.19%
-Epoch: 432, Loss: 0.2346, Train: 90.15%, Valid: 82.98%, Test: 74.02%
-Epoch: 441, Loss: 0.2368, Train: 90.30%, Valid: 83.40%, Test: 74.65%
-Epoch: 450, Loss: 0.2392, Train: 89.24%, Valid: 80.94%, Test: 73.87%
-Epoch: 459, Loss: 0.2341, Train: 90.12%, Valid: 83.33%, Test: 74.63%
-Epoch: 468, Loss: 0.2365, Train: 90.36%, Valid: 83.61%, Test: 74.03%
-Epoch: 477, Loss: 0.2327, Train: 90.23%, Valid: 83.70%, Test: 74.27%
-Epoch: 486, Loss: 0.2294, Train: 90.13%, Valid: 83.10%, Test: 74.05%
-Epoch: 495, Loss: 0.2343, Train: 90.25%, Valid: 83.70%, Test: 74.04%
-Epoch: 504, Loss: 0.2317, Train: 90.14%, Valid: 83.24%, Test: 73.98%
-Epoch: 513, Loss: 0.2460, Train: 90.23%, Valid: 83.64%, Test: 74.28%
-Epoch: 522, Loss: 0.2265, Train: 89.93%, Valid: 82.12%, Test: 71.86%
-Epoch: 531, Loss: 0.2392, Train: 90.38%, Valid: 83.77%, Test: 74.89%
-Epoch: 540, Loss: 0.2312, Train: 90.26%, Valid: 83.53%, Test: 73.86%
-Epoch: 549, Loss: 0.2361, Train: 90.21%, Valid: 83.16%, Test: 74.08%
-Epoch: 558, Loss: 0.2384, Train: 90.24%, Valid: 83.30%, Test: 74.62%
-Epoch: 567, Loss: 0.2361, Train: 90.22%, Valid: 82.84%, Test: 74.20%
-Epoch: 576, Loss: 0.2406, Train: 90.13%, Valid: 82.60%, Test: 74.23%
-Epoch: 585, Loss: 0.2348, Train: 90.07%, Valid: 82.91%, Test: 74.30%
-Epoch: 594, Loss: 0.2301, Train: 90.22%, Valid: 82.80%, Test: 74.50%
-Epoch: 603, Loss: 0.2378, Train: 90.24%, Valid: 82.93%, Test: 74.95%
-Epoch: 612, Loss: 0.2354, Train: 90.48%, Valid: 83.20%, Test: 74.40%
-Epoch: 621, Loss: 0.2263, Train: 88.75%, Valid: 82.06%, Test: 73.58%
-Epoch: 630, Loss: 0.2289, Train: 89.94%, Valid: 82.20%, Test: 74.30%
-Epoch: 639, Loss: 0.2357, Train: 90.19%, Valid: 82.78%, Test: 73.91%
-Epoch: 648, Loss: 0.2348, Train: 89.91%, Valid: 81.50%, Test: 75.19%
-Epoch: 657, Loss: 0.2349, Train: 90.00%, Valid: 82.95%, Test: 74.05%
-Epoch: 666, Loss: 0.2291, Train: 89.98%, Valid: 82.57%, Test: 73.03%
-Epoch: 675, Loss: 0.2427, Train: 89.78%, Valid: 81.12%, Test: 72.07%
-Epoch: 684, Loss: 0.2336, Train: 90.17%, Valid: 82.93%, Test: 73.85%
-Epoch: 693, Loss: 0.2365, Train: 90.41%, Valid: 83.01%, Test: 73.53%
-Epoch: 702, Loss: 0.2316, Train: 90.53%, Valid: 83.55%, Test: 74.61%
-Epoch: 711, Loss: 0.2379, Train: 90.29%, Valid: 82.70%, Test: 73.44%
-Epoch: 720, Loss: 0.2477, Train: 89.91%, Valid: 82.72%, Test: 74.04%
-Epoch: 729, Loss: 0.2317, Train: 90.14%, Valid: 82.85%, Test: 74.39%
-Epoch: 738, Loss: 0.2366, Train: 89.88%, Valid: 82.41%, Test: 74.67%
-Epoch: 747, Loss: 0.2426, Train: 90.40%, Valid: 82.47%, Test: 74.26%
-Epoch: 756, Loss: 0.2369, Train: 90.21%, Valid: 82.09%, Test: 74.18%
-Epoch: 765, Loss: 0.2345, Train: 90.39%, Valid: 83.08%, Test: 74.57%
-Epoch: 774, Loss: 0.2338, Train: 90.37%, Valid: 82.53%, Test: 75.23%
-Epoch: 783, Loss: 0.2408, Train: 90.34%, Valid: 82.84%, Test: 74.90%
-Epoch: 792, Loss: 0.2386, Train: 90.08%, Valid: 82.14%, Test: 74.00%
-Epoch: 801, Loss: 0.2316, Train: 90.09%, Valid: 80.16%, Test: 72.72%
-Epoch: 810, Loss: 0.2314, Train: 90.38%, Valid: 82.89%, Test: 75.28%
-Epoch: 819, Loss: 0.2352, Train: 89.89%, Valid: 80.40%, Test: 72.63%
-Epoch: 828, Loss: 0.2413, Train: 90.36%, Valid: 82.04%, Test: 73.77%
-Epoch: 837, Loss: 0.2226, Train: 90.44%, Valid: 82.72%, Test: 74.58%
-Epoch: 846, Loss: 0.2375, Train: 90.01%, Valid: 80.47%, Test: 73.01%
-Epoch: 855, Loss: 0.2347, Train: 90.50%, Valid: 82.37%, Test: 74.84%
-Epoch: 864, Loss: 0.2378, Train: 90.10%, Valid: 82.42%, Test: 75.09%
-Epoch: 873, Loss: 0.2378, Train: 90.28%, Valid: 81.87%, Test: 72.95%
-Epoch: 882, Loss: 0.2320, Train: 90.43%, Valid: 82.69%, Test: 74.93%
-Epoch: 891, Loss: 0.2316, Train: 90.46%, Valid: 82.82%, Test: 74.88%

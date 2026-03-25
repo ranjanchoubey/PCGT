@@ -14,8 +14,6 @@ nodeformer/
 /data/
 /data_bkp/
 **/results/
-!experiments/results/
-!experiments/medium/results/
 
 # Saved models
 **/model/
@@ -29,9 +27,7 @@ nodeformer/
 # Logs (experiment outputs — old location)
 /logs/
 
-# Experiment archive (TRACKED — do not ignore)
-!experiments/
-!experiments/**
+# Experiment logs now gitignored (kept locally)
 
 # Results
 #**/results/
@@ -150,6 +146,9 @@ study
 
 # Paper LaTeX source (keep private until after defense)
 paper/
+
+# Experiment logs (internal, not needed to reproduce)
+experiments/
 
 # Test clone folder
 test/

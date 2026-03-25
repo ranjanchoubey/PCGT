@@ -1,5 +1,0 @@
-label per class:20, valid:500,test:1000
-method: gcn hidden: 64 lr:0.01
-3 runs: Highest Train: 100.00 ± 0.00 Highest val epoch:429
-Highest Test: 82.00 ± 0.36 Final Test: 81.43 ± 0.67 run_time: 3.493755642267891
-

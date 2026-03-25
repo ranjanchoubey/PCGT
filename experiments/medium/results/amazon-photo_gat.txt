@@ -1,4 +1,0 @@
-train_prop:0.5, valid_prop:0.25method: gat hidden: 64 lr:0.01
-10 runs: Highest Train: 91.62 ± 0.66 Highest val epoch:473
-Highest Test: 91.10 ± 0.78 Final Test: 90.84 ± 0.69 run_time: 10.41089024774773
-
