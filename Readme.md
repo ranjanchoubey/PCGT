@@ -118,17 +118,15 @@ Best partition: **80.0%** accuracy (12/15 test nodes correct)
 ## Quick Start
 
 ```bash
-# Clone and setup
+# Clone and setup (installs everything + downloads data)
 git clone https://github.com/ranjanchoubey/PCGT.git && cd PCGT
-pip install -r requirements.txt
+bash setup.sh
 
-# Run PCGT on Cora (medium-scale)
-cd medium
-python main.py --method pcgt --dataset cora --backbone gcn \
-    --lr 0.01 --num_layers 3 --hidden_channels 64 --weight_decay 5e-4 \
-    --dropout 0.5 --use_graph --graph_weight 0.8 \
-    --num_partitions 10 --seed 123 --runs 10 --epochs 500
+# Quick test — trains PCGT on Cora, expect ~84% accuracy
+bash quick_test.sh
 ```
+
+For manual step-by-step installation, see [SETUP.md](SETUP.md).
 
 ---
 
@@ -136,6 +134,8 @@ python main.py --method pcgt --dataset cora --backbone gcn \
 
 ```
 PCGT/
+├── setup.sh               # One-click install (start here!)
+├── quick_test.sh           # Fast sanity check on Cora
 ├── medium/                # Medium-scale experiments
 │   ├── main.py            # Entry point
 │   ├── pcgt.py            # PCGT model
@@ -150,6 +150,7 @@ PCGT/
 │   └── MANIFEST.md        # Experiment documentation
 ├── visualization/         # Partition & analysis plots
 ├── data/                  # Datasets (auto-downloaded)
+├── download_data.sh       # Dataset downloader
 ├── requirements.txt
 ├── SETUP.md               # Detailed setup & troubleshooting
 └── reproduce_paper_results.sh

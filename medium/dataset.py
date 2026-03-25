@@ -17,7 +17,7 @@ from torch_geometric.datasets import Planetoid, Coauthor, Amazon
 from torch_geometric.transforms import ToUndirected
 from torch_geometric.utils import add_self_loops, remove_self_loops, degree, to_dense_adj
 
-DATAPATH = '../../data/'
+DATAPATH = '../data/'
 
 class NCDataset(object):
     def __init__(self, name, root=f'{DATAPATH}'):

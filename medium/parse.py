@@ -117,7 +117,7 @@ def parse_method(method, args, c, d, device):
 def parser_add_main_args(parser):
     # dataset and evaluation
     # parser.add_argument('--data_dir', type=str, default='../../../NodeFormer/data/')
-    parser.add_argument('--data_dir', type=str, default='../../data')
+    parser.add_argument('--data_dir', type=str, default='../data')
     parser.add_argument('--dataset', type=str, default='cora')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
