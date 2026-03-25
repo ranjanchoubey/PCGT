@@ -150,4 +150,6 @@ study
 
 # Paper LaTeX source (keep private until after defense)
 paper/
-test
+
+# Test clone folder
+test/
