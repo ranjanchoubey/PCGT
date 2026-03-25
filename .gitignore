@@ -142,3 +142,6 @@ try*.sh
 main.pdf
 *.fls
 *.fdb_latexmk
+
+visualization/outputs
+study

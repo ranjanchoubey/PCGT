@@ -1,20 +1,92 @@
 # PCGT: Partition-Conditioned Graph Transformer
 
-This repository implements **PCGT (Partition-Conditioned Graph Transformer)**, a graph transformer that replaces the expensive global attention in standard graph transformers with **multi-resolution partition-aware attention**. PCGT computes exact attention within graph partitions and cross-partition attention via learned representative nodes, achieving **linear complexity** while preserving structural awareness.
+A graph transformer that replaces expensive $O(N^2)$ global attention with **multi-resolution partition-aware attention**, achieving **linear complexity** while preserving structural awareness. PCGT computes exact attention within graph partitions and cross-partition attention via learned representative nodes.
 
 Built upon and extending [SGFormer](https://arxiv.org/pdf/2306.10759.pdf) (NeurIPS 2023).
 
-**Code**: [github.com/ranjanchoubey/PCGT](https://github.com/ranjanchoubey/PCGT)
+---
 
-## Key Idea
+## Architecture
 
-Standard graph transformers compute $O(N^2)$ global attention, which is expensive and structure-agnostic. PCGT partitions the graph using METIS and computes:
+<p align="center">
+  <img src="assets/architecture.png" alt="PCGT Architecture" width="100%">
+</p>
 
-1. **Local attention**: Exact softmax within each partition — $O(N^2/K)$
-2. **Global attention**: Cross-partition communication via learned seed vectors — $O(NKM)$  
-3. **Partition Structural Encoding (PSE)**: Learnable embeddings that encode partition membership
+The input graph is partitioned via METIS into $K$ groups. Each node receives a partition structural encoding (PSE), then Q/K/V projections feed two parallel branches: **local attention** within each partition ($O(N^2/K)$) and **global attention** via learned seed representatives ($O(NMK)$). The branches are $\alpha$-blended, augmented with a $\beta$-weighted self-connection, and fused with a GCN branch via the graph-weight $\lambda_{\text{gw}}$.
 
-The total complexity is $O(N \cdot (N/K + KM))$, which is linear in $N$ for fixed $K$ and $M$.
+---
+
+## Results
+
+### Medium-Scale Node Classification (Accuracy %)
+
+| Dataset | SGFormer | PCGT (ours) | $\Delta$ |
+|---------|----------|-------------|---------|
+| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | -0.20 |
+| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | +0.50 |
+| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | +0.70 |
+| Film | 37.90 ± 1.1 | **38.00** ± 0.9 | +0.10 |
+| Squirrel | 41.80 ± 2.2 | **45.50** ± 2.7 | +3.70 |
+| Chameleon | 44.90 ± 3.9 | **49.00** ± 2.8 | +4.10 |
+| Deezer | 67.10 ± 1.1 | **67.20** ± 0.7 | +0.10 |
+| Coauthor-CS | 94.60 ± 0.5 | **95.10** ± 0.3 | +0.50 |
+| Coauthor-Physics | 96.50 ± 0.2 | **96.80** ± 0.2 | +0.30 |
+| Amazon-Computers | 87.20 ± 0.8 | **88.80** ± 0.7 | +1.60 |
+| Amazon-Photo | 94.70 ± 0.4 | **95.30** ± 0.4 | +0.60 |
+
+> PCGT wins on **10 out of 11** medium-scale benchmarks. Strongest gains on heterophilic graphs: Chameleon +4.10%, Squirrel +3.70%.
+
+### Large-Scale Node Classification
+
+| Dataset | Metric | SGFormer | PCGT (ours) |
+|---------|--------|----------|-------------|
+| ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.36 ± 0.20 |
+| ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | **80.47** ± 0.55 |
+| Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | **76.68** ± 0.24 |
+
+> On Pokec (1.6M nodes), PCGT outperforms SGFormer by **+2.92%**.
+
+### Runtime Comparison (H100 GPU)
+
+<p align="center">
+  <img src="assets/runtime_comparison.png" alt="Runtime Comparison" width="85%">
+</p>
+
+---
+
+## Partition Visualization
+
+PCGT partitions the graph and performs local attention within each partition. Below are visualizations of the partition-level predictions on Cora and Chameleon.
+
+### Cora — Per-Partition Accuracy & Confusion Matrix
+
+<p align="center">
+  <img src="assets/cora_summary.png" alt="Cora Summary" width="90%">
+</p>
+
+### Cora — Best Partition (88.2% accuracy, 90/102 correct)
+
+<p align="center">
+  <img src="assets/cora_partition_best.png" alt="Cora Partition 1 — Actual vs Predicted" width="90%">
+</p>
+
+> Left: actual labels. Right: predicted labels. Red circles = misclassified nodes. Test nodes shown bold, train/val faded.
+
+### Chameleon — Per-Partition Accuracy & Confusion Matrix
+
+<p align="center">
+  <img src="assets/chameleon_summary.png" alt="Chameleon Summary" width="90%">
+</p>
+
+### Chameleon — Best Partition (80.0% accuracy, 12/15 correct)
+
+<p align="center">
+  <img src="assets/chameleon_partition_best.png" alt="Chameleon Partition 3 — Actual vs Predicted" width="90%">
+</p>
+
+> Chameleon is a heterophilic graph ($h=0.23$) where neighbors often have different labels — PCGT's partition-local attention handles this well.
+
+---
 
 ## Repository Structure
 
@@ -148,34 +220,6 @@ See `reproduce_paper_results.sh` for exact commands to reproduce all results, or
 # Large-scale experiments (requires GPU)
 cd large && bash run_all_large.sh pcgt
 ```
-
-## Results
-
-### Medium-Scale Node Classification (Accuracy %)
-
-| Dataset | SGFormer | PCGT | $\Delta$ |
-|---------|----------|------|---------|
-| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | -0.20 |
-| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | +0.50 |
-| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | +0.70 |
-| Film | 37.90 ± 1.1 | **38.00** ± 0.9 | +0.10 |
-| Squirrel | 41.80 ± 2.2 | **45.50** ± 2.7 | +3.70 |
-| Chameleon | 44.90 ± 3.9 | **49.00** ± 2.8 | +4.10 |
-| Deezer | 67.10 ± 1.1 | **67.20** ± 0.7 | +0.10 |
-| Coauthor-CS | 94.60 ± 0.5 | **95.10** ± 0.3 | +0.50 |
-| Coauthor-Physics | 96.50 ± 0.2 | **96.80** ± 0.2 | +0.30 |
-| Amazon-Computers | 87.20 ± 0.8 | **88.80** ± 0.7 | +1.60 |
-| Amazon-Photo | 94.70 ± 0.4 | **95.30** ± 0.4 | +0.60 |
-
-### Large-Scale Node Classification
-
-| Dataset | Metric | SGFormer | PCGT |
-|---------|--------|----------|------|
-| ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.36 ± 0.20 |
-| ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | 80.47 ± 0.55 |
-| Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | 76.68 ± 0.24 |
-
-> PCGT shows strongest gains on heterophilic graphs (Chameleon +3.19%, Squirrel +3.34%) and large heterophilic graphs (Pokec +2.92%).
 
 ## Reproducing Results
 
