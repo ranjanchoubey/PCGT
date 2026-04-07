@@ -107,7 +107,8 @@ def parse_method(method, args, c, d, device):
                 num_reps=args.num_reps,
                 no_pse=getattr(args, 'no_pse', False),
                 local_only=getattr(args, 'local_only', False),
-                global_only=getattr(args, 'global_only', False)).to(device)
+                global_only=getattr(args, 'global_only', False),
+                learn_graph_weight=getattr(args, 'learn_graph_weight', False)).to(device)
 
     else:
         raise ValueError(f'Invalid method {method}')
@@ -181,6 +182,8 @@ def parser_add_main_args(parser):
                         help='early stopping patience.')
     parser.add_argument('--graph_weight', type=float,
                         default=0.8, help='graph weight.')
+    parser.add_argument('--learn_graph_weight', action='store_true',
+                        help='make graph_weight a learnable sigmoid parameter')
     parser.add_argument('--ours_weight_decay', type=float,
                          help='Ours\' weight decay. Default to weight_decay.')
     parser.add_argument('--ours_use_weight', action='store_true', help='use weight for trans convolution')

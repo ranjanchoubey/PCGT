@@ -257,7 +257,8 @@ class PCGT(nn.Module):
                  use_graph=True, use_act=False,
                  graph_weight=0.8, gnn=None, aggregate='add',
                  num_partitions=10, num_reps=4,
-                 no_pse=False, local_only=False, global_only=False):
+                 no_pse=False, local_only=False, global_only=False,
+                 learn_graph_weight=False):
         super().__init__()
 
         self.pcgt_conv = PCGTConv(
@@ -268,7 +269,13 @@ class PCGT(nn.Module):
 
         self.gnn = gnn
         self.use_graph = use_graph
-        self.graph_weight = graph_weight
+        self.learn_graph_weight = learn_graph_weight
+        if learn_graph_weight:
+            # Initialize logit so sigmoid(logit) = graph_weight
+            init_logit = math.log(graph_weight / (1 - graph_weight + 1e-8))
+            self.gw_logit = nn.Parameter(torch.tensor(init_logit))
+        else:
+            self.graph_weight = graph_weight
         self.use_act = use_act
 
         self.aggregate = aggregate
@@ -283,6 +290,8 @@ class PCGT(nn.Module):
         self.partition_labels = None
 
         self.params1 = list(self.pcgt_conv.parameters())
+        if self.learn_graph_weight:
+            self.params1.append(self.gw_logit)
         self.params2 = list(self.gnn.parameters()) if self.gnn is not None else []
         self.params2.extend(list(self.fc.parameters()))
 
@@ -296,7 +305,8 @@ class PCGT(nn.Module):
         if self.use_graph:
             x2 = self.gnn(data)
             if self.aggregate == 'add':
-                x = self.graph_weight * x2 + (1 - self.graph_weight) * x1
+                gw = torch.sigmoid(self.gw_logit) if self.learn_graph_weight else self.graph_weight
+                x = gw * x2 + (1 - gw) * x1
             else:
                 x = torch.cat((x1, x2), dim=1)
         else:
@@ -309,12 +319,18 @@ class PCGT(nn.Module):
         if self.use_graph and self.gnn is not None:
             self.gnn.reset_parameters()
         self.fc.reset_parameters()
+        if self.learn_graph_weight:
+            init_logit = math.log(0.8 / 0.2)  # reset to sigmoid^-1(0.8)
+            self.gw_logit.data.fill_(init_logit)
 
     def get_gamma_values(self):
-        """Return α (local vs global) and β (self-connection) for monitoring."""
+        """Return α (local vs global), β (self-connection), and gw for monitoring."""
         vals = []
         for c in self.pcgt_conv.convs:
             a = torch.sigmoid(c.alpha_logit).item()
             b = c.beta.item()
             vals.append(f"α={a:.2f},β={b:.2f}")
+        if self.learn_graph_weight:
+            gw = torch.sigmoid(self.gw_logit).item()
+            vals.append(f"gw={gw:.3f}")
         return vals

@@ -255,7 +255,7 @@ if args.method in ('sgformer', 'pcgt') and args.use_graph:
     file_name += '_' + args.backbone
 file_name += '.txt'
 out_path = os.path.join(out_folder, file_name)
-with open(out_path, 'a+') as f:
+with open(out_path, 'w') as f:
     print_str = make_print(args.method)
     f.write(print_str)
     f.write(results)
