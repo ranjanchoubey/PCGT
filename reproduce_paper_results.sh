@@ -300,7 +300,7 @@ exit 0
 #     --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
 #     --num_partitions 10 --partition_method metis --no_pse \
 #     --rand_split_class --valid_num 500 --test_num 1000 \
-#     --seed 123 --runs 10 --epochs 500
+#     --seed 123 --runs 5 --epochs 500
 
 # Local-only (intra-partition attention only):
 # python main.py --data_dir ../data --method pcgt --dataset cora --backbone gcn \
@@ -309,7 +309,7 @@ exit 0
 #     --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
 #     --num_partitions 10 --partition_method metis --local_only \
 #     --rand_split_class --valid_num 500 --test_num 1000 \
-#     --seed 123 --runs 10 --epochs 500
+#     --seed 123 --runs 5 --epochs 500
 
 # Global-only (cross-partition attention only):
 # python main.py --data_dir ../data --method pcgt --dataset cora --backbone gcn \
@@ -318,7 +318,7 @@ exit 0
 #     --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
 #     --num_partitions 10 --partition_method metis --global_only \
 #     --rand_split_class --valid_num 500 --test_num 1000 \
-#     --seed 123 --runs 10 --epochs 500
+#     --seed 123 --runs 5 --epochs 500
 
 # Random partition (replace METIS with random):
 # python main.py --data_dir ../data --method pcgt --dataset cora --backbone gcn \
@@ -327,4 +327,4 @@ exit 0
 #     --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
 #     --num_partitions 10 --partition_method random \
 #     --rand_split_class --valid_num 500 --test_num 1000 \
-#     --seed 123 --runs 10 --epochs 500
+#     --seed 123 --runs 5 --epochs 500
