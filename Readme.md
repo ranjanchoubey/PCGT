@@ -56,7 +56,7 @@ Built upon [SGFormer](https://github.com/qitianwu/SGFormer) (Wu et al., NeurIPS 
 
 | Dataset | Metric | SGFormer | **PCGT** |
 |:--------|:------:|:--------:|:--------:|
-| ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.36 ± 0.20 |
+| ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.50 ± 0.14 |
 | ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | **80.47** ± 0.55 |
 | Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | **76.68** ± 0.24 |
 

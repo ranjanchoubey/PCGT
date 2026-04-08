@@ -150,7 +150,7 @@ run_arxiv_pcgt() {
         --trans_num_layers 1 --trans_dropout 0.5 --trans_weight_decay 0. \
         --trans_use_residual --trans_use_weight --trans_use_bn \
         --num_partitions 256 --partition_method metis \
-        --seed 123 --runs 3 --epochs 1000 --eval_step 9
+        --seed 123 --runs 10 --epochs 1000 --eval_step 9
 }
 
 # ============================================================================
