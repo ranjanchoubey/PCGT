@@ -1,0 +1,30 @@
+\section{Related Work}
+
+\textbf{Message-Passing GNNs.}~~The graph neural network framework~\citep{scarselli2009gnn, gilmer2017mpnn} aggregates features from local neighborhoods. GCN~\citep{kipf2017semi} and GAT~\citep{velickovic2018gat} aggregate features from immediate neighbors, performing well on homophilic graphs. APPNP~\citep{klicpera2019appnp} decouples feature transformation from propagation using personalized PageRank. SIGN~\citep{rossi2020sign} pre-computes multi-hop features for scalable inception-style aggregation. GIN~\citep{xu2019powerful} provides a maximally-expressive message passing framework. These methods are inherently local and struggle when informative nodes are distant or dissimilar to neighbors~\citep{li2018oversmoothing}.
+
+\textbf{Heterophily-Specific GNNs.}~~H$_2$GCN~\citep{zhu2020h2gcn} addresses heterophily through ego/neighbor separation, higher-order neighborhoods, and intermediate representation combination. GloGNN~\citep{li2022glognn} learns a global coefficient matrix to capture correlations between all node pairs, with signed weights that can down-weight heterophilic neighbors. CPGNN~\citep{zhu2021cpgnn} uses compatibility matrices to model label-label correlations across edges. Geom-GCN~\citep{pei2020geomgcn} maps nodes to a latent geometric space to define aggregation neighborhoods. GPR-GNN~\citep{chien2021gprgnn} learns signed generalized PageRank weights to adaptively combine multi-hop information. While effective, these methods either require expensive global computation ($O(N^2)$ for GloGNN) or are limited to fixed neighborhood structures.
+
+\textbf{Graph Transformers.}~~Transformers~\citep{vaswani2017attention} have been adapted for graphs to capture long-range dependencies beyond local neighborhoods. Graphormer~\citep{ying2021graphormer} incorporates structural and spatial encodings into standard transformer attention. GraphGPS~\citep{rampasek2022graphgps} provides a modular framework combining positional encodings~\citep{dwivedi2022lspe} with local and global attention. SAN~\citep{kreuzer2021rethinking} uses spectral attention with learned positional encodings. NodeFormer~\citep{wu2022nodeformer} uses Gumbel-softmax kernelized attention for $O(N)$ all-pair computation, but requires random feature approximation. DIFFormer~\citep{wu2023difformer} frames attention as energy-constrained diffusion. SGFormer~\citep{wu2023sgformer} achieves $O(N)$ global attention via a simplified single-layer, single-head design with a fixed kernel trick, demonstrating that deep multi-head attention is unnecessary for node classification on large graphs. Exphormer~\citep{shirzad2023exphormer} sparsifies attention using expander graphs and virtual nodes to achieve linear complexity; however, its attention pattern is fixed by the expander topology, whereas PCGT learns partition-conditioned attention via adaptive seeds.
+
+\textbf{Partition-Based and Inducing Point Methods.}~~Graph partitioning via METIS~\citep{karypis1998metis} is widely used for distributed graph processing and mini-batch training~\citep{chiang2019clustergcn} but rarely integrated into the attention mechanism itself. Hierarchical graph pooling methods like DiffPool~\citep{ying2018hierarchical} and MinCutPool~\citep{bianchi2020mincut} learn coarsened graph representations but target graph-level tasks rather than node classification. Set Transformer~\citep{lee2019set} introduces learnable inducing points for efficient set-level attention in $O(NM)$, but these points are not topology-aware. PCGT combines these two lines of work: graph partitions define \emph{topology-aware} attention scopes, and learned seeds produce partition representatives through attention pooling.
+
+\textbf{Positioning of PCGT.}~~Table~\ref{tab:positioning} contrasts PCGT with representative methods. Unlike SGFormer's single-resolution global kernel, PCGT operates at \emph{two} resolutions---exact local attention within partitions and learned cross-partition attention---exploiting the multi-scale structure of real graphs. Unlike GloGNN's $O(N^2)$ global coefficient matrix, PCGT achieves subquadratic complexity via partition-conditioned computation. Unlike Set Transformer's generic inducing points, PCGT's representatives are grounded in graph topology through METIS partitioning and partition structural encoding.
+
+\begin{table}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l|cccc}
+\toprule
+\textbf{Property} & \textbf{GCN} & \textbf{GloGNN} & \textbf{SGFormer} & \textbf{PCGT} \\
+\midrule
+Scope & Local & Global & Global & Multi-res. \\
+Complexity & $O(|E|)$ & $O(N^2)$ & $O(N)$ & $O(\frac{N^2}{K}\!+\!NMK)$ \\
+Topology-aware & \cmark & \xmark & \xmark & \cmark \\
+Heterophily & \xmark & \cmark & Partial & \cmark \\
+Exact attention & \xmark & N/A & \xmark & \cmark\,(local) \\
+\bottomrule
+\end{tabular}
+}%
+\caption{Method comparison. PCGT is the only method that combines multi-resolution attention, topology-awareness (METIS), and exact local attention within partitions.}
+\label{tab:positioning}
+\end{table}

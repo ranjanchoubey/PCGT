@@ -1,0 +1,204 @@
+\section{Method}
+
+\subsection{Overview and Architecture}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.6cm and 0.7cm,
+  box/.style={draw, rounded corners=3pt, minimum height=0.8cm, minimum width=1.5cm, align=center, font=\scriptsize},
+  mainbox/.style={box, fill=white, draw=black!60, thick},
+  gcnbox/.style={box, fill=green!15, draw=green!50!black, thick},
+  fusebox/.style={box, fill=orange!15, draw=orange!60!black, thick},
+  partbox/.style={box, fill=white, draw=black!60, thick, dashed, minimum width=1.2cm},
+  localbox/.style={box, fill=orange!12, draw=orange!50!black, thick},
+  globalbox/.style={box, fill=cyan!15, draw=cyan!50!black, thick},
+  outbox/.style={box, fill=pink!25, draw=red!40!black, thick},
+  arr/.style={-{Stealth[length=2mm]}, thick, black!70},
+  stagelabel/.style={font=\scriptsize\bfseries, text=black!60},
+]
+
+% === Row 1: Main attention pipeline ===
+% Input
+\node[gcnbox, minimum width=1.8cm] (input) {Input Graph\\$\mathbf{X}, \mathbf{A}$};
+
+% METIS
+\node[partbox, right=0.8cm of input] (metis) {METIS\\$\to K$ parts};
+\draw[arr] (input) -- (metis);
+
+% Linear (applied first in code)
+\node[mainbox, fill=blue!8, right=0.7cm of metis] (linproj) {Linear\\LN$\to$ReLU};
+\draw[arr] (metis) -- (linproj);
+
+% PSE (added after projection in code)
+\node[mainbox, fill=blue!8, right=0.7cm of linproj, minimum width=1.6cm] (pse) {$+\,\text{PSE}(k_i)$};
+\draw[arr] (linproj) -- (pse);
+
+% QKV
+\node[mainbox, fill=blue!12, right=0.7cm of pse] (qkv) {$\mathbf{Q,K,V}$\\Projection};
+\draw[arr] (pse) -- (qkv);
+
+% Fork point
+\coordinate[right=0.7cm of qkv] (fork);
+\draw[thick, black!70] (qkv) -- (fork);
+
+% Local attention (top branch)
+\node[localbox, above right=0.8cm and 1.0cm of fork] (local) {Local Attention\\per partition, $O(N^2\!/K)$};
+\draw[arr] (fork) |- (local);
+
+% Seed pool (bottom branch)
+\node[globalbox, below right=0.8cm and 0.3cm of fork] (seedpool) {Seed Pool\\$\mathbf{R}_k, \mathbf{R}_v$};
+\draw[arr] (fork) |- (seedpool);
+
+% Global attention (right of seed pool)
+\node[globalbox, right=0.7cm of seedpool] (global) {Global Attention\\cross-attend, $O(NMK)$};
+\draw[arr] (seedpool) -- (global);
+
+% Alpha-blend (centered right of the two branches)
+\node[fusebox] (blend) at ($(local.east)!0.5!(global.east) + (1.5,0)$) {$\alpha$-Blend\\local$+$global};
+\draw[arr] (local.east) -| (blend.north);
+\draw[arr] (global.east) -| (blend.south);
+
+% Self-connection
+\node[fusebox, right=0.7cm of blend] (self) {$+\;\beta \cdot \mathbf{V}_i$\\Self-Connect};
+\draw[arr] (blend) -- (self);
+
+% LayerNorm
+\node[mainbox, fill=blue!8, right=0.7cm of self] (ln) {LayerNorm\\$+$ Residual};
+\draw[arr] (self) -- (ln);
+
+% === Row 2: GCN branch ===
+\node[gcnbox, minimum width=1.8cm] (gcn) at ($(input)+(0,-2.4)$) {GCN Branch\\$\text{GCN}(\mathbf{X,A})$};
+\draw[arr] (input) -- (gcn);
+
+% Fusion
+\node[fusebox, fill=yellow!20, draw=yellow!60!black, minimum width=1.8cm] (gwfuse) at (ln |- gcn) {$\lambda_{\text{gw}}$-Fusion\\GCN $+$ Attn};
+\draw[arr] (ln) -- (gwfuse);
+\draw[arr] (gcn) -- (gwfuse);
+
+% Output
+\node[outbox, right=0.7cm of gwfuse, minimum width=1.5cm] (output) {Classifier\\$\hat{\mathbf{y}} = W\mathbf{h}$};
+\draw[arr] (gwfuse) -- (output);
+
+% === Background regions ===
+\begin{scope}[on background layer]
+  \node[fill=green!5, draw=green!25, rounded corners=8pt, inner xsep=10pt, inner ysep=14pt,
+        fit=(input)(metis)(gcn),
+        label={[stagelabel, text=green!50!black]above:Input}] {};
+  \node[fill=blue!4, draw=blue!25, dashed, rounded corners=8pt, inner xsep=8pt, inner ysep=16pt,
+        fit=(pse)(linproj)(qkv)(local)(global)(blend)(self)(ln)(seedpool),
+        label={[stagelabel, text=blue!50!black]above:PCGT Attention Layer}] {};
+  \node[fill=yellow!6, draw=yellow!35, rounded corners=8pt, inner xsep=10pt, inner ysep=14pt,
+        fit=(gwfuse)(output),
+        label={[stagelabel, text=yellow!50!black]above:Output}] {};
+\end{scope}
+
+\end{tikzpicture}
+}% end resizebox
+\caption{Architecture of PCGT. The input graph is partitioned via METIS into $K$ groups. Node features are linearly projected, augmented with partition structural encoding (PSE), then Q/K/V projections feed two parallel branches: \emph{local attention} within each partition (using Q, K, V restricted to the partition) and \emph{global attention} where learned seeds pool each partition's K, V into representatives $\mathbf{R}_k, \mathbf{R}_v$, and every node's Q cross-attends to all representatives. The branches are $\alpha$-blended, augmented with a $\beta$-weighted self-connection, and fused with a GCN branch via the graph-weight $\lambda_{\text{gw}}$.}
+\label{fig:architecture}
+\end{figure*}
+
+PCGT combines local and global attention with learnable blending. Given a graph with $N$ nodes, we: (1) partition into $K$ regions (METIS/KMeans), (2) compute local attention within partitions $O(N^2/K)$, (3) compute global attention via learned seeds $O(N{\cdot}M{\cdot}K)$, (4) blend via learnable $\alpha$, (5) weight self-connections via learnable $\beta$, and (6) blend with GCN as fallback.
+
+\subsection{Local Attention and Partition Encoding}
+
+Partition the graph into $K$ disjoint sets using METIS/KMeans. For partition $p$, compute:
+\begin{equation}
+\text{Attn}_{\text{local}}^{(p)} = \text{softmax}\!\left( \frac{\mathbf{Q}[S_p] \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p],\; O(N^2\!/K)
+\end{equation}
+
+Add partition structural encoding (PSE) before Q/K/V projection: $\mathbf{x}_i \leftarrow \mathbf{x}_i + \mathbf{E}_{k_i}$, where $\mathbf{E} \in \mathbb{R}^{K \times d}$ is a learned embedding table indexed by partition id $k_i$, initialized from $\mathcal{N}(0, 0.02)$.  PSE is added once (before projection) so that queries, keys, and values all encode partition membership.
+
+\subsection{Global Attention via Learned Seeds}
+
+We learn $M$ seed query vectors $\mathbf{S} \in \mathbb{R}^{M \times d}$ that are shared across all partitions. For each partition $p$, the seeds attention-pool the partition's keys and values into $M$ representative vectors:
+\begin{align}
+\mathbf{R}_k^{(p)} &= \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{K}[S_p] \label{eq:rep_k}\\
+\mathbf{R}_v^{(p)} &= \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p] \label{eq:rep_v}
+\end{align}
+where $\mathbf{R}_k^{(p)}, \mathbf{R}_v^{(p)} \in \mathbb{R}^{M \times d}$ are the key and value representatives for partition $p$. Stacking across all $K$ partitions yields $\mathbf{R}_k, \mathbf{R}_v \in \mathbb{R}^{KM \times d}$. Each node then cross-attends to all representatives:
+\begin{equation}
+\text{Attn}_{\text{global}} = \text{softmax}\left( \frac{\mathbf{Q} \, \mathbf{R}_k^T}{\sqrt{d}} \right) \mathbf{R}_v, \quad O(N \cdot M \cdot K)
+\end{equation}
+
+This two-step design (pool then cross-attend) is related to inducing points in Set Transformer~\citep{lee2019set}, but unlike generic inducing points, our seeds are \emph{topology-aware}: they pool from graph-partitioned node groups rather than arbitrary subsets. The learned seeds also adapt to the task, unlike the fixed kernel in SGFormer~\citep{wu2023sgformer}.
+
+\subsection{Blending, Self-Connection, and GCN Fusion}
+
+The local and global outputs are blended with a learnable scalar $\alpha = \sigma(\alpha_{\text{logit}})$ where $\sigma$ is the sigmoid function:
+\begin{equation}
+\mathbf{h}_{\text{context}} = \alpha \cdot \text{Attn}_{\text{local}} + (1 - \alpha) \cdot \text{Attn}_{\text{global}}
+\end{equation}
+
+A learnable self-connection weight $\beta \in \mathbb{R}$ (unconstrained) adds the node's own transformed value:
+\begin{equation}
+\mathbf{h}_{\text{attn}} = \mathbf{h}_{\text{context}} + \beta \cdot \mathbf{V}_i
+\end{equation}
+Because $\beta$ is \emph{unconstrained}, it can become negative. On datasets where a node's own features are less informative than the attention context (e.g., Film, Deezer), this lets the model suppress the self-connection. Conversely, on feature-rich graphs like Chameleon and Squirrel, $\beta$ grows strongly positive.
+
+Finally, the PCGT attention output is fused with a GCN branch via a fixed hyperparameter $\lambda_{\text{gw}} \in [0,1]$:
+\begin{equation}
+\mathbf{h}_{\text{final}} = \lambda_{\text{gw}} \cdot \text{GCN}(\mathbf{X}, \mathbf{A}) + (1 - \lambda_{\text{gw}}) \cdot \mathbf{h}_{\text{attn}}
+\end{equation}
+where GCN is a standard multi-layer graph convolutional network~\citep{kipf2017semi}. The GCN branch provides explicit edge-level structural features that complement the partition-based attention.
+
+The complete PCGT layer applies: input projection $\to$ partition structural encoding $\to$ Q,K,V projections $\to$ local + global attention $\to$ $\alpha$-blend $\to$ $\beta$ self-connection $\to$ LayerNorm $\to$ residual connection $\to$ dropout. The full procedure is summarized in Algorithm~\ref{alg:pcgt}.
+
+\begin{algorithm}[t]
+\caption{PCGT Forward Pass (one layer)}
+\label{alg:pcgt}
+\DontPrintSemicolon
+\KwIn{Features $\mathbf{X} \in \mathbb{R}^{N \times d}$, adjacency $\mathbf{A}$, partitions $\{S_1, \ldots, S_K\}$}
+\KwOut{Updated features $\mathbf{H} \in \mathbb{R}^{N \times d}$}
+\BlankLine
+\tcp{Encode \& project}
+$\mathbf{X} \leftarrow \mathbf{X} + \mathbf{E}[\text{partition id}]$ \tcp*{PSE lookup}
+$\mathbf{Q}, \mathbf{K}, \mathbf{V} \leftarrow \mathbf{X} W_Q,\; \mathbf{X} W_K,\; \mathbf{X} W_V$\;
+\BlankLine
+\tcp{Local attention \& seed pooling}
+\For{$p = 1$ \KwTo $K$}{
+  $\mathbf{h}^{(p)}_{\mathrm{local}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}[S_p]\, \mathbf{K}[S_p]^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{V}[S_p]$\;
+  $\mathbf{R}_k^{(p)},\, \mathbf{R}_v^{(p)} \leftarrow \mathrm{SeedPool}(\mathbf{S},\, \mathbf{K}[S_p],\, \mathbf{V}[S_p])$\;
+}
+Stack $\mathbf{h}_{\mathrm{local}} \!\in\! \mathbb{R}^{N \times d}$;\; stack $\mathbf{R}_k, \mathbf{R}_v \!\in\! \mathbb{R}^{KM \times d}$\;
+\BlankLine
+\tcp{Global attention via representatives}
+$\mathbf{h}_{\mathrm{global}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}\, \mathbf{R}_k^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{R}_v$\;
+\BlankLine
+\tcp{Blend, self-connect, fuse with GCN}
+$\mathbf{h}_{\mathrm{ctx}} \leftarrow \sigma(\alpha)\, \mathbf{h}_{\mathrm{local}} + (1\!-\!\sigma(\alpha))\, \mathbf{h}_{\mathrm{global}}$\;
+$\mathbf{h}_{\mathrm{attn}} \leftarrow \mathbf{h}_{\mathrm{ctx}} + \beta \cdot \mathbf{V}$\;
+$\mathbf{H} \leftarrow \lambda_{\mathrm{gw}}\, \mathrm{GCN}(\mathbf{X}, \mathbf{A}) + (1\!-\!\lambda_{\mathrm{gw}})\, \mathrm{LN}(\mathbf{h}_{\mathrm{attn}})$\;
+\Return{$\mathbf{H}$}
+\end{algorithm}
+
+\subsection{Complexity}
+
+Total per layer: $O(N^2/K + NMK + |E|)$. For $N$=10K--100K, $K$=50, $M$=4: PCGT achieves $\sim$3M--220M ops vs.\ $\sim$100M--10B for standard $O(N^2)$ attention.
+
+\subsection{Connection to Nystr\"om Attention}
+\label{sec:nystrom}
+
+The effective attention in PCGT admits a structured factorization that connects to the Nystr\"om approximation of kernel matrices~\citep{xiong2021nystromformer}.
+
+\begin{remark}[Attention Factorization]
+The PCGT attention matrix decomposes as:
+\begin{equation}
+\mathbf{A}_{\mathrm{PCGT}} = \alpha \cdot \mathbf{A}_{\mathrm{local}} + (1-\alpha) \cdot \mathbf{A}_{\mathrm{global}}
+\label{eq:factorization}
+\end{equation}
+where $\mathbf{A}_{\mathrm{local}} \in \mathbb{R}^{N \times N}$ is \emph{block-diagonal} (exact softmax attention within each partition) and $\mathbf{A}_{\mathrm{global}}$ admits a \emph{low-rank factorization}:
+\begin{equation}
+\mathbf{A}_{\mathrm{global}} = \mathbf{P} \cdot \mathbf{W} \quad \text{with}\; \mathbf{P} \in \mathbb{R}^{N \times KM},\; \mathbf{W} \in \mathbb{R}^{KM \times N}
+\label{eq:lowrank}
+\end{equation}
+where $P_{i,m} = \mathrm{softmax}(\mathbf{q}_i^T \mathbf{r}_k^{(m)} / \sqrt{d})$ is node $i$'s attention to representative $m$, and $W_{m,j} = \mathrm{softmax}(\mathbf{s}^T \mathbf{k}_j / \sqrt{d})$ is representative $m$'s pooling weight on node $j$.
+\end{remark}
+
+This structure is analogous to the Nystr\"om method, where a kernel matrix is approximated via a small set of \emph{landmark} columns: $\mathbf{K} \approx \mathbf{K}_{N,m} \mathbf{K}_{m,m}^{-1} \mathbf{K}_{m,N}$. In PCGT, the $KM$ partition representatives serve as topology-aware landmarks. The analogy is structural, not exact: Nystr\"om uses an explicit inverse $\mathbf{K}_{m,m}^{-1}$ for reconstruction, whereas PCGT's $\mathbf{P}$ and $\mathbf{W}$ are independently softmax-normalized, making the factorization a learned low-rank approximation rather than an analytical one.  Unlike generic Nystr\"om methods (e.g., Nystr\"omformer~\citep{xiong2021nystromformer}), which sample or hash random columns, PCGT's landmarks are \emph{graph-structure-aware}: they are produced by attention-pooling within METIS partitions, so the low-rank component respects the graph's community structure.
+
+The full PCGT attention thus combines a \emph{high-rank block-diagonal} component (capturing intra-community detail) with a \emph{low-rank global} component (capturing cross-community interactions)---a spectral complement where the local term covers within-partition frequencies and the global term covers between-partition frequencies. This is why a single PCGT layer can be both expressive and subquadratic.
+
+

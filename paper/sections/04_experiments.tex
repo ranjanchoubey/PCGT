@@ -1,0 +1,85 @@
+\section{Experiments}
+
+\subsection{Datasets}
+
+We evaluate on 12 node classification benchmarks spanning homophilic, heterophilic, and large-scale regimes, following the dataset selection and preprocessing of SGFormer~\citep{wu2023sgformer} and extending to standard co-purchase, co-authorship~\citep{shchur2018pitfalls}, and OGB~\citep{hu2020ogb} datasets. Dataset statistics are summarized in Table~\ref{tab:datasets}.
+
+\begin{table}[t]
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Dataset} & \textbf{Nodes} & \textbf{Feats} & \textbf{Classes} & \textbf{$h$} & \textbf{Type} \\
+\midrule
+Cora       & 2,708  & 1,433  & 7  & 0.81 & Homo. \\
+CiteSeer   & 3,327  & 3,703  & 6  & 0.74 & Homo. \\
+PubMed     & 19,717 & 500    & 3  & 0.80 & Homo. \\
+Coauthor-CS & 18,333 & 6,805 & 15 & 0.81 & Homo. \\
+Coauthor-Phys. & 34,493 & 8,415 & 5 & 0.93 & Homo. \\
+Amazon-Comp. & 13,752 & 767  & 10 & 0.78 & Homo. \\
+Amazon-Photo & 7,650  & 745   & 8  & 0.83 & Homo. \\
+Chameleon  & 890    & 2,325  & 5  & 0.24 & Hetero. \\
+Film       & 7,600  & 932    & 5  & 0.22 & Hetero. \\
+Squirrel   & 2,223  & 2,089  & 5  & 0.21 & Hetero. \\
+Deezer     & 28,281 & 31,241 & 2  & 0.53 & Mixed \\
+\midrule
+ogbn-arxiv & 169,343 & 128 & 40 & 0.66 & Large \\
+\bottomrule
+\end{tabular}
+}% end resizebox
+\caption{Dataset statistics. $h$ denotes edge homophily ratio. Chameleon and Squirrel use filtered splits from~\citet{platonov2023critical}.}
+\label{tab:datasets}
+\end{table}
+
+\noindent\textbf{Homophilic benchmarks.} Cora, CiteSeer, and PubMed are standard citation networks~\citep{kipf2017semi, sen2008collective} where connected nodes tend to share labels. Coauthor-CS and Coauthor-Physics are co-authorship graphs~\citep{shchur2018pitfalls} where nodes represent authors. Amazon-Computers and Amazon-Photo are co-purchase graphs from the Amazon product network~\citep{shchur2018pitfalls}.
+\textbf{Heterophilic benchmarks.} Chameleon and Squirrel are Wikipedia page--page networks with filtered splits from \citet{platonov2023critical}, where edges frequently connect nodes of different classes. Film is an actor co-occurrence network~\citep{pei2020geomgcn}. \textbf{Deezer}~\citep{rozemberczki2021deezer} is a social network with binary genre labels and mixed homophily.
+\textbf{ogbn-arxiv}~\citep{hu2020ogb} is a large-scale citation network (169K nodes, 1.2M edges, 40 classes) from the Open Graph Benchmark, serving as the standard scalability test for graph transformers.
+
+\subsection{Evaluation Protocol}
+
+We follow the identical evaluation protocol of SGFormer~\citep{wu2023sgformer} to enable direct comparison:
+
+\begin{itemize}
+    \item \textbf{Cora, CiteSeer, PubMed:} Semi-supervised setting with 20 labels per class, 500 validation nodes, and 1000 test nodes (random class-balanced splits). 10 runs.
+    \item \textbf{Coauthor-CS, Coauthor-Physics, Amazon-Computers, Amazon-Photo:} Random 50\%/25\%/25\% splits. 10 runs.
+    \item \textbf{Chameleon, Squirrel, Film:} Pre-computed 10-fold filtered splits (60\%/20\%/20\%) from~\citet{platonov2023critical}. 10 runs.
+    \item \textbf{Deezer:} Random 50\%/25\%/25\% splits. 10 runs.
+    \item \textbf{ogbn-arxiv:} Official OGB train/val/test split~\citep{hu2020ogb}. 10 runs.
+\end{itemize}
+
+We report mean $\pm$ standard deviation of test accuracy across runs, selecting the epoch with highest validation accuracy (early stopping with patience 200).
+
+\subsection{Baselines}
+
+We compare against 12 methods spanning three categories: (1)~\emph{Standard GNNs}: GCN~\citep{kipf2017semi}, GAT~\citep{velickovic2018gat}, APPNP~\citep{klicpera2019appnp}, SIGN~\citep{rossi2020sign}; (2)~\emph{Heterophily-specific GNNs}: H$_2$GCN~\citep{zhu2020h2gcn}, CPGNN~\citep{zhu2021cpgnn}, GloGNN~\citep{li2022glognn}; (3)~\emph{Graph Transformers}: NodeFormer~\citep{wu2022nodeformer}, DIFFormer~\citep{wu2023difformer}, NAGphormer~\citep{chen2023nagphormer}, SGFormer~\citep{wu2023sgformer}. Baseline results for the original 7 datasets are taken from \citet{wu2023sgformer}, Table~2. For Coauthor and Amazon datasets, SGFormer baselines are from our own runs with identical code and hyperparameters.
+
+\noindent\textbf{Note on GraphGPS and Exphormer.}~~GraphGPS~\citep{rampasek2022graphgps} and Exphormer~\citep{shirzad2023exphormer} are important graph transformer baselines; however, both primarily benchmark on \emph{graph-level} tasks (ZINC, LRGB, ogbg-mol*) and do not report node classification results under the semi-supervised protocol we follow (SGFormer splits). We discuss their architectural relationship to PCGT in Section~\ref{sec:nystrom} and Related Work.
+
+\subsection{Implementation Details}
+
+\textbf{Architecture.} PCGT uses hidden dimension $d=64$, 1 PCGT attention layer ($L_\text{pcgt}=1$), $M=4$ learned seeds per partition, and a multi-layer GCN backbone ($L_\text{gcn} \in \{2, 4\}$ depending on dataset). The GCN branch uses residual connections. Partition structural encoding (PSE) adds a learned $K \times d$ embedding to node features at each PCGT layer. We fix $M=4$ across all experiments; accuracy is stable across $M \in \{2, 4, 8\}$, with differences within noise (Appendix Table~\ref{tab:m_ablation}).
+
+\textbf{Partitioning.} We compute METIS~\citep{karypis1998metis} partitions once on the full graph adjacency before training. This is consistent with the transductive setting: all methods (GCN, GAT, SGFormer) access the full graph structure---including test-node edges---during message passing. PCGT uses the same structural information, organized through partitions rather than direct neighbor aggregation. The number of partitions $K$ is tuned per dataset: $K=10$ for Cora/Chameleon/Squirrel, $K=20$ for CiteSeer/Deezer, $K=50$ for PubMed, and $K=5$ for Film.
+
+\textbf{Optimization.} Adam optimizer~\citep{kingma2015adam} with learning rate 0.01 (0.05 for Film). We apply differential weight decay: a base weight decay for the GCN branch and a separate weight decay for the PCGT attention parameters. Dropout rates are tuned per dataset in $\{0.2, 0.3, 0.4, 0.5, 0.7\}$, with heavier regularization for larger or noisier datasets.
+
+\textbf{Hyperparameter selection.} All hyperparameters were selected via grid search on the validation set. For each dataset, we searched $K \in \{5, 10, 15, 20, 30, 50\}$, $\lambda_{\text{gw}} \in \{0.5, 0.7, 0.8\}$, dropout $\in \{0.2, 0.3, 0.4, 0.5, 0.7\}$, and weight decay $\in \{5\text{e-}5, 5\text{e-}4, 1\text{e-}3, 1\text{e-}2\}$, selecting the configuration with the highest mean validation accuracy over 3 preliminary runs. The final results are reported with 10 runs using the selected configuration.
+
+\textbf{Key hyperparameters.} The graph weight $\lambda_{\text{gw}} \in \{0.5, 0.7, 0.8\}$ controls the GCN vs.\ PCGT attention blend. On homophilic graphs, $\lambda_{\text{gw}}=0.8$ favors the GCN branch; on heterophilic or mixed-homophily graphs, lower values (0.5) increase the PCGT contribution. The local--global blend $\alpha$ and self-connection weight $\beta$ are learned end-to-end, initialized at 0.5 and 1.0 respectively.
+
+\subsection{Ablation Study}
+\label{sec:ablation}
+
+To validate that each component of PCGT contributes to performance, we conduct ablations on three representative datasets: Cora (homophilic), Chameleon (heterophilic), and Squirrel (heterophilic). We test the following variants:
+
+\begin{enumerate}
+    \item \textbf{w/o Global attention} (\texttt{local\_only}): Remove the cross-partition seed-based attention; only intra-partition attention is used.
+    \item \textbf{w/o Local attention} (\texttt{global\_only}): Remove intra-partition attention; only cross-partition global attention via learned seeds.
+    \item \textbf{w/o PSE} (\texttt{no\_pse}): Remove partition structural encoding, so the model receives no explicit signal about partition membership.
+    \item \textbf{w/o GCN branch}: Set $\text{gw}=0$ and disable the GCN backbone, testing pure PCGT attention.
+    \item \textbf{Random partitions}: Replace METIS with random node assignment, testing whether topology-aware partitioning matters.
+    \item \textbf{K sweep}: Vary $K \in \{5, 10, 15, 20, 30\}$ on Chameleon and Squirrel to study the effect of partition granularity.
+\end{enumerate}
+
+\noindent Results are reported in Section~\ref{sec:results}.

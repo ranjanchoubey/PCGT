@@ -1,0 +1,129 @@
+\documentclass[twocolumn, 10pt]{article}
+
+% ============================================================================
+% PACKAGES
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{cuted}
+\usepackage{colortbl}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, calc, fit, backgrounds, shapes.geometric}
+\usepackage{amsthm}
+\newtheorem{remark}{Remark}
+
+\geometry{margin=0.75in, columnsep=0.25in}
+\setstretch{1.0}
+
+% Checkmark and xmark symbols
+\newcommand{\cmark}{\textcolor{green!60!black}{\checkmark}}
+\newcommand{\xmark}{\textcolor{red!70!black}{$\times$}}
+
+% Table highlight colors (color + bold/underline for B&W fallback)
+\definecolor{bestcolor}{HTML}{D63384}    % magenta-pink for best
+\definecolor{runnerup}{HTML}{B8860B}     % dark goldenrod for runner-up
+\newcommand{\best}[1]{\textcolor{bestcolor}{\textbf{#1}}}
+\newcommand{\runup}[1]{\textcolor{runnerup}{\underline{#1}}}
+
+% Prevent footnotes from being justified (avoids stretched spaces in email)
+\let\oldfootnote\footnote
+\renewcommand{\footnote}[1]{\oldfootnote{\raggedright #1}}
+
+% ============================================================================
+% TITLE & AUTHOR
+% ============================================================================
+\title{\vspace{-0.5cm}{\rule{\textwidth}{1.2pt}}\vspace{0.25cm}\\
+\textbf{PCGT: A Graph Transformer with Topology-Aware Partition Attention}\\
+\vspace{0.25cm}{\rule{\textwidth}{1.2pt}}\vspace{-0.1cm}}
+
+\author{
+\small \textbf{Ranjan Kumar Choubey}\thanks{Corresponding author. Email: \nolinkurl{ranjankumarchoubey999@gmail.com}. Code: \url{https://github.com/ranjanchoubey/PCGT}}\quad
+\small \textbf{Kushal Bose}\quad
+\small \textbf{Swagatam Das} \\[3pt]
+\small Electronics and Communication Sciences Unit,
+Indian Statistical Institute, Kolkata, India
+}
+\date{\vspace{-0.3cm}}
+
+% ============================================================================
+% DOCUMENT START
+% ============================================================================
+\begin{document}
+
+\maketitle
+\vspace{0.2cm}
+
+% ============================================================================
+% ABSTRACT
+% ============================================================================
+\input{sections/00_abstract.tex}
+
+% ============================================================================
+% INTRODUCTION
+% ============================================================================
+\input{sections/01_introduction.tex}
+
+% ============================================================================
+% RELATED WORK
+% ============================================================================
+\input{sections/02_related_work.tex}
+
+% ============================================================================
+% METHOD
+% ============================================================================
+\input{sections/03_method.tex}
+
+% ============================================================================
+% EXPERIMENTS
+% ============================================================================
+\input{sections/04_experiments.tex}
+
+% ============================================================================
+% RESULTS
+% ============================================================================
+\input{sections/05_results.tex}
+
+% ============================================================================
+% DISCUSSION
+% ============================================================================
+\input{sections/06_discussion.tex}
+
+% ============================================================================
+% LIMITATIONS & FUTURE WORK
+% ============================================================================
+\input{sections/07_limitations.tex}
+
+% ============================================================================
+% CONCLUSION
+% ============================================================================
+\section{Conclusion}
+
+We presented PCGT, a graph transformer that exploits multi-resolution graph structure through partition-conditioned attention. By combining exact intra-partition attention with learned cross-partition pooling, PCGT captures both local community patterns and global interactions at subquadratic cost. Experiments on 12 benchmarks---from medium-scale datasets to the large-scale ogbn-arxiv (169K nodes)---demonstrate that PCGT achieves the best or tied-best result on 10 of 12 datasets, with the strongest gains on heterophilic graphs (+4.1\% Chameleon, +3.7\% Squirrel over SGFormer) while also outperforming SGFormer on homophilic benchmarks (CiteSeer +0.5\%, PubMed +0.7\%) and scaling competitively to large graphs. Ablation studies reveal two key insights: the attention mechanism's contribution scales proportionally with heterophily, and topology-aware partitioning is most beneficial when community structure carries label information. These findings suggest that partition-conditioned attention is a promising direction for building graph transformers that adapt to diverse graph structures.
+
+% ============================================================================
+% BIBLIOGRAPHY
+% ============================================================================
+{\small
+\bibliographystyle{plainnat}
+\bibliography{references}
+}
+
+% ============================================================================
+% APPENDIX
+% ============================================================================
+\input{sections/09_appendix.tex}
+
+\end{document}

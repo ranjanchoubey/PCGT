@@ -135,7 +135,9 @@ try*.sh
 *.bbl
 *.blg
 *.aux
+# main.pdf — allow paper/main.pdf but ignore elsewhere
 main.pdf
+!paper/main.pdf
 *.fls
 *.fdb_latexmk
 
@@ -145,10 +147,19 @@ study
 *.mmd
 
 # Paper LaTeX source (keep private until after defense)
-paper/
+# Paper — track sources and PDF, ignore LaTeX temp files
+paper/*.aux
+paper/*.log
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.blg
+paper/*.synctex.gz
+paper/*.out
+paper/*.bbl
 
 # Experiment logs (internal, not needed to reproduce)
 experiments/
 
 # Test clone folder
-test/
+test/paper_backup_*/
+medium/pcgt_backup.py
