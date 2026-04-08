@@ -3,7 +3,7 @@
 
 \subsection{Main Performance}
 
-Table~\ref{tab:main} compares PCGT against 12 baselines on 7 medium-scale datasets. Baseline results for GCN through SGFormer are taken from \citet{wu2023sgformer}; DIFFormer results are from \citet{wu2023difformer} and NAGphormer from \citet{chen2023nagphormer}, both under the same evaluation protocol. PCGT numbers are from our own runs on an NVIDIA H100 GPU (10 runs each).
+Table~\ref{tab:main} compares PCGT against 13 baselines on 7 medium-scale datasets. Baseline results for GCN through SGFormer are taken from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our own runs using the Performer-attention implementation of \citet{rampasek2022graphgps}. PCGT numbers are from our own runs on an NVIDIA H100 GPU (10 runs each).
 
 \begin{table*}[t]
 \centering
@@ -30,13 +30,14 @@ GloGNN & 81.9{\scriptsize$\pm$0.4} & 72.1{\scriptsize$\pm$0.6} & 78.9{\scriptsiz
 NodeFormer & 82.2{\scriptsize$\pm$0.9} & 72.5{\scriptsize$\pm$1.1} & 79.9{\scriptsize$\pm$1.0} & 36.9{\scriptsize$\pm$1.0} & 38.5{\scriptsize$\pm$1.5} & 34.7{\scriptsize$\pm$4.1} & 66.4{\scriptsize$\pm$0.7} \\
 DIFFormer & 83.5{\scriptsize$\pm$0.6} & 72.2{\scriptsize$\pm$0.5} & 79.7{\scriptsize$\pm$0.6} & 37.5{\scriptsize$\pm$1.0} & 39.5{\scriptsize$\pm$2.1} & 44.0{\scriptsize$\pm$3.5} & 66.4{\scriptsize$\pm$0.9} \\
 NAGphormer & 83.2{\scriptsize$\pm$0.8} & 72.3{\scriptsize$\pm$0.4} & 78.6{\scriptsize$\pm$0.3} & 35.8{\scriptsize$\pm$1.1} & 38.3{\scriptsize$\pm$1.9} & 42.3{\scriptsize$\pm$3.1} & 66.7{\scriptsize$\pm$0.7} \\
+GraphGPS & 78.6{\scriptsize$\pm$1.7} & 60.4{\scriptsize$\pm$1.4} & 75.5{\scriptsize$\pm$0.7} & 34.0{\scriptsize$\pm$0.6} & 36.5{\scriptsize$\pm$2.5} & 44.2{\scriptsize$\pm$3.5} & 67.0{\scriptsize$\pm$0.7} \\
 SGFormer & \best{84.5}{\scriptsize$\pm$0.8} & \runup{72.6}{\scriptsize$\pm$0.2} & \runup{80.3}{\scriptsize$\pm$0.6} & \runup{37.9}{\scriptsize$\pm$1.1} & \runup{41.8}{\scriptsize$\pm$2.2} & \runup{44.9}{\scriptsize$\pm$3.9} & \runup{67.1}{\scriptsize$\pm$1.1} \\
 \midrule
 \textbf{PCGT (ours)} & \runup{84.3}{\scriptsize$\pm$0.4} & \best{73.1}{\scriptsize$\pm$0.4} & \best{81.0}{\scriptsize$\pm$0.6} & \best{38.0}{\scriptsize$\pm$0.9} & \best{45.5}{\scriptsize$\pm$2.7} & \best{49.0}{\scriptsize$\pm$2.8} & \best{67.2}{\scriptsize$\pm$0.7} \\
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5 runs). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}. \best{Best} and \runup{runner-up} per column.}
+\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5--10 runs). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our runs. \best{Best} and \runup{runner-up} per column.}
 \label{tab:main}
 \end{table*}
 
@@ -61,7 +62,7 @@ SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2}
 \label{tab:new_datasets}
 \end{table}
 
-\textbf{Heterophilic datasets.} The largest gains are on heterophilic benchmarks: +4.1\% on Chameleon and +3.7\% on Squirrel over SGFormer, which was already the previous best. PCGT beats all 12 baselines on these datasets, including heterophily-specific methods like GloGNN (+8.8\% on Chameleon) and H$_2$GCN (+10.4\% on Squirrel). On Film, PCGT also leads (38.0 vs.\ 37.9 for SGFormer).
+\textbf{Heterophilic datasets.} The largest gains are on heterophilic benchmarks: +4.1\% on Chameleon and +3.7\% on Squirrel over SGFormer, which was already the previous best. PCGT beats all 13 baselines on these datasets, including heterophily-specific methods like GloGNN (+8.8\% on Chameleon) and H$_2$GCN (+10.4\% on Squirrel). On Film, PCGT also leads (38.0 vs.\ 37.9 for SGFormer).
 
 \textbf{Homophilic datasets.} On CiteSeer, PCGT scores 73.1 vs.\ SGFormer's 72.6 (+0.5\%, paired $t$-test $p$=0.048). On PubMed, 81.0 vs.\ 80.3 (+0.7\%, $p$=0.027). On Cora, the two are within noise (84.3 vs.\ 84.5, $p$=0.88). PCGT also shows lower run-to-run variance than SGFormer across these benchmarks.
 
