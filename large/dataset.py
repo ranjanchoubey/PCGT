@@ -293,7 +293,7 @@ def load_amazon2m_dataset(data_dir):
     dataset.label = torch.as_tensor(ogb_dataset.labels).reshape(-1, 1)
 
     def load_fixed_splits(train_prop=0.5, val_prop=0.25):
-        dir = f'{data_dir}ogb/ogbn_products/split/random_0.5_0.25'
+        dir = f'{data_dir}/ogb/ogbn_products/split/random_0.5_0.25'
         tensor_split_idx = {}
         if os.path.exists(dir):
             tensor_split_idx['train'] = torch.as_tensor(np.loadtxt(dir + '/amazon2m_train.txt'), dtype=torch.long)
@@ -341,7 +341,7 @@ def load_papers100M(data_dir):
 
 
 def load_proteins_dataset(data_dir):
-    ogb_dataset = NodePropPredDataset(name='ogbn-proteins', root=f'{data_dir}ogb')
+    ogb_dataset = NodePropPredDataset(name='ogbn-proteins', root=f'{data_dir}/ogb')
     dataset = NCDataset('ogbn-proteins')
     def protein_orig_split(**kwargs):
         split_idx = ogb_dataset.get_idx_split()
