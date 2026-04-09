@@ -57,7 +57,8 @@ print(f'PyTorch {torch.__version__}')
 print(f'CUDA available: {torch.cuda.is_available()}')
 if torch.cuda.is_available():
     print(f'GPU: {torch.cuda.get_device_name(0)}')
-    print(f'VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB')
+    mem = torch.cuda.get_device_properties(0).total_memory
+    print(f'VRAM: {mem / 1e9:.1f} GB')
 from torch_geometric.utils import to_undirected
 from torch_scatter import scatter
 from ogb.nodeproppred import NodePropPredDataset
@@ -71,6 +72,13 @@ print('All imports OK')
 
     log "=== Pre-downloading OGB datasets ==="
     $PY -c "
+import torch
+_orig = torch.load
+def _patched(*a, **kw):
+    kw.setdefault('weights_only', False)
+    return _orig(*a, **kw)
+torch.load = _patched
+
 from ogb.nodeproppred import NodePropPredDataset
 import os
 data_dir = '$DATA_DIR'
