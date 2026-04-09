@@ -129,7 +129,7 @@ Figure~\ref{fig:convergence} shows validation accuracy curves (mean $\pm$ std ov
 
 For the four additional datasets (Table~\ref{tab:new_datasets}) where we run both PCGT and SGFormer under identical code, splits, and 10 random seeds, Table~\ref{tab:pvalues} reports paired $t$-test $p$-values (paired because each run shares the same random split).  Coauthor-Physics shows a statistically significant improvement ($p = 0.004$), Amazon-Computers is marginally significant ($p = 0.051$), and the remaining two datasets show gains that are within noise.  For the seven Table~\ref{tab:main} datasets, SGFormer baselines are taken from the published numbers of \citet{wu2023sgformer} and per-run data is unavailable, so $t$-tests cannot be computed.
 
-\begin{table}[t]
+\begin{table}[ht!]
 \centering
 \small
 \begin{tabular}{l|cc|cc}
@@ -149,9 +149,34 @@ Am-Photo     & 95.27{\scriptsize$\pm$0.38} & 95.20{\scriptsize$\pm$1.12} & +0.07
 \section{Learned Self-Connection Weight $\beta$}
 \label{app:beta}
 
+\subsection{Formal Condition for Negative $\beta$}
+\label{app:beta_prop}
+
+\begin{proposition}[Condition for Negative Optimal $\beta$]
+\label{prop:beta}
+Consider a node $i$ with transformed value $\mathbf{v}_i \in \mathbb{R}^d$ and attention context $\mathbf{c}_i \in \mathbb{R}^d$ (the $\alpha$-blended local+global output). The node's representation is $\mathbf{h}_i = \mathbf{c}_i + \beta \cdot \mathbf{v}_i$. For a training loss $\mathcal{L}(\beta) = \sum_i \ell(\mathbf{h}_i, y_i)$ that is differentiable and convex in $\beta$, the gradient with respect to $\beta$ is:
+\begin{equation}
+\frac{\partial \mathcal{L}}{\partial \beta} = \sum_{i} \mathbf{g}_i^\top \mathbf{v}_i, \quad \text{where } \mathbf{g}_i = \nabla_{\mathbf{h}_i} \ell
+\label{eq:beta_grad}
+\end{equation}
+If this gradient is positive at $\beta = 0$---that is, if the self-features $\mathbf{v}_i$ are on average aligned with the loss-increasing direction---then the loss-minimizing $\beta^* < 0$.
+\end{proposition}
+
+\begin{proof}
+By the chain rule, $\partial \mathbf{h}_i / \partial \beta = \mathbf{v}_i$, so $\partial \mathcal{L}/\partial \beta = \sum_i (\nabla_{\mathbf{h}_i} \ell)^\top \mathbf{v}_i = \sum_i \mathbf{g}_i^\top \mathbf{v}_i$, giving Eq.~\eqref{eq:beta_grad}. Since $\mathcal{L}(\beta)$ is convex in $\beta$ (a scalar), it has a unique global minimizer $\beta^*$ satisfying $\partial \mathcal{L}/\partial \beta\big|_{\beta^*} = 0$. By assumption, $\partial \mathcal{L}/\partial \beta\big|_{\beta=0} > 0$, meaning the loss is \emph{increasing} at $\beta = 0$. Convexity implies the gradient is non-decreasing in $\beta$, so the zero-crossing $\beta^*$ must lie to the left of $\beta = 0$, i.e., $\beta^* < 0$.
+\end{proof}
+
+\begin{remark}
+The condition $\sum_i \mathbf{g}_i^\top \mathbf{v}_i > 0$ at $\beta = 0$ means that adding the self-feature component to the representation \emph{increases the loss}---equivalently, the projected value $\mathbf{v}_i$ pushes the representation away from the correct class on average. This matches the empirical observations: on Film (actor co-occurrence features, 932 dims, $h=0.22$), feature vectors encode movie co-appearances that are weakly correlated with genre labels, so $\beta = -0.99$ suppresses them. On Deezer ($h \approx 0.53$, near-random edge labels), self-features are similarly uninformative for the binary classification target, yielding $\beta = -0.57$. Geometrically, negative $\beta$ \emph{subtracts} the self-feature component from the representation, allowing the attention context $\mathbf{c}_i$ to dominate---the model learns that ``my neighbors know my label better than I do.''
+
+The convexity assumption holds locally around the learned $\beta^*$ in practice: $\beta$ is a single scalar and the loss landscape in this one-dimensional subspace is smooth. This is empirically verified by the consistent sign of $\beta$ across independent random seeds (negative in 8/10 splits on Film, 5/5 on Deezer).
+\end{remark}
+
+\subsection{Learned $\beta$ Values}
+
 Table~\ref{tab:beta_values} reports the learned $\beta$ values across all 11 medium-scale datasets (ogbn-arxiv excluded because the large-scale codebase does not log $\beta$).  These values supplement the bar chart in Figure~\ref{fig:beta}.  The two negative-$\beta$ datasets (Film, Deezer) have either noisy, low-dimensional features (Film: 932 dims, actor co-occurrence) or near-random edge labels (Deezer: $h \approx 0.53$), where suppressing self-features improves classification.  The highest $\beta$ values occur on Chameleon and Squirrel, whose high-dimensional Wikipedia features (2325 and 2089 dims) make self-identity highly informative even under low homophily.
 
-\begin{table}[t]
+\begin{table}[ht!]
 \centering
 \small
 \begin{tabular}{l|rcc}

@@ -1,0 +1,242 @@
+% Conceptual figure: partition-conditioned attention preserves topology
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  % --- Nodes: 2.2mm ---
+  classA/.style={circle, fill=cVioletRed, draw=cVioletRed!70!black, semithick,
+    minimum size=2.2mm, inner sep=0pt},
+  classB/.style={circle, fill=cGreen, draw=cGreen!70!black, semithick,
+    minimum size=2.2mm, inner sep=0pt},
+  classC/.style={circle, fill=cAzure, draw=cAzure!70!black, semithick,
+    minimum size=2.2mm, inner sep=0pt},
+  classD/.style={circle, fill=cGold, draw=cGold!70!black, semithick,
+    minimum size=2.2mm, inner sep=0pt},
+  % --- Edges: lighter/thinner so attention overlays dominate ---
+  edge/.style={thin, black!30},
+  % --- Seeds ---
+  seednode/.style={diamond, fill=cAzure!40, draw=cAzure!60!black, thick,
+    minimum size=5mm, inner sep=0pt, font=\small\bfseries},
+  seedarrow/.style={-{Stealth[length=1.2mm]}, cAzure!50!black, semithick, densely dotted, opacity=0.6},
+  % --- Community boundary ---
+  commbnd/.style={draw=black!50, dashed, thick, rounded corners=8pt, inner sep=5pt},
+  % --- Labels ---
+  panellabel/.style={font=\large\bfseries, text=black!85},
+  sublabel/.style={font=\scriptsize, text=black!50, align=center},
+]
+
+% ============================================================
+% NODE LAYOUT (shared across all 3 panels):
+%   P1 (upper-left):  compact blob, 5 nodes
+%   P2 (upper-right): inverted-V,   4 nodes
+%   P3 (bottom):      chain,        4 nodes
+% ============================================================
+
+% ============================================================
+% PANEL (c): PCGT
+% ============================================================
+\begin{scope}[shift={(18,0)}]
+  \node[panellabel] at (3.5, 6.4) {(c) PCGT: Partition Attention};
+  \node[sublabel] at (3.5, 5.9) {Local attention + seed-pooled global};
+
+  % P1: Compact blob, 5 nodes
+  \node[classA] (pa1) at (0.6, 4.8) {};
+  \node[classD] (pa2) at (1.4, 5.0) {};
+  \node[classB] (pa3) at (2.1, 4.6) {};
+  \node[classC] (pa4) at (0.4, 4.2) {};
+  \node[classA] (pa5) at (1.2, 4.1) {};
+
+  % P2: Inverted-V, 4 nodes
+  \node[classC] (pb1) at (4.8, 5.0) {};
+  \node[classB] (pb2) at (4.1, 4.3) {};
+  \node[classA] (pb3) at (5.5, 4.3) {};
+  \node[classD] (pb4) at (4.8, 3.7) {};
+
+  % P3: Chain, 4 nodes
+  \node[classD] (pc1) at (1.5, 2.5) {};
+  \node[classB] (pc2) at (2.8, 2.3) {};
+  \node[classC] (pc3) at (4.2, 2.5) {};
+  \node[classA] (pc4) at (5.5, 2.3) {};
+
+  % Graph edges (light, underneath)
+  \draw[edge] (pa1)--(pa2); \draw[edge] (pa2)--(pa3);
+  \draw[edge] (pa4)--(pa5); \draw[edge] (pa1)--(pa4);
+  \draw[edge] (pa2)--(pa5); \draw[edge] (pa3)--(pa5);
+  \draw[edge] (pb1)--(pb2); \draw[edge] (pb1)--(pb3);
+  \draw[edge] (pb2)--(pb4); \draw[edge] (pb3)--(pb4);
+  \draw[edge] (pc1)--(pc2); \draw[edge] (pc2)--(pc3);
+  \draw[edge] (pc3)--(pc4);
+  % Inter-community: P1-P2 (3), P2-P3 (1), P1-P3 (2)
+  \draw[edge] (pa2)--(pb1); \draw[edge] (pa3)--(pb2);
+  \draw[edge] (pa5)--(pb4);
+  \draw[edge] (pb3)--(pc4);
+  \draw[edge] (pa4)--(pc1); \draw[edge] (pa5)--(pc2);
+
+  % All-to-all LOCAL attention within each partition (violet)
+  \begin{scope}[on background layer]
+    \foreach \u in {pa1,pa2,pa3,pa4,pa5} {
+      \foreach \v in {pa1,pa2,pa3,pa4,pa5} {
+        \draw[violet!70, opacity=0.35, thin] (\u) -- (\v); }}
+    \foreach \u in {pb1,pb2,pb3,pb4} {
+      \foreach \v in {pb1,pb2,pb3,pb4} {
+        \draw[violet!70, opacity=0.35, thin] (\u) -- (\v); }}
+    \foreach \u in {pc1,pc2,pc3,pc4} {
+      \foreach \v in {pc1,pc2,pc3,pc4} {
+        \draw[violet!70, opacity=0.35, thin] (\u) -- (\v); }}
+  \end{scope}
+
+  % Community boundaries
+  \begin{scope}[on background layer]
+    \node[commbnd, fit=(pa1)(pa4)(pa3)(pa5)] {};
+    \node[commbnd, fit=(pb1)(pb2)(pb3)(pb4)] {};
+    \node[commbnd, fit=(pc1)(pc4)(pc2)] {};
+  \end{scope}
+
+  % Seeds — triangle arrangement
+  \node[seednode] (s1) at (1.2, 3.3) {$s_1$};
+  \node[seednode] (s2) at (5.0, 3.3) {$s_2$};
+  \node[seednode] (s3) at (3.1, 2.9) {$s_3$};
+
+  % Pooling arrows
+  \foreach \n in {pa1,pa2,pa3,pa4,pa5} {
+    \draw[seedarrow] (\n) -- (s1); }
+  \foreach \n in {pb1,pb2,pb3,pb4} {
+    \draw[seedarrow] (\n) -- (s2); }
+  \foreach \n in {pc1,pc2,pc3,pc4} {
+    \draw[seedarrow] (\n) -- (s3); }
+
+  % Cross-partition seed links
+  \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, cAzure!60!black, thick] (s1)--(s2);
+  \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, cAzure!60!black, thick] (s2)--(s3);
+  \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, cAzure!60!black, thick] (s1)--(s3);
+
+\end{scope}
+
+% ============================================================
+% PANEL (a): Heterophilic graph
+% ============================================================
+\begin{scope}[shift={(0,0)}]
+  \node[panellabel] at (3.5, 6.4) {(a) Heterophilic Graph};
+  \node[sublabel] at (3.5, 5.9) {3 communities, mixed labels};
+
+  % P1: Compact blob, 5 nodes
+  \node[classA] (a1) at (0.6, 4.8) {};
+  \node[classD] (a2) at (1.4, 5.0) {};
+  \node[classB] (a3) at (2.1, 4.6) {};
+  \node[classC] (a4) at (0.4, 4.2) {};
+  \node[classA] (a5) at (1.2, 4.1) {};
+  \draw[edge] (a1)--(a2); \draw[edge] (a2)--(a3);
+  \draw[edge] (a4)--(a5); \draw[edge] (a1)--(a4);
+  \draw[edge] (a2)--(a5); \draw[edge] (a3)--(a5);
+
+  % P2: Inverted-V, 4 nodes
+  \node[classC] (b1) at (4.8, 5.0) {};
+  \node[classB] (b2) at (4.1, 4.3) {};
+  \node[classA] (b3) at (5.5, 4.3) {};
+  \node[classD] (b4) at (4.8, 3.7) {};
+  \draw[edge] (b1)--(b2); \draw[edge] (b1)--(b3);
+  \draw[edge] (b2)--(b4); \draw[edge] (b3)--(b4);
+
+  % P3: Chain, 4 nodes
+  \node[classD] (c1) at (1.5, 2.5) {};
+  \node[classB] (c2) at (2.8, 2.3) {};
+  \node[classC] (c3) at (4.2, 2.5) {};
+  \node[classA] (c4) at (5.5, 2.3) {};
+  \draw[edge] (c1)--(c2); \draw[edge] (c2)--(c3);
+  \draw[edge] (c3)--(c4);
+
+  % Inter-community: P1-P2 (3), P2-P3 (1), P1-P3 (2)
+  \draw[edge] (a2)--(b1); \draw[edge] (a3)--(b2);
+  \draw[edge] (a5)--(b4);
+  \draw[edge] (b3)--(c4);
+  \draw[edge] (a4)--(c1); \draw[edge] (a5)--(c2);
+
+  % Community boundaries with labels
+  \begin{scope}[on background layer]
+    \node[commbnd, fit=(a1)(a4)(a3)(a5),
+      label={[font=\scriptsize, text=black!50]below:$\mathcal{P}_1$}] {};
+    \node[commbnd, fit=(b1)(b2)(b3)(b4),
+      label={[font=\scriptsize, text=black!50]below:$\mathcal{P}_2$}] {};
+    \node[commbnd, fit=(c1)(c4)(c2),
+      label={[font=\scriptsize, text=black!50]below:$\mathcal{P}_3$}] {};
+  \end{scope}
+\end{scope}
+
+% ============================================================
+% PANEL (b): Flat Global Attention
+% ============================================================
+\begin{scope}[shift={(9,0)}]
+  \node[panellabel] at (3.5, 6.4) {(b) Flat Global Attention};
+  \node[sublabel] at (3.5, 5.9) {All nodes attend to all $\to$ diluted signal};
+
+  % P1
+  \node[classA] (sa1) at (0.6, 4.8) {};
+  \node[classD] (sa2) at (1.4, 5.0) {};
+  \node[classB] (sa3) at (2.1, 4.6) {};
+  \node[classC] (sa4) at (0.4, 4.2) {};
+  \node[classA] (sa5) at (1.2, 4.1) {};
+  % P2
+  \node[classC] (sb1) at (4.8, 5.0) {};
+  \node[classB] (sb2) at (4.1, 4.3) {};
+  \node[classA] (sb3) at (5.5, 4.3) {};
+  \node[classD] (sb4) at (4.8, 3.7) {};
+  % P3
+  \node[classD] (sc1) at (1.5, 2.5) {};
+  \node[classB] (sc2) at (2.8, 2.3) {};
+  \node[classC] (sc3) at (4.2, 2.5) {};
+  \node[classA] (sc4) at (5.5, 2.3) {};
+
+  % Graph edges (light, underneath)
+  \draw[edge] (sa1)--(sa2); \draw[edge] (sa2)--(sa3);
+  \draw[edge] (sa4)--(sa5); \draw[edge] (sa1)--(sa4);
+  \draw[edge] (sa2)--(sa5); \draw[edge] (sa3)--(sa5);
+  \draw[edge] (sb1)--(sb2); \draw[edge] (sb1)--(sb3);
+  \draw[edge] (sb2)--(sb4); \draw[edge] (sb3)--(sb4);
+  \draw[edge] (sc1)--(sc2); \draw[edge] (sc2)--(sc3);
+  \draw[edge] (sc3)--(sc4);
+  % Inter-community
+  \draw[edge] (sa2)--(sb1); \draw[edge] (sa3)--(sb2);
+  \draw[edge] (sa5)--(sb4);
+  \draw[edge] (sb3)--(sc4);
+  \draw[edge] (sa4)--(sc1); \draw[edge] (sa5)--(sc2);
+
+  % All-to-all attention cloud
+  \begin{scope}[on background layer]
+  \foreach \u in {sa1,sa2,sa3,sa4,sa5,sb1,sb2,sb3,sb4,sc1,sc2,sc3,sc4} {
+    \foreach \v in {sa1,sa2,sa3,sa4,sa5,sb1,sb2,sb3,sb4,sc1,sc2,sc3,sc4} {
+        \draw[brown!70, opacity=0.22, thin] (\u) -- (\v);
+    }
+  }
+  \end{scope}
+
+  % Community boundaries (fading)
+  \begin{scope}[on background layer]
+    \node[commbnd, draw=black!40, fit=(sa1)(sa4)(sa3)(sa5)] {};
+    \node[commbnd, draw=black!40, fit=(sb1)(sb2)(sb3)(sb4)] {};
+    \node[commbnd, draw=black!40, fit=(sc1)(sc4)(sc2)] {};
+  \end{scope}
+\end{scope}
+
+% ============================================================
+% LEGEND
+% ============================================================
+\node[classA, label={[font=\scriptsize]right:Class A}] at (3.5, 0.3) {};
+\node[classB, label={[font=\scriptsize]right:Class B}] at (5.5, 0.3) {};
+\node[classC, label={[font=\scriptsize]right:Class C}] at (7.5, 0.3) {};
+\node[classD, label={[font=\scriptsize]right:Class D}] at (9.5, 0.3) {};
+\draw[brown!70, semithick] (11.5, 0.3) -- ++(0.7, 0) node[right, font=\scriptsize] {Global attn};
+\draw[violet!80, semithick] (14.0, 0.3) -- ++(0.7, 0) node[right, font=\scriptsize] {Local attn};
+\draw[cAzure!50!black, semithick, densely dotted, -{Stealth[length=1.2mm]}] (16.8, 0.3) -- ++(0.7, 0) node[right, font=\scriptsize] {Seed pooling};
+\node[seednode, label={[font=\scriptsize]right:Seed}] at (19.5, 0.3) {};
+
+\end{tikzpicture}%
+}
+\caption{Conceptual comparison of attention mechanisms on a heterophilic graph with 3 communities.
+(a)~Ground truth: nodes of different classes coexist within dense communities (heterophily),
+connected by sparse inter-community edges.
+(b)~Flat global attention (e.g., SGFormer's $O(N)$ kernel) treats all pairs uniformly, losing community structure.
+(c)~PCGT: \textcolor{violet!80!black}{local attention} captures exact intra-partition interactions,
+while \textcolor{cAzure!70!black}{learned seeds} pool and bridge partitions
+for global context---preserving topology at subquadratic cost.}
+\label{fig:conceptual}
+\end{figure*}

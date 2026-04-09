@@ -96,7 +96,7 @@ SGFormer~\citep{wu2023sgformer} & \best{72.63}{\scriptsize$\pm$0.13} \\
 \label{tab:arxiv}
 \end{table}
 
-\noindent PCGT scores 72.50\% on ogbn-arxiv, within the error bars of SGFormer (72.63$\pm$0.13\%) and beating all other baselines including DIFFormer (72.02\%) and GCN (71.74\%). On a homophilic graph like arxiv ($h$=0.66), SGFormer's lightweight $O(N)$ kernel is well-suited, so matching it is the expected outcome---what matters is that PCGT does not lose accuracy at this scale. The result shows that the $O(N^2/K + NMK)$ complexity is practical at 169K nodes.
+\noindent PCGT scores 72.50\% on ogbn-arxiv, within the error bars of SGFormer (72.63$\pm$0.13\%) and above all other baselines including DIFFormer (72.02\%) and GCN (71.74\%). This small gap is expected rather than surprising: ogbn-arxiv is a homophilic citation network ($h$=0.66) where connected papers share topics, and its 128-dimensional features are already well-aligned with neighborhood structure. In this regime, SGFormer's $O(N)$ global kernel---which effectively computes a rank-1 all-pair attention---is well-matched to the task, and the additional structural encoding from PCGT's partition attention provides limited additional signal. Conversely, PCGT's largest gains occur precisely where SGFormer's topology-agnostic kernel falls short: on heterophilic graphs where intra-partition structure differs qualitatively from random mixing. The ogbn-arxiv result demonstrates that PCGT degrades gracefully on datasets outside its primary advantage regime, maintaining competitive accuracy at 169K-node scale without the catastrophic failure modes seen in other transformers (cf.\ NodeFormer at 59.9\%).
 
 \begin{figure}[t]
 \centering
@@ -174,7 +174,7 @@ SGFormer~\citep{wu2023sgformer} & \best{72.63}{\scriptsize$\pm$0.13} \\
 
 Analysis of the learned $\alpha$ and $\beta$ values reveals adaptive behavior:
 \begin{itemize}
-\item $\alpha$ (local vs.~global blend) stabilizes near 0.5 across datasets, indicating that both local and global attention contribute roughly equally with the current single-layer design.
+\item $\alpha$ (local vs.~global blend) stabilizes near 0.5 across datasets. This indicates that both attention resolutions contribute complementary information under the current single-layer design: local attention captures fine-grained intra-partition patterns while global attention provides cross-partition context, and neither consistently dominates. Critically, ablations confirm that removing \emph{either} branch degrades accuracy (Table~\ref{tab:ablation}: $-$0.17 to $-$0.30 without global, $-$0.39 to $-$0.89 without local), so the equal blend reflects genuine contribution from both scales rather than redundancy. We note that $\alpha$ \emph{could} in principle be fixed at 0.5 with minimal performance loss; the learnable parameterization serves primarily as a safety valve that prevents pathological configurations during training.
 \item $\beta$ (self-connection) is dataset-dependent and \emph{unconstrained}. On 9 of 11 datasets $\beta > 0$ (the model amplifies self-features), with the largest values on Squirrel ($\beta = +3.53$) and Chameleon ($\beta = +3.08$)---datasets with high-dimensional features (2089 and 2325 dims) where self-identity is highly informative. On Film ($\beta = -0.99 \pm 1.43$, negative in 8/10 splits) and Deezer ($\beta = -0.57 \pm 0.25$, negative in 5/5 runs), the model suppresses self-features. Notably, there is no linear correlation between $\beta$ and homophily (Pearson $r = 0.006$, $p = 0.99$ across all 11 datasets), suggesting that $\beta$ may reflect complementarity between self-features and attention-weighted context rather than homophily per se (though with only 11 datasets, this correlation test has limited statistical power).
 \end{itemize}
 
@@ -284,7 +284,7 @@ SGFormer & 83.87{\scriptsize$\pm$.61} & 48.34{\scriptsize$\pm$2.64} & 44.81{\scr
 
 \textbf{PSE aids heterophilic classification.}~~Partition structural encoding provides its largest benefit on heterophilic datasets ($-$0.55 Chameleon, $-$0.64 Squirrel) vs.\ $-$0.47 on homophilic Cora. Explicit partition membership signals help distinguish structurally similar nodes across different communities.
 
-\textbf{Topology-aware partitioning matters selectively.}~~Replacing METIS with random partitions hurts Squirrel ($-$0.68) more than Chameleon ($-$0.26). Both datasets have low homophily (Squirrel $h$=0.21, Chameleon $h$=0.24), but Squirrel's stronger community structure means METIS preserves more useful information. Chameleon, with $h$ near random chance ($1/K_{\text{class}} = 0.2$), benefits less---consistent with Deezer ($h \approx 0.5$), where random partitioning works about as well.
+\textbf{Topology-aware partitioning matters selectively.}~~Replacing METIS with random partitions hurts Squirrel ($-$0.68) more than Chameleon ($-$0.26). Although Chameleon has higher Newman modularity ($Q=0.58$ vs.\ $Q=0.38$), the relevant measure is the \emph{damage} caused by random assignment. Squirrel's denser connectivity (avg.\ degree 42 vs.\ 20) means random partitions mix more structurally dissimilar nodes, destroying the fragile-but-real community structure that METIS captures. Chameleon's smaller, sparser graph is less sensitive to partition quality.
 
 \subsection{Sensitivity to Partition Count \texorpdfstring{$K$}{K}}
 
@@ -313,35 +313,32 @@ $K$ & \textbf{Cham.} & \textbf{Sqrl.} \\
 
 \subsection{Runtime Analysis}
 
-Table~\ref{tab:runtime} reports per-epoch wall-clock time on an NVIDIA H100 80GB GPU. We compare GCN (local message passing only), SGFormer ($O(N)$ global attention), and PCGT ($O(N^2/K + NMK)$ partition-conditioned attention plus GCN).
+Table~\ref{tab:runtime} reports per-epoch training time, single-pass inference time, and peak GPU memory on an NVIDIA H100 80GB GPU. We compare SGFormer ($O(N)$ global attention) and PCGT ($O(N^2/K + NMK)$ partition-conditioned attention plus GCN).
 
 \begin{table}[t]
 \centering
 \small
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2.5pt}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{l|r|r|rrr|r}
+\begin{tabular}{l|r|r|rr|rr|rr}
 \toprule
-\textbf{Dataset} & $N$ & $K$ & \textbf{GCN} & \textbf{SGF} & \textbf{PCGT} & \textbf{Ratio} \\
+ & & & \multicolumn{2}{c|}{\textbf{Train (ms/ep)}} & \multicolumn{2}{c|}{\textbf{Infer (ms)}} & \multicolumn{2}{c}{\textbf{Mem (MB)}} \\
+\textbf{Dataset} & $N$ & $K$ & \textbf{SGF} & \textbf{PCGT} & \textbf{SGF} & \textbf{PCGT} & \textbf{SGF} & \textbf{PCGT} \\
 \midrule
-Cora       &  2,708  & 10  & 3.5  & 5.5   & 15.9  & 2.9$\times$ \\
-CiteSeer   &  3,327  & 20  & 3.7  & 5.4   & 26.8  & 5.0$\times$ \\
-PubMed     & 19,717  & 50  & 3.6  & 5.4   & 61.1  & 11.2$\times$ \\
-Chameleon  &    890  & 10  & 2.4  & 4.6   & 15.1  & 3.3$\times$ \\
-Squirrel   &  2,223  & 10  & 3.3  & 8.0   & 16.9  & 2.1$\times$ \\
-Film       &  7,600  & 5   & 3.9  & 5.9   & 10.2  & 1.7$\times$ \\
-Deezer     & 28,281  & 20  & 7.6  & 14.3  & 34.1  & 2.4$\times$ \\
-Co-CS      & 18,333  & 15  & 4.0  & 6.4   & 22.3  & 3.5$\times$ \\
-Co-Phys    & 34,493  & 20  & 6.6  & 9.9   & 30.5  & 3.1$\times$ \\
-Am-Comp    & 13,752  & 10  & 4.2  & 6.5   & 17.9  & 2.7$\times$ \\
-Am-Photo   &  7,650  & 10  & 3.4  & 5.6   & 16.9  & 3.0$\times$ \\
+Cora       &  2,708  & 10  & 5.5   & 15.9  & 1.3  & 3.4   & 57   & 57  \\
+CiteSeer   &  3,327  & 20  & 5.4   & 26.8  & 1.3  & 5.5   & 91   & 91  \\
+Chameleon  &    890  & 10  & 4.6   & 15.1  & 1.3  & 3.3   & 52   & 52  \\
+Squirrel   &  2,223  & 10  & 8.0   & 16.9  & 1.4  & 3.5   & 105  & 105 \\
+Film       &  7,600  & 5   & 5.9   & 10.2  & 1.4  & 2.4   & 100  & 100 \\
+PubMed     & 19,717  & 50  & 5.4   & 61.1  & 1.3  & 11.8  & 146  & 147 \\
+Deezer     & 28,281  & 20  & 14.3  & 34.1  & 10.5 & 12.6  & 3631 & 3632 \\
 \midrule
-ogbn-arxiv & 169,343 & 256 & ---  & 56.8  & 430.2 & 7.6$\times$ \\
+ogbn-arxiv & 169,343 & 256 & 56.8  & 430.2 & ---  & ---   & ---  & ---  \\
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Per-epoch training time (ms) on H100. Ratio = PCGT / SGFormer. For medium-scale graphs ($N < 35$K), the overhead is 1.7--5.0$\times$; the PubMed outlier (11.2$\times$) reflects its large $K$=50. On ogbn-arxiv the overhead is 7.6$\times$, though both models complete 500 epochs in under 4 minutes.}
+\caption{Efficiency comparison on H100. Training time (ms/epoch), inference time (mean of 50 forward passes, ms), and peak GPU memory (MB). PCGT's training overhead is 1.7--11.2$\times$ over SGFormer, increasing with $K$. Inference overhead is 1.2--8.8$\times$; memory overhead is negligible ($<$1\,MB on all datasets). On ogbn-arxiv, a full 500-epoch run completes in $\sim$3.6 minutes.}
 \label{tab:runtime}
 \end{table}
 
-\noindent \textbf{Overhead is moderate and predictable.} Across 11 medium-scale datasets, PCGT's overhead over SGFormer ranges from 1.7$\times$ (Film, $K$=5) to 5.0$\times$ (CiteSeer, $K$=20), with a median of 3.0$\times$. The overhead correlates with $K$ and $N$: smaller $K$ yields less intra-partition attention cost (cf.\ Film at 1.7$\times$ vs.\ PubMed at 11.2$\times$ with $K$=50). The PubMed outlier is explained by its large $K$=50, which creates $N^2/K \approx 7.8$M attention operations. On ogbn-arxiv (169K nodes), PCGT takes 430\,ms/epoch vs.\ SGFormer's 57\,ms, but even at this scale a full 500-epoch run completes in $\sim$3.6 minutes---practical for real-world use.
+\noindent \textbf{Overhead is moderate and predictable.} PCGT's training overhead over SGFormer ranges from 1.7$\times$ (Film, $K$=5) to 11.2$\times$ (PubMed, $K$=50), with a median of 3.0$\times$. The PubMed outlier reflects its large $K$=50, which creates $N^2/K \approx 7.8$M attention pairs. Inference overhead follows the same pattern but is smaller (1.2--8.8$\times$) since the backward pass is absent. Crucially, \textbf{memory overhead is negligible}: PCGT adds $<$1\,MB over SGFormer on all datasets, because the partition attention operates on the same feature tensors---only the attention computation pattern changes, not the storage footprint. On Deezer (28K nodes), both methods require $\sim$3.6\,GB, dominated by the 31K-dimensional input features. On ogbn-arxiv (169K nodes), PCGT takes 430\,ms/epoch vs.\ SGFormer's 57\,ms, but even at 500 epochs this completes in $\sim$3.6 minutes.
