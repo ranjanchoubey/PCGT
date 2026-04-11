@@ -104,9 +104,9 @@ PCGT combines local and global attention with learnable blending. Given a graph 
 
 \subsection{Local Attention and Partition Encoding}
 
-Partition the graph into $K$ disjoint sets $\{S_1, \ldots, S_K\}$ using METIS/KMeans, where $S_p \subset \{1,\ldots,N\}$ is the set of node indices in partition $p$. Given node features $\mathbf{X} \in \mathbb{R}^{N \times d}$, we compute query, key, and value projections $\mathbf{Q} = \mathbf{X} W_Q$, $\mathbf{K} = \mathbf{X} W_K$, $\mathbf{V} = \mathbf{X} W_V$ with learnable weights $W_Q, W_K, W_V \in \mathbb{R}^{d \times d}$. The notation $\mathbf{Q}[S_p] \in \mathbb{R}^{|S_p| \times d}$ selects the rows of $\mathbf{Q}$ corresponding to nodes in $S_p$ (likewise for $\mathbf{K}[S_p]$, $\mathbf{V}[S_p]$). Local attention within partition $p$ is:
+Partition the graph into $K$ disjoint sets using METIS/KMeans. For partition $p$, compute:
 \begin{equation}
-\text{Attn}_{\text{local}}^{(p)} = \text{softmax}\!\left( \frac{\mathbf{Q}[S_p]\, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p],\; O(N^2\!/K)
+\text{Attn}_{\text{local}}^{(p)} = \text{softmax}\!\left( \frac{\mathbf{Q}[S_p] \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p],\; O(N^2\!/K)
 \end{equation}
 
 Add partition structural encoding (PSE) before Q/K/V projection: $\mathbf{x}_i \leftarrow \mathbf{x}_i + \mathbf{E}_{k_i}$, where $\mathbf{E} \in \mathbb{R}^{K \times d}$ is a learned embedding table indexed by partition id $k_i$, initialized from $\mathcal{N}(0, 0.02)$.  PSE is added once (before projection) so that queries, keys, and values all encode partition membership.
@@ -114,45 +114,35 @@ Add partition structural encoding (PSE) before Q/K/V projection: $\mathbf{x}_i \
 \subsection{Global Attention via Learned Seeds}
 \label{sec:global_attn}
 
-We learn $M$ seed query vectors $\mathbf{S} \in \mathbb{R}^{M \times d}$ shared across all partitions. For each partition $p$, the seeds attention-pool the partition's keys and values into $M$ representative vectors. Let $\mathbf{A}_s^{(p)}$ denote the seed-to-partition attention weights:
+We learn $M$ seed query vectors $\mathbf{S} \in \mathbb{R}^{M \times d}$ shared across all partitions. For each partition $p$, the seeds attention-pool the partition's keys and values into $M$ representatives:
 \begin{equation}
-\mathbf{A}_s^{(p)} = \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \in \mathbb{R}^{M \times |S_p|}
-\label{eq:seed_attn}
+\mathbf{R}_k^{(p)} = \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{K}[S_p], \quad \mathbf{R}_v^{(p)} = \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p]
+\label{eq:reps}
 \end{equation}
-where $\mathbf{S} \in \mathbb{R}^{M \times d}$ are the learned seed queries, $\mathbf{K}[S_p] \in \mathbb{R}^{|S_p| \times d}$ are the key vectors of nodes in partition $p$, and $d$ is the hidden dimension. The softmax normalizes over the $|S_p|$ nodes in the partition, so each row of $\mathbf{A}_s^{(p)}$ is a distribution over partition members.
-
-The key and value representatives are then:
-\begin{align}
-\mathbf{R}_k^{(p)} &= \mathbf{A}_s^{(p)} \, \mathbf{K}[S_p] \in \mathbb{R}^{M \times d} \label{eq:rk}\\
-\mathbf{R}_v^{(p)} &= \mathbf{A}_s^{(p)} \, \mathbf{V}[S_p] \in \mathbb{R}^{M \times d} \label{eq:rv}
-\end{align}
-Here $\mathbf{V}[S_p] \in \mathbb{R}^{|S_p| \times d}$ are the value vectors of partition $p$. Each of the $M$ representatives is a weighted average of the partition's keys (resp.\ values), where the weights are determined by the learned seeds' attention over that partition's nodes. Stacking across all $K$ partitions yields $\mathbf{R}_k, \mathbf{R}_v \in \mathbb{R}^{KM \times d}$---a compact summary of the entire graph's keys and values. Each node then cross-attends to all representatives:
+where $\mathbf{R}_k^{(p)}, \mathbf{R}_v^{(p)} \in \mathbb{R}^{M \times d}$. Stacking across all $K$ partitions yields $\mathbf{R}_k, \mathbf{R}_v \in \mathbb{R}^{KM \times d}$. Each node then cross-attends to all representatives:
 \begin{equation}
-\text{Attn}_{\text{global}} = \text{softmax}\!\left( \frac{\mathbf{Q} \, \mathbf{R}_k^T}{\sqrt{d}} \right) \mathbf{R}_v, \quad O(N \!\cdot\! M \!\cdot\! K)
+\text{Attn}_{\text{global}} = \text{softmax}\left( \frac{\mathbf{Q} \, \mathbf{R}_k^T}{\sqrt{d}} \right) \mathbf{R}_v, \quad O(N \cdot M \cdot K)
 \end{equation}
-where $\mathbf{Q} \in \mathbb{R}^{N \times d}$ are the query vectors of all $N$ nodes.
 This two-step design (pool then cross-attend) is related to inducing points in Set Transformer~\citep{lee2019set}, but our seeds are \emph{topology-aware}: they pool from graph-partitioned node groups rather than arbitrary subsets, and adapt to the task unlike the fixed kernel in SGFormer~\citep{wu2023sgformer}.
 
 \subsection{Blending, Self-Connection, and GCN Fusion}
 
-The local and global outputs are blended with a learnable scalar $\alpha = \sigma(\alpha_{\text{logit}}) \in (0,1)$ where $\sigma$ is the sigmoid function:
+The local and global outputs are blended with a learnable scalar $\alpha = \sigma(\alpha_{\text{logit}})$ where $\sigma$ is the sigmoid function:
 \begin{equation}
 \mathbf{h}_{\text{context}} = \alpha \cdot \text{Attn}_{\text{local}} + (1 - \alpha) \cdot \text{Attn}_{\text{global}}
 \end{equation}
-where $\text{Attn}_{\text{local}} \in \mathbb{R}^{N \times d}$ and $\text{Attn}_{\text{global}} \in \mathbb{R}^{N \times d}$ are the stacked local and global outputs from Eqs.~(1) and (5), and $\mathbf{h}_{\text{context}} \in \mathbb{R}^{N \times d}$ is the blended representation.
 
 A learnable self-connection weight $\beta \in \mathbb{R}$ (unconstrained) adds the node's own transformed value:
 \begin{equation}
 \mathbf{h}_{\text{attn}} = \mathbf{h}_{\text{context}} + \beta \cdot \mathbf{V}_i
 \end{equation}
-where $\mathbf{V}_i \in \mathbb{R}^d$ is the value vector of node $i$ (the $i$-th row of $\mathbf{V}$).
 Because $\beta$ is \emph{unconstrained}, it can become negative. On datasets where a node's own features are less informative than the attention context (e.g., Film, Deezer), this lets the model suppress the self-connection. Conversely, on feature-rich graphs like Chameleon and Squirrel, $\beta$ grows strongly positive. We formalize this: if the loss $\mathcal{L}$ is locally convex in $\beta$, then $\beta^* < 0$ whenever the self-features are, on aggregate, aligned with the loss-increasing direction (Proposition~\ref{prop:beta}, Appendix~\ref{app:beta_prop}).
 
 Finally, the PCGT attention output is fused with a GCN branch via a fixed hyperparameter $\lambda_{\text{gw}} \in [0,1]$:
 \begin{equation}
 \mathbf{h}_{\text{final}} = \lambda_{\text{gw}} \cdot \text{GCN}(\mathbf{X}, \mathbf{A}) + (1 - \lambda_{\text{gw}}) \cdot \mathbf{h}_{\text{attn}}
 \end{equation}
-where $\mathbf{X} \in \mathbb{R}^{N \times d_{\text{in}}}$ is the input feature matrix, $\mathbf{A} \in \{0,1\}^{N \times N}$ is the adjacency matrix, and GCN is a standard multi-layer graph convolutional network~\citep{kipf2017semi}. The GCN branch provides explicit edge-level structural features that complement the partition-based attention.
+where GCN is a standard multi-layer graph convolutional network~\citep{kipf2017semi}. The GCN branch provides explicit edge-level structural features that complement the partition-based attention.
 
 The complete PCGT layer applies: input projection $\to$ partition structural encoding $\to$ Q,K,V projections $\to$ local + global attention $\to$ $\alpha$-blend $\to$ $\beta$ self-connection $\to$ LayerNorm $\to$ residual connection $\to$ dropout. The full procedure is summarized in Algorithm~\ref{alg:pcgt}.
 
@@ -163,18 +153,23 @@ The complete PCGT layer applies: input projection $\to$ partition structural enc
 \KwIn{Features $\mathbf{X} \in \mathbb{R}^{N \times d}$, adjacency $\mathbf{A}$, partitions $\{S_1, \ldots, S_K\}$}
 \KwOut{Updated features $\mathbf{H} \in \mathbb{R}^{N \times d}$}
 \BlankLine
-$\mathbf{X} \leftarrow \mathbf{X} + \mathbf{E}[\text{partition id}]$ \tcp*{\color{gray}partition structural encoding}
+\tcp{Encode \& project}
+$\mathbf{X} \leftarrow \mathbf{X} + \mathbf{E}[\text{partition id}]$ \tcp*{PSE lookup}
 $\mathbf{Q}, \mathbf{K}, \mathbf{V} \leftarrow \mathbf{X} W_Q,\; \mathbf{X} W_K,\; \mathbf{X} W_V$\;
 \BlankLine
+\tcp{Local attention \& seed pooling}
 \For{$p = 1$ \KwTo $K$}{
   $\mathbf{h}^{(p)}_{\mathrm{local}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}[S_p]\, \mathbf{K}[S_p]^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{V}[S_p]$\;
   $\mathbf{R}_k^{(p)},\, \mathbf{R}_v^{(p)} \leftarrow \mathrm{SeedPool}(\mathbf{S},\, \mathbf{K}[S_p],\, \mathbf{V}[S_p])$\;
 }
-Stack all $\mathbf{h}_{\mathrm{local}}^{(p)}$ into $\mathbf{h}_{\mathrm{local}} \!\in\! \mathbb{R}^{N \times d}$; all $\mathbf{R}_k^{(p)}, \mathbf{R}_v^{(p)}$ into $\mathbf{R}_k, \mathbf{R}_v \!\in\! \mathbb{R}^{KM \times d}$\;
-$\mathbf{h}_{\mathrm{global}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}\, \mathbf{R}_k^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{R}_v$ \tcp*{\color{gray}global cross-attention}
+Stack $\mathbf{h}_{\mathrm{local}} \!\in\! \mathbb{R}^{N \times d}$;\; stack $\mathbf{R}_k, \mathbf{R}_v \!\in\! \mathbb{R}^{KM \times d}$\;
 \BlankLine
+\tcp{Global attention via representatives}
+$\mathbf{h}_{\mathrm{global}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}\, \mathbf{R}_k^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{R}_v$\;
+\BlankLine
+\tcp{Blend, self-connect, fuse with GCN}
 $\mathbf{h}_{\mathrm{ctx}} \leftarrow \sigma(\alpha)\, \mathbf{h}_{\mathrm{local}} + (1\!-\!\sigma(\alpha))\, \mathbf{h}_{\mathrm{global}}$\;
-$\mathbf{h}_{\mathrm{attn}} \leftarrow \mathbf{h}_{\mathrm{ctx}} + \beta \cdot \mathbf{V}$ \tcp*{\color{gray}self-connection}
+$\mathbf{h}_{\mathrm{attn}} \leftarrow \mathbf{h}_{\mathrm{ctx}} + \beta \cdot \mathbf{V}$\;
 $\mathbf{H} \leftarrow \lambda_{\mathrm{gw}}\, \mathrm{GCN}(\mathbf{X}, \mathbf{A}) + (1\!-\!\lambda_{\mathrm{gw}})\, \mathrm{LN}(\mathbf{h}_{\mathrm{attn}})$\;
 \Return{$\mathbf{H}$}
 \end{algorithm}
@@ -191,12 +186,12 @@ The effective attention in PCGT admits a structured factorization that connects 
 \begin{remark}[Attention Factorization]
 The PCGT attention matrix decomposes as:
 \begin{equation}
-\boldsymbol{\Omega}_{\mathrm{PCGT}} = \alpha \cdot \boldsymbol{\Omega}_{\mathrm{local}} + (1-\alpha) \cdot \boldsymbol{\Omega}_{\mathrm{global}}
+\mathbf{A}_{\mathrm{PCGT}} = \alpha \cdot \mathbf{A}_{\mathrm{local}} + (1-\alpha) \cdot \mathbf{A}_{\mathrm{global}}
 \label{eq:factorization}
 \end{equation}
-where $\boldsymbol{\Omega}_{\mathrm{local}} \in \mathbb{R}^{N \times N}$ is \emph{block-diagonal} (exact softmax attention within each partition) and $\boldsymbol{\Omega}_{\mathrm{global}}$ admits a \emph{low-rank factorization}:
+where $\mathbf{A}_{\mathrm{local}} \in \mathbb{R}^{N \times N}$ is \emph{block-diagonal} (exact softmax attention within each partition) and $\mathbf{A}_{\mathrm{global}}$ admits a \emph{low-rank factorization}:
 \begin{equation}
-\boldsymbol{\Omega}_{\mathrm{global}} = \mathbf{P} \cdot \mathbf{W} \quad \text{with}\; \mathbf{P} \in \mathbb{R}^{N \times KM},\; \mathbf{W} \in \mathbb{R}^{KM \times N}
+\mathbf{A}_{\mathrm{global}} = \mathbf{P} \cdot \mathbf{W} \quad \text{with}\; \mathbf{P} \in \mathbb{R}^{N \times KM},\; \mathbf{W} \in \mathbb{R}^{KM \times N}
 \label{eq:lowrank}
 \end{equation}
 where $P_{i,m} = \mathrm{softmax}(\mathbf{q}_i^T \mathbf{r}_k^{(m)} / \sqrt{d})$ is node $i$'s attention to representative $m$, and $W_{m,j} = \mathrm{softmax}(\mathbf{s}^T \mathbf{k}_j / \sqrt{d})$ is representative $m$'s pooling weight on node $j$.

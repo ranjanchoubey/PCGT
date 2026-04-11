@@ -1,15 +1,22 @@
 \section{Introduction}
 
-Scaling attention to large graphs without losing structural awareness is the central tension in graph transformer design. Full $O(N^2)$ self-attention captures all pairwise interactions but is prohibitive beyond a few thousand nodes; efficient alternatives achieve $O(N)$ cost by reducing attention to a single global kernel~\citep{wu2023sgformer} or random feature approximation~\citep{wu2022nodeformer}, but these treat all node pairs uniformly and discard the multi-scale community structure that real-world graphs exhibit. Neither approach uses what graph partitioning algorithms like METIS~\citep{karypis1998metis} already know: that nodes cluster into densely connected communities, and the interaction patterns \emph{within} a community differ fundamentally from those \emph{across} communities.
+Graph neural networks (GNNs) based on message passing~\citep{gilmer2017mpnn, kipf2017semi, scarselli2009gnn} have achieved strong results on node classification tasks, particularly on \emph{homophilic} graphs where connected nodes share similar labels. However, many real-world graphs are \emph{heterophilic}---neighboring nodes frequently belong to different classes~\citep{zhu2020h2gcn, pei2020geomgcn}. Standard GNNs struggle in this setting because neighborhood aggregation blends features from dissimilar nodes, degrading representations~\citep{li2018oversmoothing}.
 
-We propose \textbf{PCGT} (Partition-Conditioned Graph Transformer), which resolves this tension by operating at two attention resolutions simultaneously. Within each graph partition, exact softmax attention captures detailed intra-community patterns at cost $O(N^2/K)$. Across partitions, learned seed vectors pool each group into compact representatives, and every node cross-attends to all representatives for global context at cost $O(NMK)$. A learnable scalar $\alpha$ blends these two scales, while an unconstrained self-connection weight $\beta$ allows the model to suppress a node's own features when they are misleading---going negative on datasets like Film and Deezer where the attention context is more informative than self-identity.
+Two families of approaches address this challenge. \emph{Heterophily-specific GNNs} (H$_2$GCN~\citep{zhu2020h2gcn}, GloGNN~\citep{li2022glognn}, GPR-GNN~\citep{chien2021gprgnn}) modify the aggregation scheme to separate or reweight heterophilic neighbors, but remain constrained to local or fixed-hop neighborhoods. \emph{Graph Transformers} (NodeFormer~\citep{wu2022nodeformer}, SGFormer~\citep{wu2023sgformer}, GraphGPS~\citep{rampasek2022graphgps}) compute global all-pair attention to capture long-range dependencies, but either require $O(N^2)$ cost or use lossy kernel approximations that treat all node pairs uniformly regardless of graph topology.
+
+Real-world graphs have multi-resolution structure: nodes form local communities (captured by graph partitions) while also participating in global patterns (cross-community interactions). Local GNNs ignore the global patterns; single-resolution global transformers ignore the community structure. A method that operates at both scales should do better.
+
+We propose \textbf{PCGT} (Partition-Conditioned Graph Transformer), which operates at two attention resolutions simultaneously:
+\begin{itemize}
+\item \textbf{Fine (local):} Exact softmax attention within each graph partition, capturing detailed intra-community patterns at cost $O(N^2/K)$.
+\item \textbf{Coarse (global):} Learned seed vectors attention-pool each partition into $M$ representative vectors; every node then cross-attends to all $KM$ representatives for global context at cost $O(NMK)$.
+\item \textbf{Adaptive blending:} Learnable scalars $\alpha$ (local vs.\ global) and $\beta$ (unconstrained self-connection) allow the model to adapt to both homophilic and heterophilic regimes.
+\end{itemize}
 
 Our contributions are:
 \begin{enumerate}
 \item A \textbf{multi-resolution partition attention} mechanism that is both topology-aware and subquadratic, combining the expressiveness of exact attention with the scalability of learned pooling.
-\item An \textbf{unconstrained self-connection weight} $\beta$ that adapts per dataset---going negative on Film and Deezer where suppressing self-features helps, and strongly positive on feature-rich heterophilic graphs like Chameleon ($\beta = +3.08$) and Squirrel ($\beta = +3.53$). We provide a formal condition (Proposition~\ref{prop:beta}) under which $\beta^* < 0$ is optimal.
+\item An \textbf{unconstrained self-connection weight} $\beta$ that adapts per dataset---going negative on Film and Deezer where suppressing self-features helps, and strongly positive on feature-rich heterophilic graphs like Chameleon ($\beta = +3.08$) and Squirrel ($\beta = +3.53$).
 \item \textbf{Experiments on 12 benchmarks}---including ogbn-arxiv (169K nodes)---where PCGT beats SGFormer by +4.1\% on Chameleon and +3.7\% on Squirrel, improves on CiteSeer (+0.5\%) and PubMed (+0.7\%), and ranks first or tied-first on 10 of 12 datasets.
 \item An \textbf{analysis of partition strategies}: topology-aware (METIS) partitioning helps on structured heterophilic graphs, and ablations confirm that each component---local attention, global seeds, PSE, GCN branch---adds measurable accuracy.
 \end{enumerate}
-
-\input{sections/fig_conceptual}
