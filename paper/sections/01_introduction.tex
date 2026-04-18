@@ -1,10 +1,12 @@
 \section{Introduction}
 
+\input{sections/fig_conceptual.tex}
+
 Graph neural networks (GNNs) based on message passing~\citep{gilmer2017mpnn, kipf2017semi, scarselli2009gnn} have achieved strong results on node classification tasks, particularly on \emph{homophilic} graphs where connected nodes share similar labels. However, many real-world graphs are \emph{heterophilic}---neighboring nodes frequently belong to different classes~\citep{zhu2020h2gcn, pei2020geomgcn}. Standard GNNs struggle in this setting because neighborhood aggregation blends features from dissimilar nodes, degrading representations~\citep{li2018oversmoothing}.
 
 Two families of approaches address this challenge. \emph{Heterophily-specific GNNs} (H$_2$GCN~\citep{zhu2020h2gcn}, GloGNN~\citep{li2022glognn}, GPR-GNN~\citep{chien2021gprgnn}) modify the aggregation scheme to separate or reweight heterophilic neighbors, but remain constrained to local or fixed-hop neighborhoods. \emph{Graph Transformers} (NodeFormer~\citep{wu2022nodeformer}, SGFormer~\citep{wu2023sgformer}, GraphGPS~\citep{rampasek2022graphgps}) compute global all-pair attention to capture long-range dependencies, but either require $O(N^2)$ cost or use lossy kernel approximations that treat all node pairs uniformly regardless of graph topology.
 
-Real-world graphs have multi-resolution structure: nodes form local communities (captured by graph partitions) while also participating in global patterns (cross-community interactions). Local GNNs ignore the global patterns; single-resolution global transformers ignore the community structure. A method that operates at both scales should do better.
+Real-world graphs have multi-resolution structure: nodes form local communities (captured by graph partitions) while also participating in global patterns (cross-community interactions). Local GNNs ignore the global patterns; single-resolution global transformers ignore the community structure (Figure~\ref{fig:conceptual}). A method that operates at both scales should do better.
 
 We propose \textbf{PCGT} (Partition-Conditioned Graph Transformer), which operates at two attention resolutions simultaneously:
 \begin{itemize}
