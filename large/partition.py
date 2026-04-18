@@ -4,15 +4,23 @@ from collections import defaultdict
 
 
 def edge_index_to_adj_list(edge_index, num_nodes):
-    """Convert edge_index [2, E] to adjacency list (list of lists)."""
-    adj = defaultdict(set)
+    """Convert edge_index [2, E] to adjacency list (list of lists).
+    Uses scipy CSR for memory efficiency on large graphs."""
+    from scipy.sparse import coo_matrix
+
     src, dst = edge_index[0].numpy(), edge_index[1].numpy()
-    for s, d in zip(src, dst):
-        if s != d:
-            adj[int(s)].add(int(d))
-            adj[int(d)].add(int(s))
-    # Return as list of sorted lists (METIS format)
-    return [sorted(adj[i]) for i in range(num_nodes)]
+    # Remove self-loops
+    mask = src != dst
+    src, dst = src[mask], dst[mask]
+    # Build symmetric CSR (METIS needs undirected)
+    data = np.ones(len(src) * 2, dtype=np.int32)
+    row = np.concatenate([src, dst])
+    col = np.concatenate([dst, src])
+    adj = coo_matrix((data, (row, col)), shape=(num_nodes, num_nodes)).tocsr()
+    # Deduplicate by converting back (CSR automatically sums duplicates)
+    adj.data = np.ones_like(adj.data)
+    # Convert to list of lists
+    return [adj.indices[adj.indptr[i]:adj.indptr[i+1]].tolist() for i in range(num_nodes)]
 
 
 def metis_partition(edge_index, num_nodes, num_partitions):
