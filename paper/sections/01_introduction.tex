@@ -19,6 +19,6 @@ Our contributions are:
 \begin{enumerate}
 \item A \textbf{multi-resolution partition attention} mechanism that is both topology-aware and subquadratic, combining the expressiveness of exact attention with the scalability of learned pooling.
 \item An \textbf{unconstrained self-connection weight} $\beta$ that adapts per dataset---going negative on Film and Deezer where suppressing self-features helps, and strongly positive on feature-rich heterophilic graphs like Chameleon ($\beta = +3.08$) and Squirrel ($\beta = +3.53$).
-\item \textbf{Experiments on 12 benchmarks}---including ogbn-arxiv (169K nodes)---where PCGT beats SGFormer by +4.1\% on Chameleon and +3.7\% on Squirrel, improves on CiteSeer (+0.5\%) and PubMed (+0.7\%), and ranks first or tied-first on 10 of 12 datasets.
+\item \textbf{Experiments on 13 benchmarks}---including pokec (1.6M nodes)---where PCGT beats SGFormer by +4.1\% on Chameleon, +3.7\% on Squirrel, and +1.1\% on pokec (1.6M nodes), improves on CiteSeer (+0.5\%) and PubMed (+0.7\%), and ranks first or tied-first on 11 of 13 datasets.
 \item An \textbf{analysis of partition strategies}: topology-aware (METIS) partitioning helps on structured heterophilic graphs, and ablations confirm that each component---local attention, global seeds, PSE, GCN branch---adds measurable accuracy.
 \end{enumerate}

@@ -70,33 +70,32 @@ SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2}
 
 \textbf{Mixed homophily (Deezer).} PCGT scores 67.2 vs.\ SGFormer's 67.1 on Deezer ($h \approx 0.5$), a +0.1\% gap that is within the error bars and not statistically significant. With a lower graph weight ($\lambda_{\text{gw}}=0.5$), PCGT gives more influence to the partition-conditioned attention, but the gain on this mixed-homophily dataset is marginal.
 
-\subsection{Large-Scale Results: ogbn-arxiv}
+\subsection{Large-Scale Results}
 
-To test scalability beyond medium-sized graphs, we evaluate on ogbn-arxiv (169K nodes, 1.2M edges), the standard large-scale benchmark for graph transformers~\citep{hu2020ogb}. We use the official OGB split and follow the mini-batch training setup of SGFormer~\citep{wu2023sgformer} with batch size 10K, hidden dimension 256, 3-layer GCN backbone, and 1 PCGT attention layer with $K$=256 partitions.
+To test scalability beyond medium-sized graphs, we evaluate on ogbn-arxiv (169K nodes, 1.2M edges) and pokec (1.6M nodes, 30.6M edges)---two standard large-scale benchmarks spanning homophilic and heterophilic regimes~\citep{hu2020ogb, lim2021large}. We follow the mini-batch training setup of SGFormer~\citep{wu2023sgformer}: batch size 10K (arxiv) / 100K (pokec), hidden dimension 256 (arxiv) / 64 (pokec). Baselines are from SGFormer Table~3.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{l|c}
+\begin{tabular}{l|cc}
 \toprule
-\textbf{Method} & \textbf{ogbn-arxiv} \\
+\textbf{Method} & \textbf{ogbn-arxiv} & \textbf{pokec} \\
+ & (169K, $h$=0.66) & (1.6M, $h$=0.45) \\
 \midrule
-GCN~\citep{kipf2017semi} & 71.74{\scriptsize$\pm$0.29} \\
-SIGN~\citep{rossi2020sign} & 71.95{\scriptsize$\pm$0.11} \\
-GraphSAGE~\citep{hamilton2017sage} & 71.49{\scriptsize$\pm$0.27} \\
-ClusterGCN~\citep{chiang2019clustergcn} & 71.24{\scriptsize$\pm$0.44} \\
-NodeFormer~\citep{wu2022nodeformer} & 59.90{\scriptsize$\pm$0.42} \\
-DIFFormer~\citep{wu2023difformer} & 72.02{\scriptsize$\pm$0.13} \\
-SGFormer~\citep{wu2023sgformer} & \best{72.63}{\scriptsize$\pm$0.13} \\
+MLP & 55.50{\scriptsize$\pm$0.23} & 60.15{\scriptsize$\pm$0.03} \\
+GCN & 71.74{\scriptsize$\pm$0.29} & 62.31{\scriptsize$\pm$1.13} \\
+SIGN & 70.28{\scriptsize$\pm$0.25} & 68.01{\scriptsize$\pm$0.25} \\
+NodeFormer & 59.90{\scriptsize$\pm$0.42} & 70.32{\scriptsize$\pm$0.45} \\
+SGFormer & \best{72.63}{\scriptsize$\pm$0.13} & \runup{73.76}{\scriptsize$\pm$0.24} \\
 \midrule
-\textbf{PCGT (ours)} & \runup{72.50}{\scriptsize$\pm$0.14} \\
+\textbf{PCGT (ours)} & \runup{72.50}{\scriptsize$\pm$0.14} & \best{74.89}{\scriptsize$\pm$0.29} \\
 \bottomrule
 \end{tabular}
-\caption{Node classification accuracy (\%) on ogbn-arxiv (169K nodes). Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 10 runs, $K$=256 partitions, best validation epoch.}
-\label{tab:arxiv}
+\caption{Large-scale node classification results (\%). ogbn-arxiv uses accuracy; pokec uses accuracy. Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 3 runs, best validation epoch.}
+\label{tab:largescale}
 \end{table}
 
-\noindent PCGT scores 72.50\% on ogbn-arxiv, within the error bars of SGFormer (72.63$\pm$0.13\%) and beating all other baselines including DIFFormer (72.02\%) and GCN (71.74\%). On a homophilic graph like arxiv ($h$=0.66), SGFormer's lightweight $O(N)$ kernel is well-suited, so matching it is the expected outcome---what matters is that PCGT does not lose accuracy at this scale. The result shows that the $O(N^2/K + NMK)$ complexity is practical at 169K nodes.
+\noindent On pokec (1.6M nodes, $h$=0.45), PCGT achieves \textbf{74.89\%}, outperforming SGFormer by \textbf{+1.13\%}---the largest gap among the large-scale datasets. This confirms that partition-conditioned attention is most beneficial on graphs where community structure carries discriminative signal, even at million-node scale. On ogbn-arxiv ($h$=0.66), PCGT scores 72.50\%, within the error bars of SGFormer (72.63$\pm$0.13\%). On a homophilic graph, SGFormer's lightweight $O(N)$ kernel is well-suited; matching it shows that PCGT's $O(N^2/K + NMK)$ complexity does not sacrifice accuracy at scale.
 
 \begin{figure}[t]
 \centering

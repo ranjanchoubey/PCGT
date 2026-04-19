@@ -3,7 +3,7 @@
 \section{Hyperparameter Configuration}
 \label{app:hyperparams}
 
-Table~\ref{tab:hyperparams} lists the full hyperparameter configuration used for PCGT across all 12 datasets. Most medium-scale experiments use hidden dimension $d=64$; Deezer uses $d=96$ due to its larger feature space (31K features). All experiments use a single PCGT attention layer ($L_\text{pcgt}=1$), $M=4$ learned seeds per partition, and the METIS partitioning algorithm. The ogbn-arxiv experiment uses $d=256$ to match the SGFormer baseline configuration.
+Table~\ref{tab:hyperparams} lists the full hyperparameter configuration used for PCGT across all 13 datasets. Most medium-scale experiments use hidden dimension $d=64$; Deezer uses $d=96$ due to its larger feature space (31K features). All experiments use a single PCGT attention layer ($L_\text{pcgt}=1$), $M=4$ learned seeds per partition, and the METIS partitioning algorithm. The ogbn-arxiv experiment uses $d=256$ to match the SGFormer baseline configuration.
 
 \begin{table*}[t]
 \centering
@@ -26,6 +26,7 @@ Am-Comp.     & 64  & 10  & 4 & 0.01  & 5e-4  & 0.5 & 0.8 & 0.2 & 1e-3 & 500  & 1
 Am-Photo     & 64  & 10  & 4 & 0.01  & 5e-4  & 0.5 & 0.8 & 0.2 & 1e-3 & 500  & 10 \\
 \midrule
 ogbn-arxiv   & 256 & 256 & 3 & 0.001 & 0     & 0.5 & 0.5 & 0.5 & 0    & 1000 & 10 \\
+pokec        & 64  & 500 & 2 & 0.01  & 0     & 0.5 & 0.5 & 0   & 0    & 1000 & 3 \\
 \bottomrule
 \end{tabular}
 }% end resizebox
