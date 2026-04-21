@@ -54,7 +54,7 @@ We follow the identical evaluation protocol of SGFormer~\citep{wu2023sgformer} t
     \item \textbf{Amazon2M:} Random 50\%/25\%/25\% split~\citep{wu2022nodeformer}. 3 runs.
 \end{itemize}
 
-We report mean $\pm$ standard deviation of test accuracy across runs, selecting the epoch with highest validation accuracy (early stopping with patience 200).
+We report mean $\pm$ standard deviation of the highest test accuracy observed during training across runs. Early stopping uses patience 200 on validation accuracy. This metric follows the SGFormer evaluation protocol: both codebases use identical \texttt{logger.py} code that records the peak test accuracy across all epochs.
 
 \subsection{Baselines}
 

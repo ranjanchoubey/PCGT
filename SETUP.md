@@ -11,11 +11,17 @@
 
 git clone https://github.com/ranjanchoubey/PCGT.git
 cd PCGT
-bash setup.sh        # installs everything + downloads data
-bash quick_test.sh   # runs a fast test on Cora (~1 min)
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
-That's it. If you see `Final Test: ~84%`, everything works.
+Verify with:
+```bash
+cd medium && python main.py --method pcgt --dataset cora --backbone gcn \
+    --num_partitions 10 --seed 123 --runs 1 --epochs 500
+```
+If you see `Highest Test: ~84%`, everything works.
 
 ---
 
@@ -59,9 +65,8 @@ pip install -r requirements.txt
 
 ### Step 5: Download Datasets
 
-```bash
-bash download_data.sh
-```
+Most datasets are auto-downloaded by PyTorch Geometric on first run.
+For pokec, download manually from [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link) and place in `data/pokec/`.
 
 ### Step 6: Verify
 
@@ -72,7 +77,8 @@ python -c "import torch; import torch_geometric; import torch_sparse; print('OK'
 ### Step 7: Quick Test
 
 ```bash
-bash quick_test.sh
+cd medium && python main.py --method pcgt --dataset cora --backbone gcn \
+    --num_partitions 10 --seed 123 --runs 1 --epochs 500
 ```
 
 ---
@@ -83,5 +89,5 @@ bash quick_test.sh
 |---------|-----|
 | `torch-sparse` build fails | Install PyTorch first, then: `pip install --no-build-isolation torch-scatter torch-sparse` |
 | `No module named 'pymetis'` | `pip install pymetis` |
-| macOS: no GPU detected | Expected — use `--cpu` flag (already set in quick_test.sh) |
+| macOS: no GPU detected | Expected — use `--cpu` flag |
 | `python3` not found | Install Python 3.10 from python.org |

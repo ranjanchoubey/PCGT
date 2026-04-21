@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>PCGT</b> replaces expensive O(N²) global attention with <b>multi-resolution partition-aware attention</b>.<br>
-  Local attention within partitions · Global attention via learned seeds · Linear complexity O(N·(N/K + KM))
+  Local attention within partitions · Global attention via learned seeds · Subquadratic complexity O(N²/K + NMK)
 </p>
 
 <p align="center">
@@ -38,29 +38,29 @@ Built upon [SGFormer](https://github.com/qitianwu/SGFormer) (Wu et al., NeurIPS 
 
 | Dataset | SGFormer | **PCGT** | Δ |
 |:--------|:--------:|:--------:|:-:|
-| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | -0.20 |
-| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | +0.50 |
-| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | +0.70 |
+| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | −0.20 |
+| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | **+0.50** |
+| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | **+0.70** |
 | Film | 37.90 ± 1.1 | **38.00** ± 0.9 | +0.10 |
 | Squirrel | 41.80 ± 2.2 | **45.50** ± 2.7 | **+3.70** |
 | Chameleon | 44.90 ± 3.9 | **49.00** ± 2.8 | **+4.10** |
 | Deezer | 67.10 ± 1.1 | **67.20** ± 0.7 | +0.10 |
-| Coauthor-CS | 94.60 ± 0.5 | **95.10** ± 0.3 | +0.50 |
-| Coauthor-Physics | 96.50 ± 0.2 | **96.80** ± 0.2 | +0.30 |
-| Amazon-Computers | 87.20 ± 0.8 | **88.80** ± 0.7 | **+1.60** |
-| Amazon-Photo | 94.70 ± 0.4 | **95.30** ± 0.4 | +0.60 |
+| Coauthor-CS | 94.90 ± 0.5 | **95.10** ± 0.3 | +0.20 |
+| Coauthor-Physics | 96.60 ± 0.2 | **96.80** ± 0.2 | +0.20 |
+| Amazon-Computers | 87.50 ± 2.0 | **88.80** ± 0.7 | **+1.30** |
+| Amazon-Photo | 95.20 ± 1.2 | **95.30** ± 0.4 | +0.10 |
 
-> **PCGT wins 10/11 benchmarks.** Largest gains on heterophilic graphs: Chameleon +4.10%, Squirrel +3.70%.
+> **PCGT wins 10/11 benchmarks.** Largest gains on heterophilic graphs: Chameleon **+4.10%**, Squirrel **+3.70%**.
 
 ### Large-Scale
 
-| Dataset | Metric | SGFormer | **PCGT** |
-|:--------|:------:|:--------:|:--------:|
-| ogbn-arxiv (169K) | Accuracy | 72.63 ± 0.13 | 72.50 ± 0.14 |
-| ogbn-proteins (132K) | ROC-AUC | 79.53 ± 0.38 | **80.47** ± 0.55 |
-| Pokec (1.6M) | Accuracy | 73.76 ± 0.24 | **76.68** ± 0.24 |
+| Dataset | SGFormer | **PCGT** | Δ |
+|:--------|:--------:|:--------:|:-:|
+| ogbn-arxiv (169K) | **72.63** ± 0.13 | 72.50 ± 0.14 | −0.13 |
+| pokec (1.6M) | 73.76 ± 0.24 | **74.94** ± 0.28 | **+1.18** |
+| Amazon2M (2.4M) | **89.09** ± 0.10 | 88.79 ± 0.06 | −0.30 |
 
-> On **Pokec (1.6M nodes)**, PCGT outperforms SGFormer by **+2.92%**.
+> On **pokec (1.6M nodes)**, PCGT outperforms SGFormer by **+1.2%**.
 
 ### Runtime (H100 GPU)
 
@@ -117,18 +117,20 @@ Best partition: **80.0%** accuracy (12/15 test nodes correct)
 
 ## Quick Start
 
-> **Requires Python 3.10, 3.11, or 3.12.** Install via `brew install python@3.10` (macOS) or `sudo apt install python3.10` (Ubuntu) if needed.
+> **Requires Python 3.10, 3.11, or 3.12.**
 
 ```bash
-# Clone and setup (installs everything + downloads data)
+# Clone and setup
 git clone https://github.com/ranjanchoubey/PCGT.git && cd PCGT
-bash setup.sh
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
 
 # Quick test — trains PCGT on Cora, expect ~84% accuracy
-bash quick_test.sh
+cd medium && python main.py --method pcgt --dataset cora --backbone gcn \
+    --num_partitions 10 --seed 123 --runs 1 --epochs 500
 ```
 
-For manual step-by-step installation, see [SETUP.md](SETUP.md).
+For detailed installation (GPU setup, troubleshooting), see [SETUP.md](SETUP.md).
 
 ---
 
@@ -136,23 +138,24 @@ For manual step-by-step installation, see [SETUP.md](SETUP.md).
 
 ```
 PCGT/
-├── setup.sh               # One-click install (start here!)
-├── quick_test.sh           # Fast sanity check on Cora
-├── medium/                # Medium-scale experiments
+├── medium/                # Medium-scale experiments (11 datasets)
 │   ├── main.py            # Entry point
 │   ├── pcgt.py            # PCGT model
-│   ├── sgformer.py        # SGFormer baseline
-│   └── partition.py       # METIS partitioning
-├── large/                 # Large-scale (arxiv, proteins, pokec)
+│   ├── sgformer.py        # SGFormer baseline model
+│   ├── partition.py       # METIS graph partitioning
+│   ├── models.py          # Other baseline models
+│   └── run.sh             # Run all experiments
+├── large/                 # Large-scale (arxiv, pokec, Amazon2M)
 │   ├── main.py            # Full-batch training
 │   └── main-batch.py      # Mini-batch for >100K nodes
 ├── 100M/                  # 100M-scale experiments
+├── paper/                 # LaTeX source and PDF
 ├── visualization/         # Partition & analysis plots
-├── data/                  # Datasets (auto-downloaded)
-├── download_data.sh       # Dataset downloader
+├── assets/                # README images
+├── data/                  # Datasets (auto-downloaded on first run)
+├── reproduce_paper_results.sh  # Exact commands for all experiments
 ├── requirements.txt
-├── SETUP.md               # Detailed setup & troubleshooting
-└── reproduce_paper_results.sh
+└── SETUP.md               # Detailed setup & troubleshooting
 ```
 
 ## Requirements
@@ -163,13 +166,16 @@ PCGT/
 pip install -r requirements.txt
 ```
 
-For GPU: install matching CUDA versions of torch-scatter, torch-sparse, torch-cluster from [PyG wheels](https://data.pyg.org/whl/).
+For GPU: install matching CUDA versions of torch-scatter, torch-sparse from [PyG wheels](https://data.pyg.org/whl/).
 
 ## Datasets
 
-**Auto-downloaded by `bash setup.sh`:** Cora, CiteSeer, PubMed, Coauthor-CS/Physics, Amazon-Computers/Photo, OGB datasets, Chameleon, Squirrel, Film, Deezer.
+**Auto-downloaded** (no action needed): Cora, CiteSeer, PubMed, Chameleon, Squirrel, Film, Deezer, Coauthor-CS, Coauthor-Physics, Amazon-Computers, Amazon-Photo, ogbn-arxiv.
+These are downloaded by PyTorch Geometric into `data/` the first time you run an experiment.
 
-**Manual download (if setup.sh fails for pokec):** Pokec → [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link)
+**Manual download required:**
+- **Pokec** (1.6M nodes): Download from [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link) and place files (`pokec.mat`, `label.npy`, `node_feat.npy`) in `data/pokec/`
+- **Amazon2M** (2.4M nodes): Auto-downloaded by OGB (`ogbn-products`)
 
 ---
 
@@ -201,16 +207,16 @@ cd medium && python main.py --method pcgt --dataset cora --backbone gcn \
     --num_partitions 10 --seed 123 --runs 10 --epochs 500
 
 # Large-scale (mini-batch)
-cd large && python main-batch.py --method pcgt --dataset ogbn-proteins \
-    --num_partitions 256 --batch_size 10000 --runs 3 --epochs 1000
+cd large && python main-batch.py --method pcgt --dataset pokec \
+    --num_partitions 500 --batch_size 100000 --runs 3 --epochs 1000
 ```
 
 ### Reproduce All Results
 
 ```bash
-pip install -r requirements.txt && bash download_data.sh
-cd medium && bash run.sh          # All 11 datasets
-cd ../large && bash run.sh all    # arxiv, proteins, pokec
+pip install -r requirements.txt
+cd medium && bash run.sh          # All 11 medium-scale datasets
+cd ../large && bash run.sh all    # arxiv, pokec, Amazon2M
 ```
 
 See `reproduce_paper_results.sh` for exact per-dataset hyperparameters.

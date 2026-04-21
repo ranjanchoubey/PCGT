@@ -37,7 +37,7 @@ SGFormer & \best{84.5}{\scriptsize$\pm$0.8} & \runup{72.6}{\scriptsize$\pm$0.2} 
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5 runs). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our runs. \best{Best} and \runup{runner-up} per column.}
+\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5 runs); highest test accuracy observed during training, following the SGFormer evaluation protocol (both codebases use identical logger code; see Appendix~\ref{app:sgformer_rerun}). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our runs. \best{Best} and \runup{runner-up} per column.}
 \label{tab:main}
 \end{table*}
 
@@ -66,7 +66,7 @@ SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2}
 
 \textbf{Homophilic datasets.} On CiteSeer, PCGT scores 73.1 vs.\ SGFormer's 72.6 (+0.5\%). On PubMed, 81.0 vs.\ 80.3 (+0.7\%). On Cora, the two are within noise (84.3 vs.\ 84.5). PCGT also shows lower run-to-run variance than SGFormer across these benchmarks.
 
-\textbf{Additional datasets (Table~\ref{tab:new_datasets}).} PCGT wins on all four, outperforming not only SGFormer but also GCN and GAT baselines by large margins. Coauthor-Physics (+0.2\% over SGFormer) is statistically significant ($p$=0.004). Amazon-Computers has the largest absolute gap (+1.3\%, $p$=0.051). PCGT's variance is also consistently lower (e.g., $\pm$0.7 vs.\ $\pm$2.0 on Amazon-Computers).
+\textbf{Additional datasets (Table~\ref{tab:new_datasets}).} PCGT wins on all four, outperforming not only SGFormer but also GCN and GAT baselines by large margins. Coauthor-Physics (+0.2\% over SGFormer) is statistically significant ($p$=0.010). Amazon-Computers has the largest absolute gap (+1.3\%, $p$=0.074). PCGT's variance is also consistently lower (e.g., $\pm$0.7 vs.\ $\pm$2.0 on Amazon-Computers).
 
 \textbf{Mixed homophily (Deezer).} PCGT scores 67.2 vs.\ SGFormer's 67.1 on Deezer ($h \approx 0.5$), a +0.1\% gap that is within the error bars and not statistically significant. With a lower graph weight ($\lambda_{\text{gw}}=0.5$), PCGT gives more influence to the partition-conditioned attention, but the gain on this mixed-homophily dataset is marginal.
 
@@ -92,7 +92,7 @@ SGFormer~\citep{wu2023sgformer} & \best{72.63}{\scriptsize$\pm$0.13} & 73.76{\sc
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Large-scale node classification accuracy (\%). Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 10 runs (arxiv), 3 runs (pokec, Amazon2M), best validation epoch.}
+\caption{Large-scale node classification accuracy (\%). Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 10 runs (arxiv), 3 runs (pokec, Amazon2M), highest test accuracy during training.}
 \label{tab:largescale}
 \end{table}
 
@@ -259,16 +259,16 @@ Table~\ref{tab:ablation} reports the contribution of each PCGT component on thre
 \toprule
 \textbf{Variant} & \textbf{Cora} & \textbf{Cham.} & \textbf{Sqrl.} \\
 \midrule
-\textbf{Full PCGT} & \best{84.77}{\scriptsize$\pm$.51} & \best{49.06}{\scriptsize$\pm$2.97} & \best{45.28}{\scriptsize$\pm$2.08} \\
+\textbf{Full PCGT} & 83.90{\scriptsize$\pm$0.66} & 48.01{\scriptsize$\pm$2.23} & 47.19{\scriptsize$\pm$2.45} \\
 \midrule
-w/o Global & \runup{84.47}{\scriptsize$\pm$.50} & \runup{48.84}{\scriptsize$\pm$3.00} & \runup{45.11}{\scriptsize$\pm$2.06} \\
-w/o Local & 84.23{\scriptsize$\pm$.76} & 48.67{\scriptsize$\pm$3.44} & 44.39{\scriptsize$\pm$1.69} \\
-w/o PSE & 84.30{\scriptsize$\pm$.20} & 48.51{\scriptsize$\pm$3.34} & 44.64{\scriptsize$\pm$1.91} \\
-w/o GCN & 70.90{\scriptsize$\pm$1.37} & 42.24{\scriptsize$\pm$3.26} & 37.59{\scriptsize$\pm$1.38} \\
-Random part. & 83.78{\scriptsize$\pm$1.02} & 48.80{\scriptsize$\pm$2.07} & 44.60{\scriptsize$\pm$1.80} \\
+w/o Global & 83.58{\scriptsize$\pm$0.66} & 48.84{\scriptsize$\pm$3.18} & 46.03{\scriptsize$\pm$2.09} \\
+w/o Local & 83.64{\scriptsize$\pm$0.62} & 48.66{\scriptsize$\pm$2.64} & 46.07{\scriptsize$\pm$1.95} \\
+w/o PSE & 83.74{\scriptsize$\pm$0.69} & 47.66{\scriptsize$\pm$2.14} & 47.01{\scriptsize$\pm$1.51} \\
+w/o GCN & 68.72{\scriptsize$\pm$1.30} & 42.63{\scriptsize$\pm$2.90} & 39.31{\scriptsize$\pm$1.52} \\
+Random part. & 83.90{\scriptsize$\pm$0.59} & 48.08{\scriptsize$\pm$3.16} & 45.85{\scriptsize$\pm$0.94} \\
 \midrule
-Pure GCN & 84.13{\scriptsize$\pm$.95} & 46.87{\scriptsize$\pm$2.49} & 41.84{\scriptsize$\pm$1.24} \\
-SGFormer & 83.87{\scriptsize$\pm$.61} & 48.34{\scriptsize$\pm$2.64} & 44.81{\scriptsize$\pm$2.17} \\
+Pure GCN & 84.14{\scriptsize$\pm$0.62} & 45.94{\scriptsize$\pm$3.18} & 42.43{\scriptsize$\pm$1.20} \\
+SGFormer & 84.78{\scriptsize$\pm$1.10} & 48.00{\scriptsize$\pm$2.63} & 46.61{\scriptsize$\pm$1.74} \\
 \bottomrule
 \end{tabular}
 }
@@ -276,15 +276,15 @@ SGFormer & 83.87{\scriptsize$\pm$.61} & 48.34{\scriptsize$\pm$2.64} & 44.81{\scr
 \label{tab:ablation}
 \end{table}
 
-\textbf{Hybrid design is essential.}~~Removing the GCN branch causes large drops ($-$13.9, $-$6.8, $-$7.7), while Pure GCN alone trails full PCGT by $-$0.6 (Cora), $-$2.2 (Chameleon), and $-$3.4 (Squirrel). Neither branch alone matches the combination. This hybrid recipe---local message passing plus global attention---follows GraphGPS~\citep{rampasek2022graphgps} and similar architectures; the contribution here is the partition-conditioned attention that replaces the single-resolution alternatives. The PCGT attention branch's contribution grows with heterophily: +0.6$\to$+2.2$\to$+3.4 as homophily decreases, suggesting that partition-conditioned attention specifically helps where standard GCN aggregation hurts.
+\textbf{Hybrid design is essential.}~~Removing the GCN branch causes large drops ($-$15.2, $-$5.4, $-$7.9), confirming that message passing is critical for feature propagation. In the reverse direction, Pure GCN matches PCGT on homophilic Cora (within noise) but trails by $-$2.1 (Chameleon) and $-$4.8 (Squirrel) on heterophilic graphs. The partition-conditioned attention branch's contribution thus grows with heterophily: negligible on Cora ($-$0.2, within noise) $\to$ +2.1 $\to$ +4.8 as homophily decreases, suggesting it specifically helps where standard GCN aggregation is insufficient.
 
-\textbf{PCGT vs.\ SGFormer under controlled comparison.}~~Running SGFormer with identical hyperparameters, PCGT wins by +0.9 (Cora), +0.7 (Chameleon), and +0.5 (Squirrel). This controls for hyperparameter tuning and isolates the architectural difference: multi-resolution partition attention outperforms single-resolution kernel approximation.
+\textbf{PCGT vs.\ SGFormer under controlled comparison.}~~Running SGFormer with identical hyperparameters, SGFormer slightly outperforms on homophilic Cora ($84.78$ vs.\ $83.90$), while the two methods are statistically tied on Chameleon and PCGT wins on Squirrel ($+$0.6). This pattern---PCGT's advantage increasing as homophily decreases---suggests that multi-resolution partition attention adds value specifically on heterophilic graphs, where single-resolution kernel approximation is less effective.
 
-\textbf{Local attention more important than global.}~~Removing global attention costs $-$0.17 to $-$0.30, while removing local attention costs $-$0.39 to $-$0.89. Intra-partition exact attention captures richer patterns than the compressed cross-partition representations, particularly on heterophilic graphs where local community structure is most informative.
+\textbf{Both attention branches contribute on heterophilic graphs.}~~On Squirrel, removing either the global or local branch costs $\sim$1.1--1.2 accuracy points. On Cora, both branches contribute modestly ($\sim$0.3 each). On Chameleon, removing either branch produces changes within noise ($+$0.8 for w/o global, $+$0.7 for w/o local), suggesting that the attention components are less critical when graph modularity is high ($Q = 0.58$) and $h \approx 1/K_{\text{class}}$.
 
-\textbf{PSE aids heterophilic classification.}~~Partition structural encoding provides its largest benefit on heterophilic datasets ($-$0.55 Chameleon, $-$0.64 Squirrel) vs.\ $-$0.47 on homophilic Cora. Explicit partition membership signals help distinguish structurally similar nodes across different communities.
+\textbf{PSE provides consistent gains.}~~Removing partition structural encoding costs $-$0.2 to $-$0.4 across all three datasets, with the largest contribution on Chameleon ($-$0.4). Explicit partition membership signals provide a modest but consistent complement to the attention mechanism.
 
-\textbf{Topology-aware partitioning matters selectively.}~~Replacing METIS with random partitions hurts Squirrel ($-$0.68) more than Chameleon ($-$0.26). Both datasets have low homophily (Squirrel $h$=0.21, Chameleon $h$=0.24), but Squirrel's stronger community structure means METIS preserves more useful information. Chameleon, with $h$ near random chance ($1/K_{\text{class}} = 0.2$), benefits less---consistent with Deezer ($h \approx 0.5$), where random partitioning works about as well.
+\textbf{Topology-aware partitioning matters selectively.}~~Replacing METIS with random partitions has negligible effect on Cora and Chameleon but costs $-$1.3 on Squirrel. Squirrel's stronger community structure means METIS preserves more useful information; Chameleon, with $h$ near random chance ($1/K_{\text{class}} = 0.2$), benefits equally from random partitions---consistent with Deezer ($h \approx 0.5$).
 
 \subsection{Sensitivity to Partition Count \texorpdfstring{$K$}{K}}
 

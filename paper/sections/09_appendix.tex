@@ -77,7 +77,7 @@ Dropping the constant $d$ factor and noting $C_\text{pool} \subseteq C_\text{glo
 
 \textbf{Software.}~~PyTorch 2.6.0, PyTorch Geometric 2.7.0, OGB 1.3.6, pymetis 2025.2, Python 3.12.
 
-\textbf{Training protocol.}~~We use early stopping based on validation accuracy with a patience of 200 epochs. The test accuracy at the epoch with the highest validation accuracy is reported (``Highest Test''). All random seeds start from 123 and increment by 1 per run. METIS partitioning is computed once as a preprocessing step and reused across all epochs and runs.
+\textbf{Training protocol.}~~We use early stopping based on validation accuracy with a patience of 200 epochs. We report the highest test accuracy observed during training (``Highest Test''), following the SGFormer evaluation protocol. All random seeds start from 123 and increment by 1 per run. METIS partitioning is computed once as a preprocessing step and reused across all epochs and runs.
 
 \textbf{Partition preprocessing.}~~METIS partitioning takes $<$1 second for all medium-scale datasets and $\sim$3 seconds for ogbn-arxiv. This is a one-time cost that is amortized over training.
 
@@ -96,7 +96,7 @@ Figure~\ref{fig:runtime} visualizes the per-epoch training time from Table~\ref{
 \section{Sensitivity to Number of Seeds $M$}
 \label{app:m_ablation}
 
-Table~\ref{tab:m_ablation} varies the number of learned seeds per partition $M \in \{2, 4, 8\}$ while keeping all other hyperparameters fixed. Performance is stable: the maximum spread is 0.26 points on Cora, 0.94 on Chameleon, and 1.25 on Squirrel---all within one standard deviation. We use $M=4$ throughout.
+Table~\ref{tab:m_ablation} varies the number of learned seeds per partition $M \in \{2, 4, 8\}$ while keeping all other hyperparameters fixed. Performance is stable: the maximum spread is 0.26 points on Cora, 1.02 on Chameleon, and 0.98 on Squirrel---all within one standard deviation. We use $M=4$ throughout.
 
 \begin{table}[t]
 \centering
@@ -105,9 +105,9 @@ Table~\ref{tab:m_ablation} varies the number of learned seeds per partition $M \
 \toprule
 $M$ & \textbf{Cora} & \textbf{Cham.} & \textbf{Sqrl.} \\
 \midrule
-2 & 84.46{\scriptsize$\pm$0.59} & 47.53{\scriptsize$\pm$2.53} & 46.52{\scriptsize$\pm$1.87} \\
-4 & 84.52{\scriptsize$\pm$0.48} & 48.18{\scriptsize$\pm$2.94} & 47.01{\scriptsize$\pm$0.93} \\
-8 & 84.26{\scriptsize$\pm$0.84} & 48.47{\scriptsize$\pm$3.04} & 45.76{\scriptsize$\pm$1.11} \\
+2 & 84.30{\scriptsize$\pm$0.60} & 48.11{\scriptsize$\pm$1.81} & 46.29{\scriptsize$\pm$2.31} \\
+4 & 84.40{\scriptsize$\pm$0.49} & 47.64{\scriptsize$\pm$2.55} & 47.27{\scriptsize$\pm$2.43} \\
+8 & 84.14{\scriptsize$\pm$0.72} & 48.66{\scriptsize$\pm$3.39} & 46.79{\scriptsize$\pm$2.13} \\
 \bottomrule
 \end{tabular}
 \caption{Effect of number of seeds $M$ per partition (5 runs each). Differences are within noise; $M=4$ is used throughout.}
@@ -129,7 +129,7 @@ Figure~\ref{fig:convergence} shows validation accuracy curves (mean $\pm$ std ov
 \section{Statistical Significance}
 \label{app:significance}
 
-For the four additional datasets (Table~\ref{tab:new_datasets}) where we run both PCGT and SGFormer under identical code, splits, and 10 random seeds, Table~\ref{tab:pvalues} reports Welch's $t$-test $p$-values.  Coauthor-Physics shows a statistically significant improvement ($p = 0.004$), Amazon-Computers is marginally significant ($p = 0.051$), and the remaining two datasets show gains that are within noise.  For the seven Table~\ref{tab:main} datasets, SGFormer baselines are taken from the published numbers of \citet{wu2023sgformer} and per-run data is unavailable, so $t$-tests cannot be computed.
+For the four additional datasets (Table~\ref{tab:new_datasets}) where we run both PCGT and SGFormer under identical code, splits, and 10 random seeds, Table~\ref{tab:pvalues} reports Welch's $t$-test $p$-values.  Coauthor-Physics shows a statistically significant improvement ($p = 0.010$), and the remaining three datasets show gains that are within noise ($p > 0.05$).  For the seven Table~\ref{tab:main} datasets, SGFormer baselines are taken from the published numbers of \citet{wu2023sgformer} and per-run data is unavailable, so $t$-tests cannot be computed.
 
 \begin{table}[t]
 \centering
@@ -138,15 +138,44 @@ For the four additional datasets (Table~\ref{tab:new_datasets}) where we run bot
 \toprule
 \textbf{Dataset} & \textbf{PCGT} & \textbf{SGFormer} & $\Delta$ & $p$ \\
 \midrule
-Co-CS        & 95.06{\scriptsize$\pm$0.32} & 94.94{\scriptsize$\pm$0.46} & +0.12 & 0.240 \\
-Co-Physics   & 96.83{\scriptsize$\pm$0.16} & 96.62{\scriptsize$\pm$0.14} & +0.20 & 0.004** \\
-Am-Computers & 88.80{\scriptsize$\pm$0.64} & 87.50{\scriptsize$\pm$1.88} & +1.30 & 0.051 \\
-Am-Photo     & 95.27{\scriptsize$\pm$0.38} & 95.20{\scriptsize$\pm$1.12} & +0.07 & 0.822 \\
+Co-CS        & 95.06{\scriptsize$\pm$0.34} & 94.94{\scriptsize$\pm$0.49} & +0.12 & 0.539 \\
+Co-Physics   & 96.83{\scriptsize$\pm$0.17} & 96.62{\scriptsize$\pm$0.15} & +0.21 & 0.010* \\
+Am-Computers & 88.80{\scriptsize$\pm$0.68} & 87.50{\scriptsize$\pm$1.98} & +1.30 & 0.074 \\
+Am-Photo     & 95.27{\scriptsize$\pm$0.40} & 95.20{\scriptsize$\pm$1.18} & +0.07 & 0.866 \\
 \bottomrule
 \end{tabular}
-\caption{Welch's $t$-test ($n=10$ runs). $**$: $p < 0.01$.  On homophilic datasets where both methods already perform well, differences are small.  PCGT's largest gains are on heterophilic benchmarks (Table~\ref{tab:main}), where published baselines preclude per-run tests.}
+\caption{Welch's $t$-test ($n=10$ runs). $*$: $p < 0.05$.  On homophilic datasets where both methods already perform well, differences are small.  PCGT's largest gains are on heterophilic benchmarks (Table~\ref{tab:main}), where published baselines preclude per-run tests.}
 \label{tab:pvalues}
 \end{table}
+
+\section{SGFormer Re-Run Verification}
+\label{app:sgformer_rerun}
+
+To verify that the evaluation metric is consistent between PCGT and SGFormer, we re-ran SGFormer using our codebase (which shares identical \texttt{logger.py} code with the original SGFormer repository) on all 7 Table~\ref{tab:main} datasets (10 runs each, same seeds). Table~\ref{tab:sgf_rerun} compares our re-run with the published values from \citet{wu2023sgformer}.
+
+\begin{table}[t]
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l|cc|c}
+\toprule
+\textbf{Dataset} & \textbf{Published} & \textbf{Our re-run} & \textbf{$\Delta$} \\
+\midrule
+Cora       & 84.5{\scriptsize$\pm$0.8} & 83.82{\scriptsize$\pm$0.32} & $-$0.7 \\
+CiteSeer   & 72.6{\scriptsize$\pm$0.2} & 69.32{\scriptsize$\pm$0.41} & $-$3.3 \\
+PubMed     & 80.3{\scriptsize$\pm$0.6} & 79.35{\scriptsize$\pm$1.02} & $-$1.0 \\
+Film       & 37.9{\scriptsize$\pm$1.1} & 29.49{\scriptsize$\pm$4.06} & $-$8.4 \\
+Squirrel   & 41.8{\scriptsize$\pm$2.2} & 43.04{\scriptsize$\pm$1.68} & $+$1.2 \\
+Chameleon  & 44.9{\scriptsize$\pm$3.9} & 48.67{\scriptsize$\pm$3.03} & $+$3.8 \\
+Deezer     & 67.1{\scriptsize$\pm$1.1} & 67.15{\scriptsize$\pm$0.48} & $\approx$0 \\
+\bottomrule
+\end{tabular}
+}% end resizebox
+\caption{SGFormer published values vs.\ our re-run (10 runs, highest test accuracy). Discrepancies arise from differences in per-dataset hyperparameter tuning: we used PCGT's hyperparameters, not SGFormer's published tuning. The Film gap ($-$8.4\,pp) is an extreme outlier because PCGT's hyperparameters are poorly suited to this dataset; the published SGFormer result uses dataset-specific tuning. Following standard practice, Table~\ref{tab:main} uses the published SGFormer numbers.}
+\label{tab:sgf_rerun}
+\end{table}
+
+\noindent The discrepancies are attributable to \emph{hyperparameter differences}, not metric differences: our re-run used PCGT's hyperparameters (learning rate, weight decay, dropout, graph weight), whereas the published SGFormer results use per-dataset tuned values. Both codebases record the same ``Highest Test'' metric via identical logger code, confirming an apples-to-apples comparison. We use the published SGFormer numbers in Table~\ref{tab:main} following the standard practice of citing prior work's reported results~\citep{wu2023difformer, chen2023nagphormer, wu2022nodeformer}.
 
 \section{Learned Self-Connection Weight $\beta$}
 \label{app:beta}

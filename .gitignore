@@ -24,6 +24,9 @@ nodeformer/
 /archive/
 **/_archive/
 
+# Visualization outputs (regenerable)
+visualization/outputs/
+
 # Logs (experiment outputs — old location)
 /logs/
 
@@ -130,6 +133,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.vscode
 
 try*.sh
 *.bbl

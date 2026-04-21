@@ -40,15 +40,15 @@
   % ── Arrows ──
   arr/.style={->, line width=0.8pt, color=black!80},
   arrfork/.style={line width=0.8pt, color=black!80},
-  gcnarr/.style={->, line width=0.8pt, color=black!65, densely dashed},
+  gcnarr/.style={->, line width=1.0pt, color=black!65, densely dashed},
   % ── Labels ──
   stagelabel/.style={font=\small\bfseries\sffamily, text=black!80},
   complabel/.style={font=\footnotesize, text=black!70},
   % ── Fork ──
   forkdot/.style={circle, fill=black!80, inner sep=2.2pt},
   % ── Merge node (⊕) ──
-  mergenode/.style={circle, draw=black!75, line width=0.9pt, inner sep=1.8pt,
-                    font=\small\bfseries, fill=white},
+  mergenode/.style={circle, draw=black!75, line width=0.8pt, inner sep=2pt,
+                    font=\small, fill=white},
 ]
 
 % =====================================================================
@@ -63,7 +63,7 @@
 \draw[arr] (input) -- (metis);
 
 % Linear projection
-\node[projbox, right=0.55cm of metis] (linproj) {Linear\\[-1pt]LN\,$\to$\,ReLU};
+\node[projbox, right=1.2cm of metis] (linproj) {Linear\\[-1pt]LN\,$\to$\,ReLU};
 \draw[arr] (metis) -- (linproj);
 
 % PSE
@@ -99,9 +99,12 @@
 % ── Merge via ⊕ node ──
 \coordinate (mergeY) at ($(local.east)!0.5!(global.east)$);
 \node[mergenode] (mergeN) at ($(mergeY) + (1.6,0)$) {$\oplus$};
-% Arrows from branches to ⊕
-\draw[arr, rounded corners=4pt] (local.east) -- ++(0.4,0) |- (mergeN);
-\draw[arr, rounded corners=4pt] (global.east) -- ++(0.4,0) |- (mergeN);
+\node[font=\scriptsize, text=black!60, below=1pt of mergeN] {add};
+% Lines from branches into ⊕ (no arrowheads — standard convention)
+\draw[line width=0.8pt, color=black!80, rounded corners=4pt]
+  (local.east) -- ++(0.4,0) |- (mergeN);
+\draw[line width=0.8pt, color=black!80, rounded corners=4pt]
+  (global.east) -- ++(0.4,0) |- (mergeN);
 
 % α-Blend (right of ⊕)
 \node[blendbox, right=0.55cm of mergeN] (blend)
@@ -109,7 +112,7 @@
 \draw[arr] (mergeN) -- (blend);
 
 % Self-connection
-\node[selfbox, right=0.55cm of blend] (self) {$\beta\!\cdot\!\mathbf{V}_i$\\[-1pt]Self-Connect};
+\node[selfbox, right=0.55cm of blend] (self) {$\beta$\textbf{-SelfConn}\\[-1pt]$+\,\beta\!\cdot\!\mathbf{V}_i$};
 \draw[arr] (blend) -- (self);
 
 % LayerNorm
@@ -117,51 +120,48 @@
 \draw[arr] (self) -- (ln);
 
 % =====================================================================
-%   MAIN ROW continued — Fusion + Output (same y-level as pipeline)
+%   ROW 2 — GCN branch (below Input) + Fusion + Classifier
 % =====================================================================
 
-% λ_gw fusion — stays on main row, right of LayerNorm
-\node[gwbox] (gwfuse) at ($(ln) + (2.0,0)$) {$\lambda_{\text{gw}}$\textbf{-Fusion}\\[-1pt]{\small GCN\,$+$\,Attn}};
+% GCN — directly below Input, short vertical arrow
+\node[gcnbox] (gcn) at ($(input) + (0,-2.0)$) {$\text{GCN}(\mathbf{X},\mathbf{A})$};
+\draw[gcnarr] (input) -- (gcn);
+
+% λ_gw fusion — below LayerNorm, same y as GCN
+\node[gwbox] (gwfuse) at (ln |- gcn) {$\lambda_{\text{gw}}$\textbf{-Fusion}\\[-1pt]{\small GCN\,$+$\,Attn}};
+% Thick arrow from LayerNorm down to fusion
 \draw[arr, line width=1.0pt] (ln) -- (gwfuse);
+% Dashed arrow from GCN right to fusion
+\draw[gcnarr] (gcn) -- (gwfuse);
 
-% Classifier — continues main row
-\node[outbox, right=0.55cm of gwfuse] (output) {Classifier\\[-1pt]$\hat{\mathbf{y}} = W\mathbf{h}$};
+% Classifier — right of fusion on bottom row
+\node[outbox, right=0.6cm of gwfuse] (output) {Classifier\\[-1pt]$\hat{\mathbf{y}} = W\mathbf{h}$};
 \draw[arr] (gwfuse) -- (output);
-
-% =====================================================================
-%   GCN branch — below blend/self area, short dashed arrow UP into fusion
-% =====================================================================
-
-\node[gcnbox] (gcn) at ($(gwfuse) + (0,-1.8)$) {$\text{GCN}(\mathbf{X},\mathbf{A})$};
-% Dashed arrow from input down-and-right to GCN
-\draw[gcnarr, rounded corners=4pt] (input.south) -- ++(0,-0.5) -| (gcn.west);
-% Short dashed arrow from GCN straight up into fusion
-\draw[gcnarr] (gcn.north) -- (gwfuse.south);
 
 % =====================================================================
 %   Background regions (visible fills, dark labels)
 % =====================================================================
 \begin{scope}[on background layer]
-  % Input region (just input + metis, no GCN)
+  % Input region (Input + METIS + GCN)
   \node[
     fill=blue!14, draw=blue!45, rounded corners=10pt,
-    inner xsep=11pt, inner ysep=16pt,
-    fit=(input)(metis),
+    inner xsep=8pt, inner ysep=16pt,
+    fit=(input)(metis)(gcn),
     label={[stagelabel, text=black!75]above:\textsf{Input}}
   ] {};
   % PCGT Attention Layer
   \node[
     fill=orange!14, draw=orange!45, rounded corners=10pt,
-    inner xsep=9pt, inner ysep=18pt, line width=0.8pt,
+    inner xsep=7pt, inner ysep=18pt, line width=0.8pt,
     fit=(linproj)(pse)(qkv)(local)(global)(seedpool)(blend)(self)(ln),
     label={[stagelabel, text=black!80]above:\textsf{PCGT Attention Layer}}
   ] {};
-  % Output region
+  % Fusion & Output region
   \node[
     fill=black!12, draw=black!35, rounded corners=10pt,
     inner xsep=15pt, inner ysep=16pt,
-    fit=(gwfuse)(output)(gcn),
-    label={[stagelabel, text=black!75]above:\textsf{Fusion \& Output}}
+    fit=(gwfuse)(output),
+    label={[stagelabel, text=black!75, anchor=north west]above right:\textsf{Fusion \& Output}}
   ] {};
 \end{scope}
 
