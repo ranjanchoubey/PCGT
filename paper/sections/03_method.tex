@@ -231,8 +231,10 @@ $\mathbf{Q}, \mathbf{K}, \mathbf{V} \leftarrow \mathbf{X} W_Q,\; \mathbf{X} W_K,
 \tcp{Local attention \& seed pooling}
 \For{$p = 1$ \KwTo $K$}{
   $\mathbf{h}^{(p)}_{\mathrm{local}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}[S_p]\, \mathbf{K}[S_p]^{\!\top}\!/\sqrt{d}\bigr)\, \mathbf{V}[S_p]$\;
+  \smallskip
   $\mathbf{R}_k^{(p)},\, \mathbf{R}_v^{(p)} \leftarrow \mathrm{SeedPool}(\mathbf{S},\, \mathbf{K}[S_p],\, \mathbf{V}[S_p])$\;
 }
+\smallskip
 Stack $\mathbf{h}_{\mathrm{local}} \!\in\! \mathbb{R}^{N \times d}$;\; stack $\mathbf{R}_k, \mathbf{R}_v \!\in\! \mathbb{R}^{KM \times d}$\;
 \BlankLine
 \tcp{Global attention via representatives}
@@ -240,8 +242,11 @@ $\mathbf{h}_{\mathrm{global}} \leftarrow \mathrm{softmax}\!\bigl(\mathbf{Q}\, \m
 \BlankLine
 \tcp{Blend, self-connect, fuse with GCN}
 $\mathbf{h}_{\mathrm{ctx}} \leftarrow \sigma(\alpha)\, \mathbf{h}_{\mathrm{local}} + (1\!-\!\sigma(\alpha))\, \mathbf{h}_{\mathrm{global}}$\;
+\smallskip
 $\mathbf{h}_{\mathrm{attn}} \leftarrow \mathbf{h}_{\mathrm{ctx}} + \beta \cdot \mathbf{V}$\;
+\smallskip
 $\mathbf{H} \leftarrow \lambda_{\mathrm{gw}}\, \mathrm{GCN}(\mathbf{X}, \mathbf{A}) + (1\!-\!\lambda_{\mathrm{gw}})\, \mathrm{LN}(\mathbf{h}_{\mathrm{attn}})$\;
+\BlankLine
 \Return{$\mathbf{H}$}
 \end{algorithm}
 

@@ -8,29 +8,29 @@ We evaluate on 14 node classification benchmarks spanning homophilic, heterophil
 \centering
 \small
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-\textbf{Dataset} & \textbf{Nodes} & \textbf{Feats} & \textbf{Classes} & \textbf{$h$} & \textbf{Type} \\
+\textbf{Dataset} & \textbf{Nodes} & \textbf{Edges} & \textbf{Feats} & \textbf{Cls.} & \textbf{$h$} & \textbf{Type} \\
 \midrule
-Cora       & 2,708  & 1,433  & 7  & 0.81 & Homo. \\
-CiteSeer   & 3,327  & 3,703  & 6  & 0.74 & Homo. \\
-PubMed     & 19,717 & 500    & 3  & 0.80 & Homo. \\
-Coauthor-CS & 18,333 & 6,805 & 15 & 0.81 & Homo. \\
-Coauthor-Phys. & 34,493 & 8,415 & 5 & 0.93 & Homo. \\
-Amazon-Comp. & 13,752 & 767  & 10 & 0.78 & Homo. \\
-Amazon-Photo & 7,650  & 745   & 8  & 0.83 & Homo. \\
-Chameleon  & 890    & 2,325  & 5  & 0.24 & Hetero. \\
-Film       & 7,600  & 932    & 5  & 0.22 & Hetero. \\
-Squirrel   & 2,223  & 2,089  & 5  & 0.21 & Hetero. \\
-Deezer     & 28,281 & 31,241 & 2  & 0.53 & Mixed \\
+Cora       & 2,708  & 10,556  & 1,433  & 7  & 0.81 & Homo. \\
+CiteSeer   & 3,327  & 9,104   & 3,703  & 6  & 0.74 & Homo. \\
+PubMed     & 19,717 & 88,648  & 500    & 3  & 0.80 & Homo. \\
+Co-CS      & 18,333 & 163,788 & 6,805  & 15 & 0.81 & Homo. \\
+Co-Phys.   & 34,493 & 495,924 & 8,415  & 5  & 0.93 & Homo. \\
+Am-Comp.   & 13,752 & 491,722 & 767    & 10 & 0.78 & Homo. \\
+Am-Photo   & 7,650  & 238,162 & 745    & 8  & 0.83 & Homo. \\
+Chameleon  & 890    & 13,584  & 2,325  & 5  & 0.24 & Hetero. \\
+Film       & 7,600  & 33,544  & 932    & 5  & 0.22 & Hetero. \\
+Squirrel   & 2,223  & 65,718  & 2,089  & 5  & 0.21 & Hetero. \\
+Deezer     & 28,281 & 185,504 & 31,241 & 2  & 0.53 & Mixed \\
 \midrule
-ogbn-arxiv & 169,343 & 128 & 40 & 0.66 & Large \\
-pokec      & 1,632,803 & 65 & 2 & 0.45 & Large \\
-Amazon2M   & 2,449,029 & 100 & 47 & 0.78 & Large \\
+ogbn-arxiv & 169K   & 1.17M   & 128    & 40 & 0.66 & Large \\
+pokec      & 1.63M  & 30.6M   & 65     & 2  & 0.45 & Large \\
+Amazon2M   & 2.45M  & 61.9M   & 100    & 47 & 0.78 & Large \\
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Dataset statistics. $h$ denotes edge homophily ratio. Chameleon and Squirrel use filtered splits from~\citet{platonov2023critical}.}
+\caption{Dataset statistics. $h$: edge homophily ratio. Chameleon and Squirrel use filtered splits from~\citet{platonov2023critical}.}
 \label{tab:datasets}
 \end{table}
 
