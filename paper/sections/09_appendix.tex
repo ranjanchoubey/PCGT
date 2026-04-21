@@ -243,11 +243,11 @@ Evaluating the gradient at $\beta = 0$:
 That is, $\beta^*$ is negative precisely when the self-features $\mathbf{V}_i$ are, on average, aligned with the direction of \emph{increasing} loss.
 \end{proof}
 
+Table~\ref{tab:beta_values} reports the learned $\beta$ values across all 11 medium-scale datasets (ogbn-arxiv excluded because the large-scale codebase does not log $\beta$).  These values supplement the bar chart in Figure~\ref{fig:beta}.  The two negative-$\beta$ datasets (Film, Deezer) have either noisy, low-dimensional features (Film: 932 dims, actor co-occurrence) or near-random edge labels (Deezer: $h \approx 0.53$), where suppressing self-features improves classification.  The highest $\beta$ values occur on Chameleon and Squirrel, whose high-dimensional Wikipedia features (2325 and 2089 dims) make self-identity highly informative even under low homophily.
+
 \begin{remark}
 In practice, $\beta$ is learned end-to-end via backpropagation, not computed from this closed-form condition. The proposition explains \emph{why} the network learns negative $\beta$ on certain datasets: when a node's own features are noisy or misleading (e.g., Film's sparse actor co-occurrence vectors), attending to neighbors and suppressing self-identity reduces the loss.
 \end{remark}
-
-Table~\ref{tab:beta_values} reports the learned $\beta$ values across all 11 medium-scale datasets (ogbn-arxiv excluded because the large-scale codebase does not log $\beta$).  These values supplement the bar chart in Figure~\ref{fig:beta}.  The two negative-$\beta$ datasets (Film, Deezer) have either noisy, low-dimensional features (Film: 932 dims, actor co-occurrence) or near-random edge labels (Deezer: $h \approx 0.53$), where suppressing self-features improves classification.  The highest $\beta$ values occur on Chameleon and Squirrel, whose high-dimensional Wikipedia features (2325 and 2089 dims) make self-identity highly informative even under low homophily.
 
 \begin{table}[t]
 \centering
