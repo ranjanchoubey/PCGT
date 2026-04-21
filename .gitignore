@@ -161,8 +161,8 @@ paper/*.synctex.gz
 paper/*.out
 paper/*.bbl
 
-# Experiment logs (internal, not needed to reproduce)
-experiments/
+# Experiment logs (tracked on experiments branch)
+# experiments/
 
 # Test clone folder
 test/paper_backup_*/

@@ -1,0 +1,84 @@
+Namespace(dataset='ogbn-arxiv', sub_dataset='', data_dir='/home/ecsumlrl/ranjan/PCGT/data/', device=0, seed=123, cpu=False, epochs=1000, runs=10, directed=False, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=False, label_num_per_class=20, metric='acc', method='pcgt', hidden_channels=256, use_graph=True, aggregate='add', graph_weight=0.5, gnn_use_bn=True, gnn_use_residual=True, gnn_use_weight=True, gnn_use_init=False, gnn_use_act=True, gnn_num_layers=3, gnn_dropout=0.5, gnn_weight_decay=0.0, trans_num_heads=1, trans_use_weight=True, trans_use_bn=True, trans_use_residual=True, trans_use_act=False, trans_num_layers=1, trans_dropout=0.5, trans_weight_decay=0.0, lr=0.001, batch_size=10000, patience=200, display_step=100, eval_step=9, cached=False, print_prop=False, save_result=False, save_model=False, use_pretrained=False, save_att=False, model_dir='../../model/', hops=2, gat_heads=4, out_heads=1, num_partitions=256, partition_method='metis')
+ogbn-arxiv
+dataset ogbn-arxiv | num nodes 169343 | num edge 1166243 | num node feats 128 | num classes 40
+Computing 256 partitions using metis...
+Partitions: 256, avg size: 661, max size: 681, boundary: 109448/169343 (64.6%)
+MODEL: PCGTFormer(
+  (pcgt_conv): PCGTConv(
+    (fcs): ModuleList(
+      (0): Linear(in_features=128, out_features=256, bias=True)
+    )
+    (bns): ModuleList(
+      (0-1): 2 x LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+    )
+    (partition_pe): Embedding(256, 256)
+    (convs): ModuleList(
+      (0): PCGTConvLayer(
+        (Wq): Linear(in_features=256, out_features=256, bias=True)
+        (Wk): Linear(in_features=256, out_features=256, bias=True)
+        (Wv): Linear(in_features=256, out_features=256, bias=True)
+      )
+    )
+  )
+  (graph_conv): GraphConv(
+    (convs): ModuleList(
+      (0-2): 3 x GraphConvLayer(
+        (W): Linear(in_features=256, out_features=256, bias=True)
+      )
+    )
+    (fcs): ModuleList(
+      (0): Linear(in_features=128, out_features=256, bias=True)
+    )
+    (bns): ModuleList(
+      (0-3): 4 x BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (fc): Linear(in_features=256, out_features=40, bias=True)
+)
+Epoch: 00, Loss: 3.8621, Train: 17.92%, Valid: 7.66%, Test: 5.89%
+Epoch: 900, Loss: 0.6262, Train: 84.49%, Valid: 73.32%, Test: 71.78%
+Run 01:Highest Train: 85.20 Highest Valid: 73.56 Highest Test: 72.60
+Chosen epoch: 84 Final Train: 83.21 Final Test: 72.02
+Epoch: 00, Loss: 3.9101, Train: 17.50%, Valid: 7.88%, Test: 6.05%
+Epoch: 900, Loss: 0.6325, Train: 84.24%, Valid: 73.25%, Test: 71.65%
+Run 02:Highest Train: 85.00 Highest Valid: 73.59 Highest Test: 72.54
+Chosen epoch: 95 Final Train: 83.88 Final Test: 72.11
+Epoch: 00, Loss: 3.9839, Train: 17.42%, Valid: 7.97%, Test: 6.31%
+Epoch: 900, Loss: 0.6307, Train: 84.36%, Valid: 73.12%, Test: 71.36%
+Run 03:Highest Train: 85.13 Highest Valid: 73.73 Highest Test: 72.51
+Chosen epoch: 98 Final Train: 84.10 Final Test: 72.38
+Epoch: 00, Loss: 3.9046, Train: 17.91%, Valid: 7.63%, Test: 5.87%
+Epoch: 900, Loss: 0.6347, Train: 84.35%, Valid: 73.52%, Test: 71.97%
+Run 04:Highest Train: 84.96 Highest Valid: 73.71 Highest Test: 72.44
+Chosen epoch: 107 Final Train: 84.78 Final Test: 72.14
+Epoch: 00, Loss: 3.8556, Train: 18.80%, Valid: 9.89%, Test: 7.56%
+Epoch: 900, Loss: 0.6304, Train: 84.39%, Valid: 73.28%, Test: 71.76%
+Run 05:Highest Train: 85.12 Highest Valid: 73.62 Highest Test: 72.49
+Chosen epoch: 92 Final Train: 83.87 Final Test: 72.02
+Epoch: 00, Loss: 3.7364, Train: 17.50%, Valid: 7.90%, Test: 6.25%
+Epoch: 900, Loss: 0.6293, Train: 84.21%, Valid: 73.50%, Test: 72.51%
+Run 06:Highest Train: 85.17 Highest Valid: 73.58 Highest Test: 72.51
+Chosen epoch: 108 Final Train: 84.75 Final Test: 72.33
+Epoch: 00, Loss: 4.0062, Train: 10.55%, Valid: 18.67%, Test: 17.20%
+Epoch: 900, Loss: 0.6333, Train: 84.30%, Valid: 73.34%, Test: 71.92%
+Run 07:Highest Train: 85.08 Highest Valid: 73.57 Highest Test: 72.27
+Chosen epoch: 85 Final Train: 83.17 Final Test: 72.17
+Epoch: 00, Loss: 3.9037, Train: 12.58%, Valid: 5.47%, Test: 4.43%
+Epoch: 900, Loss: 0.6323, Train: 84.22%, Valid: 73.28%, Test: 72.35%
+Run 08:Highest Train: 85.16 Highest Valid: 73.55 Highest Test: 72.78
+Chosen epoch: 62 Final Train: 80.86 Final Test: 72.58
+Epoch: 00, Loss: 3.8003, Train: 20.23%, Valid: 13.07%, Test: 10.85%
+Epoch: 900, Loss: 0.6286, Train: 84.47%, Valid: 73.62%, Test: 72.38%
+Run 09:Highest Train: 85.24 Highest Valid: 73.69 Highest Test: 72.54
+Chosen epoch: 77 Final Train: 82.59 Final Test: 72.47
+Epoch: 00, Loss: 3.9248, Train: 3.00%, Valid: 2.92%, Test: 2.71%
+Epoch: 900, Loss: 0.6307, Train: 84.30%, Valid: 73.48%, Test: 71.98%
+Run 10:Highest Train: 84.97 Highest Valid: 73.50 Highest Test: 72.31
+Chosen epoch: 103 Final Train: 84.42 Final Test: 72.21
+Average epoch time: 1040.50 ms
+All runs:
+Highest Train: 85.10 ± 0.10
+Highest Test: 72.50 ± 0.14
+Highest Valid: 73.61 ± 0.08
+  Final Train: 83.56 ± 1.19
+   Final Test: 72.24 ± 0.19

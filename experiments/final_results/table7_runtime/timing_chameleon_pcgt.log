@@ -1,0 +1,12 @@
+Namespace(data_dir='../data', dataset='chameleon', device=0, seed=123, cpu=False, epochs=50, runs=1, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=False, label_num_per_class=20, valid_num=500, test_num=500, directed=False, method='pcgt', hidden_channels=64, num_layers=2, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=0.001, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.8, learn_graph_weight=False, ours_weight_decay=0.01, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.3, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+chameleon
+features shape=torch.Size([890, 2325])
+num nodes 890 | num classes 5 | num node feats 2325
+Computing 10 partitions using metis...
+Partitions: 10, Boundary nodes: 549/890 (61.7%)
+Intra-partition edges: 13982/17708 (79.0%)
+Epoch: 00, Loss: 1.6086, Train: 31.05%, Valid: 24.39%, Test: 28.87% [α=0.50,β=0.99]
+Run 01:Highest Train: 94.62 Highest Valid: 45.64 Highest Test: 50.52 Chosen epoch: 41
+Final Train: 90.95 Final Test: 47.42
+1 runs: Highest Train: 94.62 ± nan Highest val epoch:40
+Highest Test: 50.52 ± nan Final Test: 47.42 ± nan

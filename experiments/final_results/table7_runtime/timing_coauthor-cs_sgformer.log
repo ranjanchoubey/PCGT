@@ -1,0 +1,13 @@
+Namespace(data_dir='../data', dataset='coauthor-cs', device=0, seed=123, cpu=False, epochs=50, runs=1, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=True, rand_split_class=False, label_num_per_class=20, valid_num=500, test_num=500, directed=False, method='sgformer', hidden_channels=64, num_layers=4, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=0.0005, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.8, learn_graph_weight=False, ours_weight_decay=0.001, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.2, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+coauthor-cs
+Downloading https://github.com/shchur/gnn-benchmark/raw/master/data/npz/ms_academic_cs.npz
+Processing...
+Done!
+coauthor-cs: nodes=18333, edges=163788, feats=6805, classes=15
+features shape=torch.Size([18333, 6805])
+num nodes 18333 | num classes 15 | num node feats 6805
+Epoch: 00, Loss: 2.7257, Train: 19.28%, Valid: 17.48%, Test: 17.74%
+Run 01:Highest Train: 95.79 Highest Valid: 92.86 Highest Test: 93.04 Chosen epoch: 41
+Final Train: 95.29 Final Test: 93.00
+1 runs: Highest Train: 95.79 ± nan Highest val epoch:40
+Highest Test: 93.04 ± nan Final Test: 93.00 ± nan

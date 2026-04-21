@@ -1,0 +1,14 @@
+Namespace(data_dir='../data', dataset='cora', device=0, seed=123, cpu=False, epochs=50, runs=1, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=True, label_num_per_class=20, valid_num=500, test_num=1000, directed=False, method='pcgt', hidden_channels=64, num_layers=2, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=0.0005, dropout=0.4, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.8, learn_graph_weight=False, ours_weight_decay=0.001, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.2, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+cora
+Num nodes: 2708
+train:torch.Size([140]), valid:torch.Size([500]), test:torch.Size([1000])
+features shape=torch.Size([2708, 1433])
+num nodes 2708 | num classes 7 | num node feats 1433
+Computing 10 partitions using metis...
+Partitions: 10, Boundary nodes: 674/2708 (24.9%)
+Intra-partition edges: 9382/10556 (88.9%)
+Epoch: 00, Loss: 1.9471, Train: 93.57%, Valid: 64.20%, Test: 66.50% [α=0.50,β=0.99]
+Run 01:Highest Train: 100.00 Highest Valid: 79.20 Highest Test: 83.80 Chosen epoch: 6
+Final Train: 98.57 Final Test: 82.90
+1 runs: Highest Train: 100.00 ± nan Highest val epoch:5
+Highest Test: 83.80 ± nan Final Test: 82.90 ± nan

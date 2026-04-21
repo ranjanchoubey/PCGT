@@ -1,0 +1,11 @@
+Namespace(data_dir='../data', dataset='film', device=0, seed=123, cpu=False, epochs=50, runs=1, train_prop=0.5, valid_prop=0.25, protocol='semi', rand_split=False, rand_split_class=False, label_num_per_class=20, valid_num=500, test_num=500, directed=False, method='sgformer', hidden_channels=64, num_layers=4, num_heads=1, alpha=0.5, use_bn=False, use_residual=True, use_graph=True, use_weight=False, use_init=False, use_act=False, attention='gcn', lr=0.01, weight_decay=0.0005, dropout=0.5, display_step=50, no_feat_norm=True, patience=200, graph_weight=0.8, learn_graph_weight=False, ours_weight_decay=0.001, ours_use_weight=False, ours_use_residual=False, ours_use_act=False, backbone='gcn', ours_layers=1, ours_dropout=0.3, aggregate='add', hops=1, gat_heads=8, out_heads=1, lamda=0.1, num_elayers=2, encoder_emdim=768, num_partitions=10, num_reps=4, partition_method='metis', no_pse=False, local_only=False, global_only=False)
+film
+(7600, 932)
+Num nodes: 7600
+features shape=torch.Size([7600, 932])
+num nodes 7600 | num classes 5 | num node feats 932
+Epoch: 00, Loss: 1.6267, Train: 23.30%, Valid: 23.97%, Test: 25.07%
+Run 01:Highest Train: 29.91 Highest Valid: 29.44 Highest Test: 29.28 Chosen epoch: 50
+Final Train: 29.91 Final Test: 29.28
+1 runs: Highest Train: 29.91 ± nan Highest val epoch:49
+Highest Test: 29.28 ± nan Final Test: 29.28 ± nan
