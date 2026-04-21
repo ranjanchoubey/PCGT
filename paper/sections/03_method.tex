@@ -185,11 +185,12 @@ Add partition structural encoding (PSE) before Q/K/V projection: $\mathbf{x}_i \
 \subsection{Global Attention via Learned Seeds}
 \label{sec:global_attn}
 
-We learn $M$ seed query vectors $\mathbf{S} \in \mathbb{R}^{M \times d}$ shared across all partitions. For each partition $p$, the seeds attention-pool the partition's keys and values into $M$ representatives:
-\begin{equation}
-\mathbf{R}_k^{(p)} = \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{K}[S_p], \quad \mathbf{R}_v^{(p)} = \mathrm{softmax}\!\left( \frac{\mathbf{S} \, \mathbf{K}[S_p]^T}{\sqrt{d}} \right) \mathbf{V}[S_p]
+We learn $M$ seed query vectors $\mathbf{S} \in \mathbb{R}^{M \times d}$ shared across all partitions. For each partition $p$, the seeds attention-pool the partition's keys and values into $M$ representatives. Let $\mathbf{A}_s^{(p)} = \mathrm{softmax}\!\bigl(\mathbf{S}\,\mathbf{K}[S_p]^T / \sqrt{d}\bigr)$, then:
+\begin{align}
+\mathbf{R}_k^{(p)} &= \mathbf{A}_s^{(p)}\, \mathbf{K}[S_p], \quad
+\mathbf{R}_v^{(p)} = \mathbf{A}_s^{(p)}\, \mathbf{V}[S_p]
 \label{eq:reps}
-\end{equation}
+\end{align}
 where $\mathbf{R}_k^{(p)}, \mathbf{R}_v^{(p)} \in \mathbb{R}^{M \times d}$. Stacking across all $K$ partitions yields $\mathbf{R}_k, \mathbf{R}_v \in \mathbb{R}^{KM \times d}$. Each node then cross-attends to all representatives:
 \begin{equation}
 \text{Attn}_{\text{global}} = \text{softmax}\left( \frac{\mathbf{Q} \, \mathbf{R}_k^T}{\sqrt{d}} \right) \mathbf{R}_v, \quad O(N \cdot M \cdot K)
