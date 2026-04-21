@@ -183,7 +183,15 @@ Deezer     & 67.1{\scriptsize$\pm$1.1} & 67.15{\scriptsize$\pm$0.48} & $\approx$
 
 \begin{proposition}[Sign of optimal $\beta$]
 \label{prop:beta}
-Let $\mathcal{L}(\beta) = \frac{1}{N} \sum_{i=1}^{N} \ell\bigl(\mathbf{h}_{\text{context},i} + \beta \, \mathbf{V}_i,\; y_i\bigr)$ where $\ell$ is a per-node loss.  If $\mathcal{L}$ is locally convex in $\beta$ near its minimizer $\beta^*$, then $\beta^* < 0$ if and only if adding self-features increases the loss at $\beta=0$.
+Let $\ell$ be a per-node loss and define the aggregate loss
+\[
+\mathcal{L}(\beta) \;=\; \frac{1}{N} \sum_{i=1}^{N} \ell\!\bigl(\mathbf{h}_{\emph{context},i} + \beta \, \mathbf{V}_i,\; y_i\bigr),
+\]
+where $\mathbf{h}_{\emph{context},i}$ is the blended attention output and $\mathbf{V}_i$ is node $i$'s value projection. If $\mathcal{L}$ is locally convex in $\beta$ near its minimizer $\beta^*$, then:
+\begin{enumerate}
+    \item $\beta^* < 0$ \;\;(self-features suppressed) \;$\iff$\; adding self-features increases the loss at $\beta = 0$.
+    \item $\beta^* > 0$ \;\;(self-features amplified) \;$\iff$\; adding self-features decreases the loss at $\beta = 0$.
+\end{enumerate}
 \end{proposition}
 
 \begin{proof}
