@@ -4,103 +4,174 @@
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.95\textwidth}{!}{%
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  node distance=0.7cm and 0.8cm,
-  box/.style={draw, rounded corners=3pt, minimum height=0.8cm, minimum width=1.5cm, align=center, font=\scriptsize},
-  mainbox/.style={box, fill=white, draw=black!60, thick},
-  gcnbox/.style={box, fill=green!15, draw=green!50!black, thick},
-  fusebox/.style={box, fill=orange!15, draw=orange!60!black, thick},
-  partbox/.style={box, fill=white, draw=black!60, thick, dashed, minimum width=1.2cm},
-  localbox/.style={box, fill=orange!12, draw=orange!50!black, thick},
-  globalbox/.style={box, fill=cyan!15, draw=cyan!50!black, thick},
-  outbox/.style={box, fill=pink!25, draw=red!40!black, thick},
-  arr/.style={-{Stealth[length=2mm]}, thick, black!70},
-  stagelabel/.style={font=\scriptsize\bfseries, text=black!60},
+  % ── No resizebox font degradation: use \small base, resizebox only for width fit ──
+  >={Stealth[length=2.8mm, width=2mm]},
+  % ── Base box ──
+  box/.style={
+    draw, rounded corners=3pt, minimum height=0.90cm, minimum width=1.4cm,
+    align=center, font=\small, line width=0.7pt,
+  },
+  % ── 3-family palette ──
+  %   Family A (blue): transformer pipeline — input, proj, QKV, norm
+  %   Family B (warm):  novel contributions — local (orange), global (blue-green), blend
+  %   Family C (gray):  GCN branch + output
+  %
+  % -- Family A: blue pipeline --
+  inputbox/.style={box, fill=blue!18, draw=blue!60!black, minimum width=1.7cm},
+  partbox/.style={box, fill=blue!15, draw=blue!55!black, minimum width=1.5cm, densely dashed},
+  projbox/.style={box, fill=blue!20, draw=blue!55!black},
+  qkvbox/.style={box, fill=blue!28, draw=blue!70!black, font=\small\bfseries},
+  normbox/.style={box, fill=blue!18, draw=blue!50!black},
+  % -- Family B: novel contribution boxes (visually prominent) --
+  localbox/.style={box, fill=orange!25, draw=orange!75!black, line width=1.0pt,
+                   minimum width=2.2cm, minimum height=1.05cm},
+  seedbox/.style={box, fill=teal!22, draw=teal!70!black, minimum width=1.6cm},
+  globalbox/.style={box, fill=teal!28, draw=teal!75!black, line width=1.0pt,
+                    minimum width=2.2cm, minimum height=1.05cm},
+  blendbox/.style={box, fill=orange!28, draw=orange!65!black, line width=0.9pt},
+  selfbox/.style={box, fill=orange!22, draw=orange!55!black},
+  % -- Family C: GCN + output (neutral) --
+  gcnbox/.style={box, fill=black!10, draw=black!55, minimum width=1.6cm},
+  gwbox/.style={box, fill=black!14, draw=black!60, minimum width=1.6cm,
+                font=\small\bfseries},
+  outbox/.style={box, fill=black!10, draw=black!50, minimum width=1.5cm},
+  % ── Arrows ──
+  arr/.style={->, line width=0.8pt, color=black!80},
+  arrfork/.style={line width=0.8pt, color=black!80},
+  gcnarr/.style={->, line width=0.8pt, color=black!65, densely dashed},
+  % ── Labels ──
+  stagelabel/.style={font=\small\bfseries\sffamily, text=black!80},
+  complabel/.style={font=\footnotesize, text=black!70},
+  % ── Fork ──
+  forkdot/.style={circle, fill=black!80, inner sep=2.2pt},
+  % ── Merge node (⊕) ──
+  mergenode/.style={circle, draw=black!75, line width=0.9pt, inner sep=1.8pt,
+                    font=\small\bfseries, fill=white},
 ]
 
-% === Row 1: Main attention pipeline ===
+% =====================================================================
+%   ROW 1 — main transformer pipeline
+% =====================================================================
+
 % Input
-\node[gcnbox, minimum width=1.8cm] (input) {Input Graph\\$\mathbf{X}, \mathbf{A}$};
+\node[inputbox] (input) {Input Graph\\[-1pt]$\mathbf{X},\;\mathbf{A}$};
 
 % METIS
-\node[partbox, right=0.8cm of input] (metis) {METIS\\$\to K$ parts};
+\node[partbox, right=0.6cm of input] (metis) {METIS\\[-1pt]$\to K$ parts};
 \draw[arr] (input) -- (metis);
 
-% Linear (applied first in code)
-\node[mainbox, fill=blue!8, right=0.7cm of metis] (linproj) {Linear\\LN$\to$ReLU};
+% Linear projection
+\node[projbox, right=0.55cm of metis] (linproj) {Linear\\[-1pt]LN\,$\to$\,ReLU};
 \draw[arr] (metis) -- (linproj);
 
-% PSE (added after projection in code)
-\node[mainbox, fill=blue!8, right=0.7cm of linproj, minimum width=1.6cm] (pse) {$+\,\text{PSE}(k_i)$};
+% PSE
+\node[projbox, right=0.55cm of linproj, minimum width=1.6cm] (pse) {$+\;\text{PSE}(k_i)$};
 \draw[arr] (linproj) -- (pse);
 
 % QKV
-\node[mainbox, fill=blue!12, right=0.7cm of pse] (qkv) {$\mathbf{Q,K,V}$\\Projection};
+\node[qkvbox, right=0.55cm of pse] (qkv) {Q,\,K,\,V\\[-1pt]Projection};
 \draw[arr] (pse) -- (qkv);
 
-% Fork point
-\coordinate[right=0.7cm of qkv] (fork);
-\draw[thick, black!70] (qkv) -- (fork);
+% ── Fork (prominent dot) ──
+\coordinate[right=0.55cm of qkv] (fork);
+\node[forkdot] at (fork) {};
+\draw[arrfork] (qkv) -- (fork);
 
-% Local attention (top branch)
-\node[localbox, above right=0.8cm and 1.0cm of fork] (local) {Local Attention\\per partition, $O(N^2\!/K)$};
-\draw[arr] (fork) |- (local);
+% ── TOP branch: Local attention ──
+\node[localbox, above right=0.9cm and 1.0cm of fork] (local) {%
+  \textbf{Local Attention}\\[-1pt]
+  {\small per partition}};
+\node[complabel, above=2pt of local.north] {$O(N^2\!/K)$};
+\draw[arr, rounded corners=4pt] (fork) |- (local);
 
-% Seed pool (bottom branch)
-\node[globalbox, below right=0.8cm and 0.3cm of fork] (seedpool) {Seed Pool\\$\mathbf{R}_k, \mathbf{R}_v$};
-\draw[arr] (fork) |- (seedpool);
+% ── BOTTOM branch: Seed pool → Global attention ──
+\node[seedbox, below right=0.9cm and 0.4cm of fork] (seedpool) {Seed Pool\\[-1pt]$\mathbf{R}_k,\;\mathbf{R}_v$};
+\draw[arr, rounded corners=4pt] (fork) |- (seedpool);
 
-% Global attention (right of seed pool)
-\node[globalbox, right=0.7cm of seedpool] (global) {Global Attention\\cross-attend, $O(NMK)$};
+\node[globalbox, right=0.55cm of seedpool] (global) {%
+  \textbf{Global Attention}\\[-1pt]
+  {\small cross-attend}};
+\node[complabel, above=2pt of global.north] {$O(NMK)$};
 \draw[arr] (seedpool) -- (global);
 
-% Alpha-blend (centered right of the two branches)
-\node[fusebox] (blend) at ($(local.east)!0.5!(global.east) + (1.5,0)$) {$\alpha$-Blend\\local$+$global};
-\draw[arr] (local.east) -| (blend.north);
-\draw[arr] (global.east) -| (blend.south);
+% ── Merge via ⊕ node ──
+\coordinate (mergeY) at ($(local.east)!0.5!(global.east)$);
+\node[mergenode] (mergeN) at ($(mergeY) + (1.6,0)$) {$\oplus$};
+% Arrows from branches to ⊕
+\draw[arr, rounded corners=4pt] (local.east) -- ++(0.4,0) |- (mergeN);
+\draw[arr, rounded corners=4pt] (global.east) -- ++(0.4,0) |- (mergeN);
+
+% α-Blend (right of ⊕)
+\node[blendbox, right=0.55cm of mergeN] (blend)
+  {$\alpha$\textbf{-Blend}\\[-1pt]{\small local\,+\,global}};
+\draw[arr] (mergeN) -- (blend);
 
 % Self-connection
-\node[fusebox, right=0.7cm of blend] (self) {$+\;\beta \cdot \mathbf{V}_i$\\Self-Connect};
+\node[selfbox, right=0.55cm of blend] (self) {$\beta\!\cdot\!\mathbf{V}_i$\\[-1pt]Self-Connect};
 \draw[arr] (blend) -- (self);
 
 % LayerNorm
-\node[mainbox, fill=blue!8, right=0.7cm of self] (ln) {LayerNorm\\$+$ Residual};
+\node[normbox, right=0.55cm of self] (ln) {LayerNorm\\[-1pt]$+$ Residual};
 \draw[arr] (self) -- (ln);
 
-% === Row 2: GCN branch ===
-\node[gcnbox, minimum width=1.8cm] (gcn) at ($(input)+(0,-2.4)$) {GCN Branch\\$\text{GCN}(\mathbf{X,A})$};
-\draw[arr] (input) -- (gcn);
+% =====================================================================
+%   MAIN ROW continued — Fusion + Output (same y-level as pipeline)
+% =====================================================================
 
-% Fusion
-\node[fusebox, fill=yellow!20, draw=yellow!60!black, minimum width=1.8cm] (gwfuse) at (ln |- gcn) {$\lambda_{\text{gw}}$-Fusion\\GCN $+$ Attn};
-\draw[arr] (ln) -- (gwfuse);
-\draw[arr] (gcn) -- (gwfuse);
+% λ_gw fusion — stays on main row, right of LayerNorm
+\node[gwbox] (gwfuse) at ($(ln) + (2.0,0)$) {$\lambda_{\text{gw}}$\textbf{-Fusion}\\[-1pt]{\small GCN\,$+$\,Attn}};
+\draw[arr, line width=1.0pt] (ln) -- (gwfuse);
 
-% Output
-\node[outbox, right=0.7cm of gwfuse, minimum width=1.5cm] (output) {Classifier\\$\hat{\mathbf{y}} = W\mathbf{h}$};
+% Classifier — continues main row
+\node[outbox, right=0.55cm of gwfuse] (output) {Classifier\\[-1pt]$\hat{\mathbf{y}} = W\mathbf{h}$};
 \draw[arr] (gwfuse) -- (output);
 
-% === Background regions ===
+% =====================================================================
+%   GCN branch — below blend/self area, short dashed arrow UP into fusion
+% =====================================================================
+
+\node[gcnbox] (gcn) at ($(gwfuse) + (0,-1.8)$) {$\text{GCN}(\mathbf{X},\mathbf{A})$};
+% Dashed arrow from input down-and-right to GCN
+\draw[gcnarr, rounded corners=4pt] (input.south) -- ++(0,-0.5) -| (gcn.west);
+% Short dashed arrow from GCN straight up into fusion
+\draw[gcnarr] (gcn.north) -- (gwfuse.south);
+
+% =====================================================================
+%   Background regions (visible fills, dark labels)
+% =====================================================================
 \begin{scope}[on background layer]
-  \node[fill=green!5, draw=green!25, rounded corners=8pt, inner xsep=10pt, inner ysep=14pt,
-        fit=(input)(metis)(gcn),
-        label={[stagelabel, text=green!50!black]above:Input}] {};
-  \node[fill=blue!4, draw=blue!25, dashed, rounded corners=8pt, inner xsep=8pt, inner ysep=16pt,
-        fit=(pse)(linproj)(qkv)(local)(global)(blend)(self)(ln)(seedpool),
-        label={[stagelabel, text=blue!50!black]above:PCGT Attention Layer}] {};
-  \node[fill=yellow!6, draw=yellow!35, rounded corners=8pt, inner xsep=10pt, inner ysep=14pt,
-        fit=(gwfuse)(output),
-        label={[stagelabel, text=yellow!50!black]above:Output}] {};
+  % Input region (just input + metis, no GCN)
+  \node[
+    fill=blue!14, draw=blue!45, rounded corners=10pt,
+    inner xsep=11pt, inner ysep=16pt,
+    fit=(input)(metis),
+    label={[stagelabel, text=black!75]above:\textsf{Input}}
+  ] {};
+  % PCGT Attention Layer
+  \node[
+    fill=orange!14, draw=orange!45, rounded corners=10pt,
+    inner xsep=9pt, inner ysep=18pt, line width=0.8pt,
+    fit=(linproj)(pse)(qkv)(local)(global)(seedpool)(blend)(self)(ln),
+    label={[stagelabel, text=black!80]above:\textsf{PCGT Attention Layer}}
+  ] {};
+  % Output region
+  \node[
+    fill=black!12, draw=black!35, rounded corners=10pt,
+    inner xsep=15pt, inner ysep=16pt,
+    fit=(gwfuse)(output)(gcn),
+    label={[stagelabel, text=black!75]above:\textsf{Fusion \& Output}}
+  ] {};
 \end{scope}
 
 \end{tikzpicture}
 }% end resizebox
-\caption{Architecture of PCGT. The input graph is partitioned via METIS into $K$ groups. Node features are linearly projected, augmented with partition structural encoding (PSE), then Q/K/V projections feed two parallel branches: \emph{local attention} within each partition (using Q, K, V restricted to the partition) and \emph{global attention} where learned seeds pool each partition's K, V into representatives $\mathbf{R}_k, \mathbf{R}_v$, and every node's Q cross-attends to all representatives. The branches are $\alpha$-blended, augmented with a $\beta$-weighted self-connection, and fused with a GCN branch via the graph-weight $\lambda_{\text{gw}}$.}
+\caption{Architecture of PCGT\@. The input graph is partitioned via METIS into $K$ groups. Node features are linearly projected, augmented with partition structural encoding (PSE), then Q/K/V projections feed two parallel branches: \emph{local attention} within each partition (using Q, K, V restricted to the partition) and \emph{global attention} where learned seeds pool each partition's K, V into representatives $\mathbf{R}_k, \mathbf{R}_v$, and every node's Q cross-attends to all representatives. The branches are $\alpha$-blended, augmented with a $\beta$-weighted self-connection, and fused with a GCN branch via the graph-weight $\lambda_{\text{gw}}$.}
 \label{fig:architecture}
 \end{figure*}
 
-PCGT combines local and global attention with learnable blending. Given a graph with $N$ nodes, we: (1) partition into $K$ regions (METIS/KMeans), (2) compute local attention within partitions $O(N^2/K)$, (3) compute global attention via learned seeds $O(N{\cdot}M{\cdot}K)$, (4) blend via learnable $\alpha$, (5) weight self-connections via learnable $\beta$, and (6) blend with GCN as fallback.
+PCGT combines local and global attention with learnable blending (Figure~\ref{fig:architecture}). Given a graph with $N$ nodes, we: (1) partition into $K$ regions (METIS/KMeans), (2) compute local attention within partitions $O(N^2/K)$, (3) compute global attention via learned seeds $O(N{\cdot}M{\cdot}K)$, (4) blend via learnable $\alpha$, (5) weight self-connections via learnable $\beta$, and (6) blend with GCN as fallback.
 
 \subsection{Local Attention and Partition Encoding}
 

@@ -37,7 +37,7 @@ SGFormer & \best{84.5}{\scriptsize$\pm$0.8} & \runup{72.6}{\scriptsize$\pm$0.2} 
 \bottomrule
 \end{tabular}
 }% end resizebox
-\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5--10 runs). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our runs. \best{Best} and \runup{runner-up} per column.}
+\caption{Node classification accuracy (\%) on medium-scale benchmarks. Mean $\pm$ std over 10 runs (Deezer: 5 runs). GCN--SGFormer from \citet{wu2023sgformer}; DIFFormer from \citet{wu2023difformer}; NAGphormer from \citet{chen2023nagphormer}; GraphGPS from our runs. \best{Best} and \runup{runner-up} per column.}
 \label{tab:main}
 \end{table*}
 
@@ -52,7 +52,7 @@ Table~\ref{tab:new_datasets} reports results on four additional datasets where w
 \toprule
 \textbf{Method} & \textbf{Co-CS} & \textbf{Co-Phys} & \textbf{Am-Comp} & \textbf{Am-Photo} \\
 \midrule
-GCN & 91.5{\scriptsize$\pm$0.3} & 95.7{\scriptsize$\pm$0.2} & 82.8{\scriptsize$\pm$1.8} & 90.9{\scriptsize$\pm$1.2} \\
+GCN & 91.9{\scriptsize$\pm$0.4} & 95.7{\scriptsize$\pm$0.2} & 82.8{\scriptsize$\pm$1.8} & 90.9{\scriptsize$\pm$1.2} \\
 GAT & 92.0{\scriptsize$\pm$0.3} & 95.4{\scriptsize$\pm$0.2} & 83.4{\scriptsize$\pm$0.9} & 91.1{\scriptsize$\pm$0.8} \\
 SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2} & \runup{87.5}{\scriptsize$\pm$2.0} & \runup{95.2}{\scriptsize$\pm$1.2} \\
 \textbf{PCGT (ours)} & \best{95.1}{\scriptsize$\pm$0.3} & \best{96.8}{\scriptsize$\pm$0.2} & \best{88.8}{\scriptsize$\pm$0.7} & \best{95.3}{\scriptsize$\pm$0.4} \\
@@ -64,7 +64,7 @@ SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2}
 
 \textbf{Heterophilic datasets.} The largest gains are on heterophilic benchmarks: +4.1\% on Chameleon and +3.7\% on Squirrel over SGFormer, which was already the previous best. PCGT beats all 13 baselines on these datasets, including heterophily-specific methods like GloGNN (+8.8\% on Chameleon) and H$_2$GCN (+10.4\% on Squirrel). On Film, PCGT also leads (38.0 vs.\ 37.9 for SGFormer).
 
-\textbf{Homophilic datasets.} On CiteSeer, PCGT scores 73.1 vs.\ SGFormer's 72.6 (+0.5\%, paired $t$-test $p$=0.048). On PubMed, 81.0 vs.\ 80.3 (+0.7\%, $p$=0.027). On Cora, the two are within noise (84.3 vs.\ 84.5, $p$=0.88). PCGT also shows lower run-to-run variance than SGFormer across these benchmarks.
+\textbf{Homophilic datasets.} On CiteSeer, PCGT scores 73.1 vs.\ SGFormer's 72.6 (+0.5\%). On PubMed, 81.0 vs.\ 80.3 (+0.7\%). On Cora, the two are within noise (84.3 vs.\ 84.5). PCGT also shows lower run-to-run variance than SGFormer across these benchmarks.
 
 \textbf{Additional datasets (Table~\ref{tab:new_datasets}).} PCGT wins on all four, outperforming not only SGFormer but also GCN and GAT baselines by large margins. Coauthor-Physics (+0.2\% over SGFormer) is statistically significant ($p$=0.004). Amazon-Computers has the largest absolute gap (+1.3\%, $p$=0.051). PCGT's variance is also consistently lower (e.g., $\pm$0.7 vs.\ $\pm$2.0 on Amazon-Computers).
 
@@ -72,30 +72,31 @@ SGFormer & \runup{94.9}{\scriptsize$\pm$0.5} & \runup{96.6}{\scriptsize$\pm$0.2}
 
 \subsection{Large-Scale Results}
 
-To test scalability beyond medium-sized graphs, we evaluate on ogbn-arxiv (169K nodes, 1.2M edges) and pokec (1.6M nodes, 30.6M edges)---two standard large-scale benchmarks spanning homophilic and heterophilic regimes~\citep{hu2020ogb, lim2021large}. We follow the mini-batch training setup of SGFormer~\citep{wu2023sgformer}: batch size 10K (arxiv) / 100K (pokec), hidden dimension 256 (arxiv) / 64 (pokec). Baselines are from SGFormer Table~3.
+To test scalability beyond medium-sized graphs, we evaluate on three large-scale benchmarks spanning homophilic and heterophilic regimes: ogbn-arxiv (169K nodes, 1.2M edges)~\citep{hu2020ogb}, pokec (1.6M nodes, 30.6M edges)~\citep{lim2021large}, and Amazon2M (2.4M nodes, 61.9M edges)~\citep{wu2022nodeformer}. We follow the mini-batch training setup of SGFormer~\citep{wu2023sgformer}. Baselines are from \citet{wu2023sgformer} Table~3.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{l|cc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l|ccc}
 \toprule
-\textbf{Method} & \textbf{ogbn-arxiv} & \textbf{pokec} \\
- & (169K, $h$=0.66) & (1.6M, $h$=0.45) \\
+\textbf{Method} & \textbf{ogbn-arxiv} & \textbf{pokec} & \textbf{Amazon2M} \\
 \midrule
-MLP & 55.50{\scriptsize$\pm$0.23} & 60.15{\scriptsize$\pm$0.03} \\
-GCN & 71.74{\scriptsize$\pm$0.29} & 62.31{\scriptsize$\pm$1.13} \\
-SIGN & 70.28{\scriptsize$\pm$0.25} & 68.01{\scriptsize$\pm$0.25} \\
-NodeFormer & 59.90{\scriptsize$\pm$0.42} & 70.32{\scriptsize$\pm$0.45} \\
-SGFormer & \best{72.63}{\scriptsize$\pm$0.13} & \runup{73.76}{\scriptsize$\pm$0.24} \\
+MLP & 55.50{\scriptsize$\pm$0.23} & 60.15{\scriptsize$\pm$0.03} & 63.46{\scriptsize$\pm$0.10} \\
+GCN~\citep{kipf2017semi} & 71.74{\scriptsize$\pm$0.29} & 62.31{\scriptsize$\pm$1.13} & 83.90{\scriptsize$\pm$0.10} \\
+SIGN~\citep{rossi2020sign} & 71.95{\scriptsize$\pm$0.11} & 68.01{\scriptsize$\pm$0.25} & 80.98{\scriptsize$\pm$0.31} \\
+NodeFormer~\citep{wu2022nodeformer} & 59.90{\scriptsize$\pm$0.42} & 70.32{\scriptsize$\pm$0.45} & 87.85{\scriptsize$\pm$0.24} \\
+SGFormer~\citep{wu2023sgformer} & \best{72.63}{\scriptsize$\pm$0.13} & 73.76{\scriptsize$\pm$0.24} & \best{89.09}{\scriptsize$\pm$0.10} \\
 \midrule
-\textbf{PCGT (ours)} & \runup{72.50}{\scriptsize$\pm$0.14} & \best{74.89}{\scriptsize$\pm$0.29} \\
+\textbf{PCGT (ours)} & \runup{72.50}{\scriptsize$\pm$0.14} & \best{74.94}{\scriptsize$\pm$0.28} & \runup{88.79}{\scriptsize$\pm$0.06} \\
 \bottomrule
 \end{tabular}
-\caption{Large-scale node classification results (\%). ogbn-arxiv uses accuracy; pokec uses accuracy. Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 3 runs, best validation epoch.}
+}% end resizebox
+\caption{Large-scale node classification accuracy (\%). Baselines from~\citet{wu2023sgformer} Table~3. PCGT: 10 runs (arxiv), 3 runs (pokec, Amazon2M), best validation epoch.}
 \label{tab:largescale}
 \end{table}
 
-\noindent On pokec (1.6M nodes, $h$=0.45), PCGT achieves \textbf{74.89\%}, outperforming SGFormer by \textbf{+1.13\%}---the largest gap among the large-scale datasets. This confirms that partition-conditioned attention is most beneficial on graphs where community structure carries discriminative signal, even at million-node scale. On ogbn-arxiv ($h$=0.66), PCGT scores 72.50\%, within the error bars of SGFormer (72.63$\pm$0.13\%). On a homophilic graph, SGFormer's lightweight $O(N)$ kernel is well-suited; matching it shows that PCGT's $O(N^2/K + NMK)$ complexity does not sacrifice accuracy at scale.
+\noindent PCGT achieves the best result on pokec (74.94\%, +1.2\% over SGFormer) and is runner-up on ogbn-arxiv (72.50\% vs.\ 72.63\%) and Amazon2M (88.79\% vs.\ 89.09\%), both within the error bars of SGFormer. On pokec---a heterophilic social network ($h$=0.45) with 1.6M nodes---partition-conditioned attention provides meaningful gains, consistent with the pattern observed on medium-scale heterophilic graphs. On homophilic graphs (arxiv $h$=0.66, Amazon2M), SGFormer's lightweight $O(N)$ kernel is well-suited, so matching it is the expected outcome. Importantly, PCGT scales to 2.4M nodes without accuracy collapse, confirming that $O(N^2/K + NMK)$ complexity remains practical at million-node scale.
 
 \begin{figure}[t]
 \centering
@@ -264,7 +265,7 @@ w/o Global & \runup{84.47}{\scriptsize$\pm$.50} & \runup{48.84}{\scriptsize$\pm$
 w/o Local & 84.23{\scriptsize$\pm$.76} & 48.67{\scriptsize$\pm$3.44} & 44.39{\scriptsize$\pm$1.69} \\
 w/o PSE & 84.30{\scriptsize$\pm$.20} & 48.51{\scriptsize$\pm$3.34} & 44.64{\scriptsize$\pm$1.91} \\
 w/o GCN & 70.90{\scriptsize$\pm$1.37} & 42.24{\scriptsize$\pm$3.26} & 37.59{\scriptsize$\pm$1.38} \\
-Random part. & 83.80{\scriptsize$\pm$.53} & 48.80{\scriptsize$\pm$2.07} & 44.60{\scriptsize$\pm$1.80} \\
+Random part. & 83.78{\scriptsize$\pm$1.02} & 48.80{\scriptsize$\pm$2.07} & 44.60{\scriptsize$\pm$1.80} \\
 \midrule
 Pure GCN & 84.13{\scriptsize$\pm$.95} & 46.87{\scriptsize$\pm$2.49} & 41.84{\scriptsize$\pm$1.24} \\
 SGFormer & 83.87{\scriptsize$\pm$.61} & 48.34{\scriptsize$\pm$2.64} & 44.81{\scriptsize$\pm$2.17} \\

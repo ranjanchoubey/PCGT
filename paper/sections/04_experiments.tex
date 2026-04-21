@@ -2,7 +2,7 @@
 
 \subsection{Datasets}
 
-We evaluate on 13 node classification benchmarks spanning homophilic, heterophilic, and large-scale regimes, following the dataset selection and preprocessing of SGFormer~\citep{wu2023sgformer} and extending to standard co-purchase, co-authorship~\citep{shchur2018pitfalls}, and OGB~\citep{hu2020ogb} datasets. Dataset statistics are summarized in Table~\ref{tab:datasets}.
+We evaluate on 14 node classification benchmarks spanning homophilic, heterophilic, and large-scale regimes, following the dataset selection and preprocessing of SGFormer~\citep{wu2023sgformer} and extending to standard co-purchase, co-authorship~\citep{shchur2018pitfalls}, and OGB~\citep{hu2020ogb} datasets. Dataset statistics are summarized in Table~\ref{tab:datasets}.
 
 \begin{table}[t]
 \centering
@@ -25,7 +25,8 @@ Squirrel   & 2,223  & 2,089  & 5  & 0.21 & Hetero. \\
 Deezer     & 28,281 & 31,241 & 2  & 0.53 & Mixed \\
 \midrule
 ogbn-arxiv & 169,343 & 128 & 40 & 0.66 & Large \\
-pokec & 1,632,803 & 65 & 2 & 0.45 & Large \\
+pokec      & 1,632,803 & 65 & 2 & 0.45 & Large \\
+Amazon2M   & 2,449,029 & 100 & 47 & 0.78 & Large \\
 \bottomrule
 \end{tabular}
 }% end resizebox
@@ -36,7 +37,8 @@ pokec & 1,632,803 & 65 & 2 & 0.45 & Large \\
 \noindent\textbf{Homophilic benchmarks.} Cora, CiteSeer, and PubMed are standard citation networks~\citep{kipf2017semi, sen2008collective} where connected nodes tend to share labels. Coauthor-CS and Coauthor-Physics are co-authorship graphs~\citep{shchur2018pitfalls} where nodes represent authors. Amazon-Computers and Amazon-Photo are co-purchase graphs from the Amazon product network~\citep{shchur2018pitfalls}.
 \textbf{Heterophilic benchmarks.} Chameleon and Squirrel are Wikipedia page--page networks with filtered splits from \citet{platonov2023critical}, where edges frequently connect nodes of different classes. Film is an actor co-occurrence network~\citep{pei2020geomgcn}. \textbf{Deezer}~\citep{rozemberczki2021deezer} is a social network with binary genre labels and mixed homophily.
 \textbf{ogbn-arxiv}~\citep{hu2020ogb} is a large-scale citation network (169K nodes, 1.2M edges, 40 classes) from the Open Graph Benchmark.
-\textbf{pokec}~\citep{lim2021large} is a large-scale social network (1.6M nodes, 30.6M edges, binary classification, $h$=0.45) from Slovakia, serving as a scalability test on heterophilic graphs.
+\textbf{pokec}~\citep{lim2021large} is a social network (1.6M nodes, 30.6M edges) with binary gender labels and heterophilic structure ($h$=0.45), using 10\%/10\%/80\% random splits.
+\textbf{Amazon2M}~\citep{wu2022nodeformer} is a co-purchasing network (2.4M nodes, 61.9M edges, 47 classes) with bag-of-words features, using 50\%/25\%/25\% random splits.
 
 \subsection{Evaluation Protocol}
 
@@ -48,6 +50,8 @@ We follow the identical evaluation protocol of SGFormer~\citep{wu2023sgformer} t
     \item \textbf{Chameleon, Squirrel, Film:} Pre-computed 10-fold filtered splits (60\%/20\%/20\%) from~\citet{platonov2023critical}. 10 runs.
     \item \textbf{Deezer:} Random 50\%/25\%/25\% splits. 10 runs.
     \item \textbf{ogbn-arxiv:} Official OGB train/val/test split~\citep{hu2020ogb}. 10 runs.
+    \item \textbf{pokec:} Random 10\%/10\%/80\% split~\citep{lim2021large}. 3 runs.
+    \item \textbf{Amazon2M:} Random 50\%/25\%/25\% split~\citep{wu2022nodeformer}. 3 runs.
 \end{itemize}
 
 We report mean $\pm$ standard deviation of test accuracy across runs, selecting the epoch with highest validation accuracy (early stopping with patience 200).

@@ -3,7 +3,7 @@
 \section{Hyperparameter Configuration}
 \label{app:hyperparams}
 
-Table~\ref{tab:hyperparams} lists the full hyperparameter configuration used for PCGT across all 13 datasets. Most medium-scale experiments use hidden dimension $d=64$; Deezer uses $d=96$ due to its larger feature space (31K features). All experiments use a single PCGT attention layer ($L_\text{pcgt}=1$), $M=4$ learned seeds per partition, and the METIS partitioning algorithm. The ogbn-arxiv experiment uses $d=256$ to match the SGFormer baseline configuration.
+Table~\ref{tab:hyperparams} lists the full hyperparameter configuration used for PCGT across all 14 datasets. Most medium-scale experiments use hidden dimension $d=64$; Deezer uses $d=96$ due to its larger feature space (31K features). All experiments use a single PCGT attention layer ($L_\text{pcgt}=1$), $M=4$ learned seeds per partition, and the METIS partitioning algorithm. The large-scale experiments (ogbn-arxiv, pokec, Amazon2M) use $d=256$ and mini-batch training with batch size 100K.
 
 \begin{table*}[t]
 \centering
@@ -26,7 +26,8 @@ Am-Comp.     & 64  & 10  & 4 & 0.01  & 5e-4  & 0.5 & 0.8 & 0.2 & 1e-3 & 500  & 1
 Am-Photo     & 64  & 10  & 4 & 0.01  & 5e-4  & 0.5 & 0.8 & 0.2 & 1e-3 & 500  & 10 \\
 \midrule
 ogbn-arxiv   & 256 & 256 & 3 & 0.001 & 0     & 0.5 & 0.5 & 0.5 & 0    & 1000 & 10 \\
-pokec        & 64  & 500 & 2 & 0.01  & 0     & 0.5 & 0.5 & 0   & 0    & 1000 & 3 \\
+pokec        & 64  & 500 & 2 & 0.01  & 0     & 0   & 0.5 & 0   & 0    & 1000 & 3 \\
+Amazon2M     & 256 & 1000 & 3 & 0.01 & 0     & 0   & 0.5 & 0   & 0    & 1000 & 3 \\
 \bottomrule
 \end{tabular}
 }% end resizebox
@@ -128,7 +129,7 @@ Figure~\ref{fig:convergence} shows validation accuracy curves (mean $\pm$ std ov
 \section{Statistical Significance}
 \label{app:significance}
 
-For the four additional datasets (Table~\ref{tab:new_datasets}) where we run both PCGT and SGFormer under identical code, splits, and 10 random seeds, Table~\ref{tab:pvalues} reports paired $t$-test $p$-values (paired because each run shares the same random split).  Coauthor-Physics shows a statistically significant improvement ($p = 0.004$), Amazon-Computers is marginally significant ($p = 0.051$), and the remaining two datasets show gains that are within noise.  For the seven Table~\ref{tab:main} datasets, SGFormer baselines are taken from the published numbers of \citet{wu2023sgformer} and per-run data is unavailable, so $t$-tests cannot be computed.
+For the four additional datasets (Table~\ref{tab:new_datasets}) where we run both PCGT and SGFormer under identical code, splits, and 10 random seeds, Table~\ref{tab:pvalues} reports Welch's $t$-test $p$-values.  Coauthor-Physics shows a statistically significant improvement ($p = 0.004$), Amazon-Computers is marginally significant ($p = 0.051$), and the remaining two datasets show gains that are within noise.  For the seven Table~\ref{tab:main} datasets, SGFormer baselines are taken from the published numbers of \citet{wu2023sgformer} and per-run data is unavailable, so $t$-tests cannot be computed.
 
 \begin{table}[t]
 \centering
@@ -143,12 +144,30 @@ Am-Computers & 88.80{\scriptsize$\pm$0.64} & 87.50{\scriptsize$\pm$1.88} & +1.30
 Am-Photo     & 95.27{\scriptsize$\pm$0.38} & 95.20{\scriptsize$\pm$1.12} & +0.07 & 0.822 \\
 \bottomrule
 \end{tabular}
-\caption{Paired $t$-test ($n=10$ runs, same splits). $**$: $p < 0.01$.  On homophilic datasets where both methods already perform well, differences are small.  PCGT's largest gains are on heterophilic benchmarks (Table~\ref{tab:main}), where published baselines preclude per-run tests.}
+\caption{Welch's $t$-test ($n=10$ runs). $**$: $p < 0.01$.  On homophilic datasets where both methods already perform well, differences are small.  PCGT's largest gains are on heterophilic benchmarks (Table~\ref{tab:main}), where published baselines preclude per-run tests.}
 \label{tab:pvalues}
 \end{table}
 
 \section{Learned Self-Connection Weight $\beta$}
 \label{app:beta}
+\label{app:beta_prop}
+
+\begin{proposition}[Sign of optimal $\beta$]
+\label{prop:beta}
+Let $\mathcal{L}(\beta) = \frac{1}{N} \sum_{i=1}^{N} \ell\bigl(\mathbf{h}_{\text{context},i} + \beta \, \mathbf{V}_i,\; y_i\bigr)$ where $\ell$ is a per-node loss.  If $\mathcal{L}$ is locally convex in $\beta$ near its minimizer $\beta^*$, then
+\[
+\beta^* < 0 \iff \left.\frac{\partial \mathcal{L}}{\partial \beta}\right|_{\beta=0} < 0 \text{ is false, i.e., } \left.\frac{\partial \mathcal{L}}{\partial \beta}\right|_{\beta=0} > 0.
+\]
+Equivalently, $\beta^* < 0$ whenever the aggregate gradient $\frac{1}{N}\sum_i \frac{\partial \ell}{\partial \mathbf{h}_i}\Big|_{\beta=0} \!\cdot\, \mathbf{V}_i > 0$, meaning that adding self-features (increasing $\beta$ from 0) increases the loss.
+\end{proposition}
+
+\begin{proof}
+By the chain rule,
+\[
+\frac{\partial \mathcal{L}}{\partial \beta} = \frac{1}{N} \sum_{i=1}^{N} \frac{\partial \ell}{\partial \mathbf{h}_i} \cdot \mathbf{V}_i,
+\]
+where $\mathbf{h}_i = \mathbf{h}_{\text{context},i} + \beta\,\mathbf{V}_i$.  Since $\mathcal{L}$ is locally convex in $\beta$, the function $\beta \mapsto \mathcal{L}(\beta)$ has a unique local minimum $\beta^*$ satisfying $\mathcal{L}'(\beta^*) = 0$.  Convexity implies $\mathcal{L}'$ is non-decreasing, so $\mathcal{L}'(0) > 0$ forces $\beta^* < 0$ (the zero-crossing must be to the left of 0).  Conversely, $\mathcal{L}'(0) < 0$ gives $\beta^* > 0$.
+\end{proof}
 
 Table~\ref{tab:beta_values} reports the learned $\beta$ values across all 11 medium-scale datasets (ogbn-arxiv excluded because the large-scale codebase does not log $\beta$).  These values supplement the bar chart in Figure~\ref{fig:beta}.  The two negative-$\beta$ datasets (Film, Deezer) have either noisy, low-dimensional features (Film: 932 dims, actor co-occurrence) or near-random edge labels (Deezer: $h \approx 0.53$), where suppressing self-features improves classification.  The highest $\beta$ values occur on Chameleon and Squirrel, whose high-dimensional Wikipedia features (2325 and 2089 dims) make self-identity highly informative even under low homophily.
 

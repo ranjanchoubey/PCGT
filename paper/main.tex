@@ -21,8 +21,9 @@
 \usepackage{colortbl}
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage{tikz}
-\usetikzlibrary{positioning, arrows.meta, calc, fit, backgrounds, shapes.geometric}
+\usetikzlibrary{positioning, arrows.meta, calc, fit, backgrounds, shapes.geometric, shadows.blur}
 \usepackage{amsthm}
+\newtheorem{proposition}{Proposition}
 \newtheorem{remark}{Remark}
 
 \geometry{margin=0.75in, columnsep=0.25in}
@@ -35,11 +36,12 @@
 % Table highlight colors (color + bold/underline for B&W fallback)
 \definecolor{bestcolor}{HTML}{D63384}    % magenta-pink for best
 \definecolor{runnerup}{HTML}{B8860B}     % dark goldenrod for runner-up
-% Figure 1 custom colors
-\definecolor{cVioletRed}{HTML}{C71585}
-\definecolor{cGreen}{HTML}{008000}
-\definecolor{cAzure}{HTML}{007FFF}
-\definecolor{cGold}{HTML}{E86100}
+\definecolor{cVioletRed}{HTML}{C71585}   % medium violet red for conceptual figure
+\definecolor{cGreen}{HTML}{008000}       % green for conceptual figure
+\definecolor{cAzure}{HTML}{007FFF}       % azure for conceptual figure
+\definecolor{cGold}{HTML}{E86100}        % gold/orange for conceptual figure
+\definecolor{indigo}{HTML}{3F51B5}        % indigo for architecture figure
+\definecolor{violet}{HTML}{7B1FA2}        % violet for architecture figure
 \newcommand{\best}[1]{\textcolor{bestcolor}{\textbf{#1}}}
 \newcommand{\runup}[1]{\textcolor{runnerup}{\underline{#1}}}
 
@@ -116,7 +118,7 @@ Indian Statistical Institute, Kolkata, India
 % ============================================================================
 \section{Conclusion}
 
-We presented PCGT, a graph transformer that exploits multi-resolution graph structure through partition-conditioned attention. By combining exact intra-partition attention with learned cross-partition pooling, PCGT captures both local community patterns and global interactions at subquadratic cost. Experiments on 13 benchmarks---from medium-scale datasets to pokec (1.6M nodes)---demonstrate that PCGT achieves the best or tied-best result on 11 of 13 datasets, with the strongest gains on heterophilic graphs (+4.1\% Chameleon, +3.7\% Squirrel, +1.1\% pokec over SGFormer) while also outperforming SGFormer on homophilic benchmarks (CiteSeer +0.5\%, PubMed +0.7\%) and scaling to million-node graphs. Ablation studies reveal two key insights: the attention mechanism's contribution scales proportionally with heterophily, and topology-aware partitioning is most beneficial when community structure carries label information. These findings suggest that partition-conditioned attention is a promising direction for building graph transformers that adapt to diverse graph structures.
+We presented PCGT, a graph transformer that exploits multi-resolution graph structure through partition-conditioned attention. By combining exact intra-partition attention with learned cross-partition pooling, PCGT captures both local community patterns and global interactions at subquadratic cost. Experiments on 14 benchmarks---from medium-scale datasets to million-node graphs (pokec 1.6M, Amazon2M 2.4M nodes)---demonstrate that PCGT achieves the best or tied-best result on 11 of 14 datasets, with the strongest gains on heterophilic graphs (+4.1\% Chameleon, +3.7\% Squirrel, +1.2\% pokec over SGFormer) while also outperforming SGFormer on homophilic benchmarks (CiteSeer +0.5\%, PubMed +0.7\%) and scaling to large graphs, albeit with moderate computational overhead (Appendix~\ref{app:runtime}). Ablation studies reveal two key insights: the attention mechanism's contribution scales proportionally with heterophily, and topology-aware partitioning is most beneficial when community structure carries label information. These findings suggest that partition-conditioned attention is a promising direction for building graph transformers that adapt to diverse graph structures.
 
 % ============================================================================
 % BIBLIOGRAPHY
