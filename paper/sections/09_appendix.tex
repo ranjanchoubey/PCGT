@@ -225,37 +225,4 @@ Squirrel     & $+3.53$ & 0.21 & 2,089 \\
 \label{tab:beta_values}
 \end{table}
 
-\section{Dataset Details}
-\label{app:datasets}
 
-Table~\ref{tab:dataset_details} provides full statistics for all 14 benchmarks, including edge counts and split ratios.
-
-\begin{table}[h!]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{l|rrrrc}
-\toprule
-\textbf{Dataset} & \textbf{Nodes} & \textbf{Edges} & \textbf{Feat.} & \textbf{Cls.} & $\bm{h}$ \\
-\midrule
-Cora           & 2,708     & 10,556     & 1,433  & 7  & 0.81 \\
-CiteSeer       & 3,327     & 9,104      & 3,703  & 6  & 0.74 \\
-PubMed         & 19,717    & 88,648     & 500    & 3  & 0.80 \\
-Co-CS          & 18,333    & 163,788    & 6,805  & 15 & 0.81 \\
-Co-Phys.       & 34,493    & 495,924    & 8,415  & 5  & 0.93 \\
-Am-Comp.       & 13,752    & 491,722    & 767    & 10 & 0.78 \\
-Am-Photo       & 7,650     & 238,162    & 745    & 8  & 0.83 \\
-\midrule
-Chameleon      & 890       & 13,584     & 2,325  & 5  & 0.24 \\
-Squirrel       & 2,223     & 65,718     & 2,089  & 5  & 0.21 \\
-Film           & 7,600     & 33,544     & 932    & 5  & 0.22 \\
-Deezer         & 28,281    & 185,504    & 31,241 & 2  & 0.53 \\
-\midrule
-ogbn-arxiv     & 169K      & 1.17M     & 128    & 40 & 0.66 \\
-pokec          & 1.63M     & 30.6M     & 65     & 2  & 0.45 \\
-Amazon2M       & 2.45M     & 61.9M     & 100    & 47 & 0.78 \\
-\bottomrule
-\end{tabular}
-\caption{Full dataset statistics. $h$: edge homophily ratio. Cora/CiteSeer/PubMed use the semi-supervised setting (20/class, 500 val, 1000 test)~\citep{kipf2017semi}. Chameleon/Squirrel use filtered splits~\citep{platonov2023critical}. Other medium-scale: 60\%/20\%/20\%. pokec: 10\%/10\%/80\%. Amazon2M: 50\%/25\%/25\%.}
-\label{tab:dataset_details}
-\end{table}
