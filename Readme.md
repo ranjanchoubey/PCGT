@@ -1,7 +1,7 @@
 # PCGT: Partition-Conditioned Graph Transformer
 
 <p align="center">
-  <img src="assets/architecture.png" alt="PCGT Architecture" width="100%">
+  <img src="assets/architecture_detailed.png" alt="PCGT Architecture" width="100%">
 </p>
 
 <p align="center">
@@ -20,6 +20,10 @@
 ---
 
 ## How It Works
+
+<p align="center">
+  <img src="assets/architecture.png" alt="Conceptual comparison" width="100%">
+</p>
 
 1. **Partition** the graph into $K$ balanced groups using METIS
 2. **Encode** each node with a learnable Partition Structural Encoding (PSE)
