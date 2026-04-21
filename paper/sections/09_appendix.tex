@@ -183,20 +183,61 @@ Deezer     & 67.1{\scriptsize$\pm$1.1} & 67.15{\scriptsize$\pm$0.48} & $\approx$
 
 \begin{proposition}[Sign of optimal $\beta$]
 \label{prop:beta}
-Let $\mathcal{L}(\beta) = \frac{1}{N} \sum_{i=1}^{N} \ell\bigl(\mathbf{h}_{\text{context},i} + \beta \, \mathbf{V}_i,\; y_i\bigr)$ where $\ell$ is a per-node loss.  If $\mathcal{L}$ is locally convex in $\beta$ near its minimizer $\beta^*$, then
-\[
-\beta^* < 0 \iff \left.\frac{\partial \mathcal{L}}{\partial \beta}\right|_{\beta=0} < 0 \text{ is false, i.e., } \left.\frac{\partial \mathcal{L}}{\partial \beta}\right|_{\beta=0} > 0.
-\]
-Equivalently, $\beta^* < 0$ whenever the aggregate gradient $\frac{1}{N}\sum_i \frac{\partial \ell}{\partial \mathbf{h}_i}\Big|_{\beta=0} \!\cdot\, \mathbf{V}_i > 0$, meaning that adding self-features (increasing $\beta$ from 0) increases the loss.
+Let $\mathcal{L}(\beta) = \frac{1}{N} \sum_{i=1}^{N} \ell\bigl(\mathbf{h}_{\text{context},i} + \beta \, \mathbf{V}_i,\; y_i\bigr)$ where $\ell$ is a per-node loss.  If $\mathcal{L}$ is locally convex in $\beta$ near its minimizer $\beta^*$, then $\beta^* < 0$ if and only if adding self-features increases the loss at $\beta=0$.
 \end{proposition}
 
 \begin{proof}
-By the chain rule,
-\[
-\frac{\partial \mathcal{L}}{\partial \beta} = \frac{1}{N} \sum_{i=1}^{N} \frac{\partial \ell}{\partial \mathbf{h}_i} \cdot \mathbf{V}_i,
-\]
-where $\mathbf{h}_i = \mathbf{h}_{\text{context},i} + \beta\,\mathbf{V}_i$.  Since $\mathcal{L}$ is locally convex in $\beta$, the function $\beta \mapsto \mathcal{L}(\beta)$ has a unique local minimum $\beta^*$ satisfying $\mathcal{L}'(\beta^*) = 0$.  Convexity implies $\mathcal{L}'$ is non-decreasing, so $\mathcal{L}'(0) > 0$ forces $\beta^* < 0$ (the zero-crossing must be to the left of 0).  Conversely, $\mathcal{L}'(0) < 0$ gives $\beta^* > 0$.
+We proceed in four steps.
+
+\medskip
+\noindent\textbf{Step 1: Setup.}
+Define the per-node output as
+\begin{equation}
+\mathbf{h}_i(\beta) \;=\; \mathbf{h}_{\text{context},i} + \beta\,\mathbf{V}_i,
+\end{equation}
+where $\mathbf{h}_{\text{context},i}$ is the $\alpha$-blended attention output (independent of $\beta$) and $\mathbf{V}_i$ is node $i$'s value projection. The aggregate loss is
+\begin{equation}
+\mathcal{L}(\beta) \;=\; \frac{1}{N}\sum_{i=1}^{N} \ell\bigl(\mathbf{h}_i(\beta),\; y_i\bigr).
+\end{equation}
+
+\noindent\textbf{Step 2: Gradient with respect to $\beta$.}
+Applying the chain rule, since $\frac{\partial \mathbf{h}_i}{\partial \beta} = \mathbf{V}_i$:
+\begin{equation}
+\frac{\partial \mathcal{L}}{\partial \beta} \;=\; \frac{1}{N}\sum_{i=1}^{N} \frac{\partial \ell}{\partial \mathbf{h}_i} \cdot \mathbf{V}_i.
+\label{eq:beta_grad}
+\end{equation}
+This is a scalar: the average dot product between each node's loss gradient and its self-features.
+
+\medskip
+\noindent\textbf{Step 3: Optimality condition.}
+Since $\mathcal{L}$ is locally convex in $\beta$, the map $\beta \mapsto \mathcal{L}(\beta)$ has a unique local minimizer $\beta^*$ satisfying the first-order condition:
+\begin{equation}
+\mathcal{L}'(\beta^*) \;=\; 0.
+\end{equation}
+Convexity implies the derivative $\mathcal{L}'(\beta)$ is non-decreasing in $\beta$:
+\begin{equation}
+\beta_1 < \beta_2 \;\implies\; \mathcal{L}'(\beta_1) \leq \mathcal{L}'(\beta_2).
+\label{eq:monotone}
+\end{equation}
+
+\noindent\textbf{Step 4: Sign determination.}
+Evaluating the gradient at $\beta = 0$:
+
+\emph{Case (a):} If $\mathcal{L}'(0) > 0$, then by~\eqref{eq:monotone} the zero-crossing $\beta^*$ must satisfy $\beta^* < 0$. Increasing $\beta$ from zero increases the loss, so the optimum lies in the negative direction---the network suppresses self-features.
+
+\emph{Case (b):} If $\mathcal{L}'(0) < 0$, then $\beta^* > 0$. Adding self-features decreases the loss, so the network amplifies them.
+
+\medskip
+\noindent Combining both cases:
+\begin{equation}
+\beta^* < 0 \;\iff\; \left.\frac{\partial \mathcal{L}}{\partial \beta}\right|_{\beta=0} > 0 \;\iff\; \frac{1}{N}\sum_{i=1}^{N} \left.\frac{\partial \ell}{\partial \mathbf{h}_i}\right|_{\beta=0} \!\!\cdot\; \mathbf{V}_i \;>\; 0.
+\end{equation}
+That is, $\beta^*$ is negative precisely when the self-features $\mathbf{V}_i$ are, on average, aligned with the direction of \emph{increasing} loss.
 \end{proof}
+
+\begin{remark}
+In practice, $\beta$ is learned end-to-end via backpropagation, not computed from this closed-form condition. The proposition explains \emph{why} the network learns negative $\beta$ on certain datasets: when a node's own features are noisy or misleading (e.g., Film's sparse actor co-occurrence vectors), attending to neighbors and suppressing self-identity reduces the loss.
+\end{remark}
 
 Table~\ref{tab:beta_values} reports the learned $\beta$ values across all 11 medium-scale datasets (ogbn-arxiv excluded because the large-scale codebase does not log $\beta$).  These values supplement the bar chart in Figure~\ref{fig:beta}.  The two negative-$\beta$ datasets (Film, Deezer) have either noisy, low-dimensional features (Film: 932 dims, actor co-occurrence) or near-random edge labels (Deezer: $h \approx 0.53$), where suppressing self-features improves classification.  The highest $\beta$ values occur on Chameleon and Squirrel, whose high-dimensional Wikipedia features (2325 and 2089 dims) make self-identity highly informative even under low homophily.
 
