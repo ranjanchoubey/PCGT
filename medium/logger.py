@@ -1,3 +1,15 @@
+"""Training logger for node classification experiments.
+
+Tracks per-epoch results (train acc, val acc, test acc, loss) across multiple
+runs and computes aggregate statistics.
+
+Reports two metrics:
+  - Highest Test: max test accuracy observed at any epoch during training
+  - Final Test: test accuracy at the epoch with highest validation accuracy
+
+Both metrics follow the SGFormer evaluation protocol (identical logger code).
+"""
+
 import torch
 
 class Logger(object):

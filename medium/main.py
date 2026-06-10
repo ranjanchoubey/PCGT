@@ -1,3 +1,23 @@
+"""PCGT Training Pipeline (medium-scale datasets).
+
+This script handles the full training and evaluation loop for PCGT and baseline
+methods (SGFormer, GCN, GAT, etc.) on medium-scale node classification benchmarks.
+
+Key steps:
+  1. Load dataset and splits
+  2. Compute METIS partitions (once, before training)
+  3. Build model (PCGT or baseline)
+  4. Train with early stopping (patience on validation accuracy)
+  5. Log results: Highest Test (max test acc across epochs) and
+     Final Test (test acc at best-validation epoch)
+  6. Save results to text file + CSV
+
+Usage:
+  python main.py --method pcgt --dataset cora --num_partitions 10
+
+See parse.py for all command-line arguments.
+"""
+
 import argparse
 import copy
 import os

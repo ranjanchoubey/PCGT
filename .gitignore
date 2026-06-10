@@ -167,3 +167,4 @@ experiments/
 # Test clone folder
 test/paper_backup_*/
 medium/pcgt_backup.py
+template/
