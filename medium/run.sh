@@ -56,7 +56,7 @@ run_cora() {
         --use_graph --graph_weight 0.8 --ours_dropout 0.2 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.001 --no_feat_norm \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 
     run "cora_pcgt" --dataset cora --method pcgt \
         --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
@@ -75,7 +75,7 @@ run_citeseer() {
         --use_graph --graph_weight 0.7 --ours_dropout 0.3 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.01 --no_feat_norm \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 
     run "citeseer_pcgt" --dataset citeseer --method pcgt \
         --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
@@ -94,7 +94,7 @@ run_pubmed() {
         --use_graph --graph_weight 0.8 --ours_dropout 0.3 --use_residual \
         --alpha 0.5 --ours_weight_decay 0.01 --no_feat_norm \
         --rand_split_class --valid_num 500 --test_num 1000 \
-        --seed 123 --runs 5
+        --seed 123 --runs 10
 
     run "pubmed_pcgt" --dataset pubmed --method pcgt \
         --backbone gcn --lr 0.01 --num_layers 2 --hidden_channels 64 \
@@ -160,7 +160,7 @@ run_deezer() {
         --backbone gcn --rand_split --lr 0.01 --num_layers 2 \
         --hidden_channels 96 --weight_decay 5e-05 --dropout 0.4 \
         --ours_layers 1 --use_graph --num_heads 1 --ours_use_residual \
-        --alpha 0.5 --seed 123 --runs 5
+        --alpha 0.5 --seed 123 --runs 10
 
     run "deezer_pcgt" --dataset deezer-europe --method pcgt \
         --backbone gcn --rand_split --lr 0.01 --num_layers 2 \
