@@ -42,19 +42,19 @@ Built upon [SGFormer](https://github.com/qitianwu/SGFormer) (Wu et al., NeurIPS 
 
 | Dataset | SGFormer | **PCGT** | Δ |
 |:--------|:--------:|:--------:|:-:|
-| Cora | **84.50** ± 0.8 | 84.30 ± 0.4 | −0.20 |
-| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.4 | **+0.50** |
-| PubMed | 80.30 ± 0.6 | **81.00** ± 0.6 | **+0.70** |
-| Film | 37.90 ± 1.1 | **38.00** ± 0.9 | +0.10 |
-| Squirrel | 41.80 ± 2.2 | **45.50** ± 2.7 | **+3.70** |
-| Chameleon | 44.90 ± 3.9 | **49.00** ± 2.8 | **+4.10** |
-| Deezer | 67.10 ± 1.1 | **67.20** ± 0.7 | +0.10 |
-| Coauthor-CS | 94.90 ± 0.5 | **95.10** ± 0.3 | +0.20 |
-| Coauthor-Physics | 96.60 ± 0.2 | **96.80** ± 0.2 | +0.20 |
-| Amazon-Computers | 87.50 ± 2.0 | **88.80** ± 0.7 | **+1.30** |
-| Amazon-Photo | 95.20 ± 1.2 | **95.30** ± 0.4 | +0.10 |
+| Cora | **84.50** ± 0.8 | 84.30 ± 0.8 | −0.20 |
+| CiteSeer | 72.60 ± 0.2 | **73.10** ± 0.3 | **+0.50** |
+| PubMed | 80.30 ± 0.6 | **80.90** ± 0.7 | **+0.60** |
+| Film | **37.90** ± 1.1 | 37.70 ± 0.8 | −0.20 |
+| Squirrel | 41.80 ± 2.2 | **45.60** ± 2.7 | **+3.80** |
+| Chameleon | 44.90 ± 3.9 | **48.70** ± 3.2 | **+3.80** |
+| Deezer | **67.10** ± 1.1 | 67.00 ± 0.6 | −0.10 |
+| Coauthor-CS | 95.00 ± 0.5 | **95.00** ± 0.3 | +0.05 |
+| Coauthor-Physics | 96.60 ± 0.2 | **96.80** ± 0.1 | **+0.15** |
+| Amazon-Computers | 88.50 ± 1.6 | **89.00** ± 0.7 | **+0.57** |
+| Amazon-Photo | 95.10 ± 0.8 | **95.50** ± 0.4 | **+0.38** |
 
-> **PCGT wins 10/11 benchmarks.** Largest gains on heterophilic graphs: Chameleon **+4.10%**, Squirrel **+3.70%**.
+> **PCGT wins 8/11 benchmarks.** Largest gains on heterophilic graphs: Chameleon **+3.80%**, Squirrel **+3.80%**.
 
 ### Large-Scale
 
@@ -174,8 +174,23 @@ For GPU: install matching CUDA versions of torch-scatter, torch-sparse from [PyG
 
 ## Datasets
 
-**Auto-downloaded** (no action needed): Cora, CiteSeer, PubMed, Chameleon, Squirrel, Film, Deezer, Coauthor-CS, Coauthor-Physics, Amazon-Computers, Amazon-Photo, ogbn-arxiv.
-These are downloaded by PyTorch Geometric into `data/` the first time you run an experiment.
+**Auto-downloaded** (via PyTorch Geometric / OGB, no action needed):
+Cora, CiteSeer, PubMed, Coauthor-CS, Coauthor-Physics, Amazon-Computers, Amazon-Photo, ogbn-arxiv.
+
+**Pre-packaged in `data/`** (must be present before running — NOT auto-downloaded):
+- **Chameleon** → `data/wiki_new/chameleon/chameleon_filtered.npz`
+- **Squirrel** → `data/wiki_new/squirrel/squirrel_filtered.npz`
+- **Film** → `data/geom-gcn/film/out1_graph_edges.txt`, `out1_node_feature_label.txt`, + 10 split files
+- **Deezer** → `data/deezer/deezer-europe.mat`
+
+These files use filtered splits from [Platonov et al. (2023)](https://arxiv.org/abs/2302.11640) and are included in the repository's `data/` directory (gitignored). If cloning fresh, download them:
+
+```bash
+# From a machine that has the data (e.g., your local copy):
+tar czf missing_datasets.tar.gz data/wiki_new/ data/geom-gcn/film/ data/deezer/
+# Then on the target machine:
+tar xzf missing_datasets.tar.gz
+```
 
 **Manual download required:**
 - **Pokec** (1.6M nodes): Download from [Google Drive](https://drive.google.com/drive/folders/1rr3kewCBUvIuVxA6MJ90wzQuF-NnCRtf?usp=drive_link) and place files (`pokec.mat`, `label.npy`, `node_feat.npy`) in `data/pokec/`
